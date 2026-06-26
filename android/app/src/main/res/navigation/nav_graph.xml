@@ -29,4 +29,9 @@
         android:name="com.stocksentinel.ui.news.NewsFragment"
         android:label="News" />
 
+    <fragment
+        android:id="@+id/watchlistFragment"
+        android:name="com.stocksentinel.ui.watchlist.WatchlistFragment"
+        android:label="Watchlist" />
+
 </navigation>

@@ -23,6 +23,7 @@ import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
 import com.stocksentinel.ui.search.SearchActivity;
+import com.stocksentinel.util.DeviceUtils;
 import com.stocksentinel.util.FormatUtils;
 
 import java.util.ArrayList;
@@ -200,6 +201,8 @@ public class StocksFragment extends Fragment {
                     ? stock.get("exchange").getAsString() : "";
             String currency = stock.has("currency") && !stock.get("currency").isJsonNull()
                     ? stock.get("currency").getAsString() : "INR";
+            int stockId = stock.has("id") && !stock.get("id").isJsonNull()
+                    ? stock.get("id").getAsInt() : 0;
 
             holder.symbolText.setText(symbol);
             holder.nameText.setText(name.length() > 30 ? name.substring(0, 30) + "…" : name);
@@ -207,10 +210,31 @@ public class StocksFragment extends Fragment {
             holder.priceText.setText(FormatUtils.formatPrice(price, currency));
             holder.changeText.setText(FormatUtils.formatChangePercent(pct));
             holder.changeText.setTextColor(FormatUtils.getChangeColor(pct));
+
+            // Add to Watchlist button
+            final int fStockId = stockId;
+            holder.addBtn.setVisibility(stockId > 0 ? View.VISIBLE : View.GONE);
+            holder.addBtn.setOnClickListener(v -> {
+                String deviceId = DeviceUtils.getDeviceId(
+                        com.stocksentinel.StockSentinelApp.getAppContext());
+                JsonObject body = new JsonObject();
+                body.addProperty("device_id", deviceId);
+                body.addProperty("stock_id", fStockId);
+                ApiClient.getApi().addToWatchlist(body).enqueue(new Callback<JsonObject>() {
+                    @Override
+                    public void onResponse(@NonNull Call<JsonObject> call,
+                                           @NonNull Response<JsonObject> response) {
+                        holder.addBtn.setText("✓ Added");
+                        holder.addBtn.setEnabled(false);
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) { }
+                });
+            });
         }
 
         static class VH extends RecyclerView.ViewHolder {
-            TextView symbolText, nameText, exchangeText, priceText, changeText;
+            TextView symbolText, nameText, exchangeText, priceText, changeText, addBtn;
 
             VH(View v) {
                 super(v);
@@ -219,6 +243,7 @@ public class StocksFragment extends Fragment {
                 exchangeText = v.findViewById(R.id.stock_exchange);
                 priceText = v.findViewById(R.id.stock_price);
                 changeText = v.findViewById(R.id.stock_change);
+                addBtn = v.findViewById(R.id.add_watchlist_btn);
             }
         }
     }

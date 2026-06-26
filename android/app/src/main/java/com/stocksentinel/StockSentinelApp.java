@@ -3,6 +3,7 @@ package com.stocksentinel;
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Build;
 
 /**
@@ -14,10 +15,17 @@ public class StockSentinelApp extends Application {
     public static final String CHANNEL_IPO_ALERTS = "ipo_alerts";
     public static final String CHANNEL_DIVIDEND_ALERTS = "dividend_alerts";
 
+    private static StockSentinelApp instance;
+
     @Override
     public void onCreate() {
         super.onCreate();
+        instance = this;
         createNotificationChannels();
+    }
+
+    public static Context getAppContext() {
+        return instance;
     }
 
     private void createNotificationChannels() {

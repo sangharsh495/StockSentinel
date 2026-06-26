@@ -20,4 +20,9 @@
         android:id="@+id/newsFragment"
         android:icon="@drawable/ic_news"
         android:title="@string/tab_news" />
+
+    <item
+        android:id="@+id/watchlistFragment"
+        android:icon="@drawable/ic_watchlist"
+        android:title="@string/tab_watchlist" />
 </menu>
