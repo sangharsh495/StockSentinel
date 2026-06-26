@@ -29,20 +29,23 @@ NSE_HEADERS = {
 }
 
 
-async def get_nse_session() -> httpx.AsyncClient:
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def get_nse_session():
     """Create an httpx client with NSE cookies."""
-    client = httpx.AsyncClient(
+    async with httpx.AsyncClient(
         headers=NSE_HEADERS,
         timeout=30,
         follow_redirects=True,
-    )
-    # Hit main page first to get cookies
-    try:
-        await client.get(NSE_BASE)
-        await asyncio.sleep(1)
-    except Exception as e:
-        logger.warning(f"Failed to get NSE cookies: {e}")
-    return client
+    ) as client:
+        # Hit main page first to get cookies
+        try:
+            await client.get(NSE_BASE)
+            await asyncio.sleep(1)
+        except Exception as e:
+            logger.warning(f"Failed to get NSE cookies: {e}")
+        yield client
 
 
 async def fetch_nse_equity_list():
@@ -50,7 +53,7 @@ async def fetch_nse_equity_list():
     logger.info("Fetching NSE equity list...")
 
     try:
-        async with await get_nse_session() as client:
+        async with get_nse_session() as client:
             # Fetch market status and equity data
             # NSE provides CSV/JSON data for all equities
             resp = await client.get(f"{NSE_API}/equity-stockIndices?index=SECURITIES%20IN%20F%26O")
@@ -134,7 +137,7 @@ async def fetch_nse_all_stocks():
     seen_symbols = set()
 
     try:
-        async with await get_nse_session() as client:
+        async with get_nse_session() as client:
             for index_name in indices:
                 try:
                     encoded = index_name.replace(" ", "%20").replace("&", "%26")
@@ -212,7 +215,7 @@ async def fetch_nse_dividends():
     logger.info("Fetching NSE dividend data...")
 
     try:
-        async with await get_nse_session() as client:
+        async with get_nse_session() as client:
             resp = await client.get(
                 f"{NSE_API}/corporates-corporateActions",
                 params={"index": "equities", "from_date": "", "to_date": ""},
