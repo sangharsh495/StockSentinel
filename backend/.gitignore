@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+*.env
+.venv/
+env/
+venv/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.log
+firebase-credentials.json

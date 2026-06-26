@@ -1,0 +1,41 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# Database
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+
+# Environment
+python-dotenv==1.0.1
+
+# Scheduler
+apscheduler==3.10.4
+
+# HTTP client
+httpx==0.28.1
+
+# Web scraping
+beautifulsoup4==4.12.3
+lxml==5.3.0
+
+# RSS parsing
+feedparser==6.0.11
+
+# Stock data
+yfinance==0.2.48
+
+# Finnhub
+finnhub-python==2.4.20
+
+# Google Gemini
+google-generativeai==0.8.4
+
+# Firebase Admin (server-side push)
+firebase-admin==6.6.0
+
+# Data validation
+pydantic==2.10.3
+
+# Timezone handling
+pytz==2024.2
