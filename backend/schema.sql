@@ -92,12 +92,35 @@ CREATE TABLE IF NOT EXISTS news (
     related_symbols TEXT[],
     category VARCHAR(50),
     summary TEXT,
+    -- ML Impact Analysis fields
+    impact_score DECIMAL(5,4),
+    affected_stocks JSONB DEFAULT '[]'::jsonb,
+    dividend_detected BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_news_published ON news(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_news_sentiment ON news(sentiment);
 CREATE INDEX IF NOT EXISTS idx_news_source ON news(source);
+CREATE INDEX IF NOT EXISTS idx_news_dividend ON news(dividend_detected) WHERE dividend_detected = TRUE;
+CREATE INDEX IF NOT EXISTS idx_news_impact ON news(impact_score DESC NULLS LAST);
+
+-- News ↔ Stock impact junction (for fast "show all news for stock X" queries)
+CREATE TABLE IF NOT EXISTS news_stock_impact (
+    id SERIAL PRIMARY KEY,
+    news_id INTEGER REFERENCES news(id) ON DELETE CASCADE,
+    stock_id INTEGER REFERENCES stocks(id) ON DELETE CASCADE,
+    symbol VARCHAR(20) NOT NULL,
+    impact_direction VARCHAR(10),  -- BULLISH / BEARISH / NEUTRAL
+    impact_score DECIMAL(5,4),
+    reason VARCHAR(200),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(news_id, symbol)
+);
+
+CREATE INDEX IF NOT EXISTS idx_nsi_news ON news_stock_impact(news_id);
+CREATE INDEX IF NOT EXISTS idx_nsi_stock ON news_stock_impact(stock_id);
+CREATE INDEX IF NOT EXISTS idx_nsi_symbol ON news_stock_impact(symbol);
 
 -- Watchlist (per device)
 CREATE TABLE IF NOT EXISTS watchlist (

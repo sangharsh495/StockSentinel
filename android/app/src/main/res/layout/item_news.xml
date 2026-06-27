@@ -59,7 +59,54 @@
             android:textSize="10sp"
             android:textStyle="bold"
             android:text="🟢 BULLISH" />
+
+        <TextView
+            android:id="@+id/news_impact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/badge_bg"
+            android:layout_marginStart="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:text="⚡ 0.8" 
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/news_dividend_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/badge_bg"
+            android:layout_marginStart="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:text="💰 DIVIDEND" 
+            android:visibility="gone"/>
     </LinearLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/affected_stocks_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:layout_marginTop="8dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/affected_stocks_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
 
     <View
         android:layout_width="match_parent"

@@ -28,6 +28,33 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Self-ping keep-alive (prevents Render free tier from sleeping)
+# ---------------------------------------------------------------------------
+_ping_stop = threading.Event()
+
+
+def _self_ping_loop():
+    """Background thread: pings /health every 10 min to keep Render awake."""
+    url = settings.RENDER_EXTERNAL_URL
+    if not url:
+        logger.warning("RENDER_EXTERNAL_URL not set — self-ping disabled")
+        return
+
+    health_url = f"{url.rstrip('/')}/health"
+    logger.info(f"Self-ping thread started → {health_url} every 10 min")
+
+    while not _ping_stop.is_set():
+        try:
+            with httpx.Client(timeout=10) as client:
+                resp = client.get(health_url)
+                logger.debug(f"Self-ping OK: {resp.status_code}")
+        except Exception as e:
+            logger.debug(f"Self-ping failed (non-fatal): {e}")
+
+        # Sleep 10 minutes, but check stop event every 5 seconds for fast shutdown
+        _ping_stop.wait(timeout=600)
+
 
 # ---------------------------------------------------------------------------
 # APScheduler setup
@@ -50,7 +77,7 @@ def start_scheduler():
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage application lifecycle — DB pool, scheduler."""
+    """Manage application lifecycle — DB pool, scheduler, self-ping."""
     # --- STARTUP ---
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
 
@@ -65,11 +92,17 @@ async def lifespan(app: FastAPI):
     # 2. Start APScheduler
     scheduler = start_scheduler()
 
+    # 3. Start self-ping keep-alive thread
+    _ping_stop.clear()
+    ping_thread = threading.Thread(target=_self_ping_loop, daemon=True, name="self-ping")
+    ping_thread.start()
+
     logger.info("StockSentinel API is live!")
 
     yield  # App is running
 
     # --- SHUTDOWN ---
+    _ping_stop.set()  # Signal self-ping thread to stop
     if scheduler:
         scheduler.shutdown(wait=False)
         logger.info("Scheduler stopped")

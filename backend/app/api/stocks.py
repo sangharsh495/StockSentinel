@@ -200,6 +200,21 @@ async def market_indices():
     return {"indices": indices}
 
 
+@router.get("/stocks/count/summary")
+async def stock_count():
+    """Get count of stocks by market/exchange."""
+    counts = await fetch(
+        """
+        SELECT market, exchange, COUNT(*) as count
+        FROM stocks WHERE is_active = TRUE
+        GROUP BY market, exchange
+        ORDER BY market, exchange
+        """
+    )
+    total = sum(row["count"] for row in counts)
+    return {"total": total, "breakdown": counts}
+
+
 @router.get("/stocks/{symbol}")
 async def get_stock(symbol: str, exchange: Optional[str] = None):
     """Get detailed info for a single stock."""
@@ -229,16 +244,26 @@ async def get_stock(symbol: str, exchange: Optional[str] = None):
     return {"stock": stock}
 
 
-@router.get("/stocks/count/summary")
-async def stock_count():
-    """Get count of stocks by market/exchange."""
-    counts = await fetch(
+@router.get("/stocks/{symbol}/news")
+async def get_stock_news(
+    symbol: str,
+    limit: int = Query(20, ge=1, le=100),
+):
+    """Get all news affecting a specific stock — with ML impact scores."""
+    items = await fetch(
         """
-        SELECT market, exchange, COUNT(*) as count
-        FROM stocks WHERE is_active = TRUE
-        GROUP BY market, exchange
-        ORDER BY market, exchange
-        """
+        SELECT nsi.impact_direction, nsi.impact_score, nsi.reason,
+               n.id as news_id, n.title, n.url, n.source, n.published_at,
+               n.sentiment, n.sentiment_score, n.dividend_detected
+        FROM news_stock_impact nsi
+        JOIN news n ON nsi.news_id = n.id
+        WHERE nsi.symbol = $1
+        ORDER BY n.published_at DESC
+        LIMIT $2
+        """,
+        symbol.upper(),
+        limit,
     )
-    total = sum(row["count"] for row in counts)
-    return {"total": total, "breakdown": counts}
+
+    return {"symbol": symbol.upper(), "count": len(items), "news": items}
+

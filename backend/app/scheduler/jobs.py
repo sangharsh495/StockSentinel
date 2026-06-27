@@ -22,12 +22,17 @@ logger = logging.getLogger(__name__)
 
 
 def _run_async(coro):
-    """Helper to run async functions from sync APScheduler jobs."""
+    """Helper to run async functions from sync APScheduler jobs.
+    Uses run_coroutine_threadsafe for reliable scheduling on the running loop."""
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            # Schedule it on the running loop
-            asyncio.ensure_future(coro)
+            # Schedule on the running loop and wait for the result
+            future = asyncio.run_coroutine_threadsafe(coro, loop)
+            try:
+                future.result(timeout=300)  # 5 min timeout per job
+            except Exception as e:
+                logger.error(f"Async job failed: {e}")
         else:
             loop.run_until_complete(coro)
     except RuntimeError:
@@ -113,9 +118,8 @@ def job_fetch_us_stock_list():
 def job_fetch_news():
     """Fetch news from RSS feeds."""
     async def _run():
-        from app.scrapers.news_scraper import fetch_news, extract_related_symbols
+        from app.scrapers.news_scraper import fetch_news
         await _log_job("news_fetch", fetch_news)
-        await _log_job("news_symbols", extract_related_symbols)
     _run_async(_run())
 
 
@@ -124,6 +128,14 @@ def job_sentiment():
     async def _run():
         from app.scrapers.sentiment import analyze_sentiment
         await _log_job("sentiment", analyze_sentiment)
+    _run_async(_run())
+
+
+def job_stock_impact():
+    """Run ML stock impact analysis on new headlines."""
+    async def _run():
+        from app.ml.stock_impact_analyzer import run_stock_impact_analysis
+        await _log_job("stock_impact", run_stock_impact_analysis)
     _run_async(_run())
 
 
@@ -224,9 +236,17 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Sentiment: every 30 min, 24/7 (offset by 15 min from news) ---
     scheduler.add_job(
         job_sentiment,
-        CronTrigger(minute="15,45"),
+        CronTrigger(minute="10,40"),
         id="sentiment",
         name="Sentiment Analysis",
+    )
+
+    # --- Stock Impact ML: every 30 min (offset by 5 min after sentiment) ---
+    scheduler.add_job(
+        job_stock_impact,
+        CronTrigger(minute="20,50"),
+        id="stock_impact",
+        name="ML Stock Impact Analysis",
     )
 
     # --- Dividends: every 2 hours, 6 AM - 10 PM IST ---

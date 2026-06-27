@@ -83,12 +83,30 @@ public interface StockApi {
     Call<JsonObject> getNews(
             @Query("sentiment") String sentiment,
             @Query("source") String source,
+            @Query("dividend_only") Boolean dividendOnly,
+            @Query("min_impact") Float minImpact,
             @Query("limit") int limit,
             @Query("offset") int offset
     );
 
     @GET("api/news/sentiment-summary")
     Call<JsonObject> getSentimentSummary(@Query("hours") int hours);
+
+    @GET("api/news/stock-impact")
+    Call<JsonObject> getStockImpactNews(
+            @Query("symbol") String symbol,
+            @Query("direction") String direction,
+            @Query("limit") int limit
+    );
+
+    @GET("api/news/dividend-alerts")
+    Call<JsonObject> getDividendAlerts(@Query("limit") int limit);
+
+    @GET("api/stocks/{symbol}/news")
+    Call<JsonObject> getStockNews(
+            @Path("symbol") String symbol,
+            @Query("limit") int limit
+    );
 
     // ---- Watchlist ----
     @GET("api/watchlist/{device_id}")
