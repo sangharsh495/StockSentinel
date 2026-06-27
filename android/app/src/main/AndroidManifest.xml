@@ -16,9 +16,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="34">
 
-        <!-- Main Activity -->
+        <!-- Splash Activity -->
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".ui.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.StockSentinel">
             <intent-filter>
@@ -26,6 +26,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Main Activity -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.StockSentinel" />
 
         <!-- Search Activity -->
         <activity
