@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# App build outputs (APK, DEX, intermediates)
+app/build/
