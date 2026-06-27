@@ -9,9 +9,9 @@
         android:icon="@drawable/ic_stocks"
         android:title="@string/tab_stocks" />
     <item
-        android:id="@+id/dividendsFragment"
-        android:icon="@drawable/ic_dividends"
-        android:title="@string/tab_dividends" />
+        android:id="@+id/newsFragment"
+        android:icon="@drawable/ic_news"
+        android:title="@string/tab_news" />
     <item
         android:id="@+id/iposFragment"
         android:icon="@drawable/ic_ipo"
