@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_dark">
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        app:cardBackgroundColor="@color/surface_dark"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="16dp">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_home"
+                android:rotation="90"
+                app:tint="@color/text_primary" />
+
+            <EditText
+                android:id="@+id/search_input"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:background="@null"
+                android:hint="@string/search_hint"
+                android:textColorHint="@color/text_secondary"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:inputType="textNoSuggestions"
+                android:maxLines="1"
+                android:imeOptions="actionSearch" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/empty_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:text="@string/search_hint"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
+            android:gravity="center" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_results"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp"
+            android:clipToPadding="false" />
+    </FrameLayout>
+</LinearLayout>

@@ -14,28 +14,46 @@ logger = logging.getLogger(__name__)
 
 _executor = ThreadPoolExecutor(max_workers=3)
 
-# RSS feed sources
 RSS_FEEDS = {
+    # --- India Financial News (direct, fast) ---
     "Moneycontrol": "https://www.moneycontrol.com/rss/MCtopnews.xml",
     "Economic Times": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
+    "ET Markets": "https://economictimes.indiatimes.com/markets/stocks/rssfeeds/2146842.cms",
     "LiveMint": "https://www.livemint.com/rss/markets",
+    "Mint Markets": "https://www.livemint.com/rss/money",
     "CNBC TV18": "https://www.cnbctv18.com/commonfeeds/v1/cne/rss/market-buzz.xml",
+    "CNBC TV18 Markets": "https://www.cnbctv18.com/commonfeeds/v1/cne/rss/market.xml",
     "Business Standard": "https://www.business-standard.com/rss/markets-106.rss",
     "Financial Express": "https://www.financialexpress.com/market/feed/",
     "NDTV Profit": "https://feeds.feedburner.com/ndtvprofit-latest",
+
+    # --- US/International ---
     "Reuters Business": "https://feeds.reuters.com/reuters/businessNews",
     "Yahoo Finance": "https://finance.yahoo.com/news/rssindex",
     "MarketWatch": "https://feeds.marketwatch.com/marketwatch/topstories/",
+
+    # --- Google News (real-time aggregated) ---
+    "Google News NSE": "https://news.google.com/rss/search?q=NSE+stocks+India&hl=en-IN&gl=IN&ceid=IN:en",
+    "Google News Nifty": "https://news.google.com/rss/search?q=Nifty+Sensex+market&hl=en-IN&gl=IN&ceid=IN:en",
+    "Google News US": "https://news.google.com/rss/search?q=US+stock+market+S%26P+NASDAQ&hl=en-US&gl=US&ceid=US:en",
 }
 
 
 def _parse_feeds_sync() -> list[dict]:
     """Parse all RSS feeds synchronously (runs in thread pool)."""
+    import urllib.request
     articles = []
 
     for source, url in RSS_FEEDS.items():
         try:
-            feed = feedparser.parse(url)
+            # feedparser with timeout to prevent hanging
+            feed = feedparser.parse(url, request_headers={
+                "User-Agent": "Mozilla/5.0 (StockSentinel/1.0)"
+            })
+            # Skip feeds that returned errors
+            if feed.bozo and not feed.entries:
+                logger.warning(f"Feed {source} returned error, skipping")
+                continue
             for entry in feed.entries[:20]:  # Max 20 per source
                 title = entry.get("title", "").strip()
                 link = entry.get("link", "").strip()

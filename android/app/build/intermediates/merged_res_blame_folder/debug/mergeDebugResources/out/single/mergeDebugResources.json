@@ -1,0 +1,114 @@
+[
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_ic_notification.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/ic_notification.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_badge_bg.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/badge_bg.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_item_stock_list.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/item_stock_list.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_fragment_stocks.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/fragment_stocks.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_fragment_home.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/fragment_home.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_fragment_dividends.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/fragment_dividends.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_fragment_watchlist.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/fragment_watchlist.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_item_index_card.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/item_index_card.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_activity_search.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/activity_search.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_item_news.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/item_news.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_fragment_news.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/fragment_news.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_ic_stocks.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/ic_stocks.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_item_ipo.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/item_ipo.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/navigation_nav_graph.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/navigation/nav_graph.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_ic_home.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/ic_home.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_item_dividend.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/item_dividend.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_fragment_ipos.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/fragment_ipos.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_ic_ipo.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/ic_ipo.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_ic_news.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/ic_news.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/color_bottom_nav_colors.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/color/bottom_nav_colors.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_change_badge_bg.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/change_badge_bg.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/menu_bottom_nav.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/menu/bottom_nav.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_ic_dividends.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/ic_dividends.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_ic_search.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/ic_search.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/menu_toolbar_menu.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/menu/toolbar_menu.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_item_stock_row.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/item_stock_row.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/drawable_ic_watchlist.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/drawable/ic_watchlist.xml"
+    },
+    {
+        "merged": "com.stocksentinel.app-debug-46:/layout_activity_main.xml.flat",
+        "source": "com.stocksentinel.app-main-48:/layout/activity_main.xml"
+    }
+]

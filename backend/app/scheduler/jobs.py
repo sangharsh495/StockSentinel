@@ -213,10 +213,10 @@ def create_scheduler() -> BackgroundScheduler:
         name="Market Indices",
     )
 
-    # --- News: every 30 min, 24/7 ---
+    # --- News: every 15 min, 24/7 ---
     scheduler.add_job(
         job_fetch_news,
-        IntervalTrigger(minutes=30),
+        IntervalTrigger(minutes=15),
         id="news",
         name="News Feed",
     )

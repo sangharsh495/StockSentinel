@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.stocksentinel.app-mergeDebugResources-44:/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+            "map": [
+                {
+                    "source": "/Users/sangharshgedekar/.gradle/caches/9.3.0/transforms/e7d1bc1934efafb3ad22e7429fdbba53/transformed/material-1.12.0/res/values-h320dp-port-v13/values-h320dp-port-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "63",
+                        "endOffsets": "114"
+                    }
+                }
+            ]
+        }
+    ]
+}

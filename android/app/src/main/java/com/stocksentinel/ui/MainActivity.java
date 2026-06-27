@@ -18,7 +18,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
@@ -60,8 +59,7 @@ public class MainActivity extends AppCompatActivity {
         // Request notification permission (Android 13+)
         requestNotificationPermission();
 
-        // Register FCM token
-        registerFCMToken();
+        // Register FCM token removed
     }
 
     @Override
@@ -90,37 +88,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void registerFCMToken() {
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Log.w(TAG, "FCM token fetch failed", task.getException());
-                        return;
-                    }
-
-                    String token = task.getResult();
-                    String deviceId = DeviceUtils.getDeviceId(this);
-                    Log.d(TAG, "FCM Token: " + token);
-
-                    // Register with backend
-                    JsonObject body = new JsonObject();
-                    body.addProperty("device_id", deviceId);
-                    body.addProperty("fcm_token", token);
-                    body.addProperty("platform", "android");
-
-                    ApiClient.getApi().registerDevice(body).enqueue(new Callback<JsonObject>() {
-                        @Override
-                        public void onResponse(@NonNull Call<JsonObject> call,
-                                               @NonNull Response<JsonObject> response) {
-                            Log.d(TAG, "Device registered: " + response.body());
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<JsonObject> call,
-                                              @NonNull Throwable t) {
-                            Log.w(TAG, "Device registration failed", t);
-                        }
-                    });
-                });
-    }
 }

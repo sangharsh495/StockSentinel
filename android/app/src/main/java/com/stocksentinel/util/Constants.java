@@ -8,7 +8,7 @@ public class Constants {
     // ============================================================
     // 🔧 UPDATE THIS with your Render deployment URL
     // ============================================================
-    public static final String BASE_URL = "https://stocksentinel-api.onrender.com/";
+    public static final String BASE_URL = "https://stocksentinel-kjjj.onrender.com/";
 
     // API paths
     public static final String API_PREFIX = "api/";

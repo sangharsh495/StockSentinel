@@ -30,35 +30,6 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Self-ping keep-alive thread (Layer 3 of 24/7 strategy)
-# ---------------------------------------------------------------------------
-def self_ping_loop(url: str):
-    """
-    Background thread that pings our own /health endpoint every 10 minutes.
-    This is a failsafe — cron-job.org and UptimeRobot are the primary layers.
-    """
-    logger.info(f"Self-ping thread started for {url}")
-    while True:
-        time.sleep(600)  # 10 minutes
-        try:
-            resp = httpx.get(f"{url}/health", timeout=10)
-            logger.debug(f"Self-ping OK: {resp.status_code}")
-        except Exception as e:
-            logger.debug(f"Self-ping failed (non-critical): {e}")
-
-
-def start_self_ping():
-    """Start the self-ping thread if RENDER_EXTERNAL_URL is set."""
-    url = settings.RENDER_EXTERNAL_URL
-    if url:
-        thread = threading.Thread(target=self_ping_loop, args=(url,), daemon=True)
-        thread.start()
-        logger.info("Self-ping keep-alive thread started")
-    else:
-        logger.info("No RENDER_EXTERNAL_URL set — self-ping disabled (local dev)")
-
-
-# ---------------------------------------------------------------------------
 # APScheduler setup
 # ---------------------------------------------------------------------------
 def start_scheduler():
@@ -79,7 +50,7 @@ def start_scheduler():
 # ---------------------------------------------------------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage application lifecycle — DB pool, scheduler, self-ping."""
+    """Manage application lifecycle — DB pool, scheduler."""
     # --- STARTUP ---
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
 
@@ -93,9 +64,6 @@ async def lifespan(app: FastAPI):
 
     # 2. Start APScheduler
     scheduler = start_scheduler()
-
-    # 3. Start self-ping thread
-    start_self_ping()
 
     logger.info("StockSentinel API is live!")
 
