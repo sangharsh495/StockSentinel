@@ -45,7 +45,7 @@ async def analyze_sentiment():
         import google.generativeai as genai
 
         genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
         count = 0
         batch_size = settings.GEMINI_BATCH_SIZE
