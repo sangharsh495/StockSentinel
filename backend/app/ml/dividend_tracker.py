@@ -109,6 +109,11 @@ class DividendTracker:
                 "average_yield_pct": avg_yield,
                 "highest_yield_pct": round(highest_yield, 2),
                 "highest_yield_stock": highest_yield_stock,
+                "stats": {
+                    "total_payouts": len(items),
+                    "avg_yield_pct": avg_yield,
+                    "high_yield_count": sum(1 for x in items if (x.get("dividend_yield_pct") or 0) >= 3.0),
+                },
                 "weeks": {str(k): v for k, v in sorted(weeks.items())},
                 "dividends": items,
             }

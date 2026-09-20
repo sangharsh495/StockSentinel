@@ -14,7 +14,7 @@ async def list_news(
     sentiment: Optional[str] = Query(None, description="BULLISH, BEARISH, NEUTRAL"),
     source: Optional[str] = Query(None, description="Filter by source"),
     dividend_only: bool = Query(False, description="Show only dividend-related news"),
-    min_impact: Optional[float] = Query(None, ge=0, le=1, description="Min impact score"),
+    min_impact: Optional[float] = Query(None, ge=0, le=10, description="Min impact score (0-10 scale)"),
     limit: int = Query(30, ge=1, le=100),
     offset: int = Query(0, ge=0),
 ):
@@ -34,12 +34,13 @@ async def list_news(
         param_idx += 1
 
     if dividend_only:
-        conditions.append("dividend_detected = TRUE")
+        conditions.append("(dividend_detected = TRUE OR title ILIKE '%dividend%' OR title ILIKE '%bonus%')")
 
     if min_impact is not None:
-        conditions.append(f"impact_score >= ${param_idx}")
-        params.append(min_impact)
-        param_idx += 1
+        threshold = min_impact if min_impact > 1.0 else min_impact * 10.0
+        conditions.append(f"(impact_score >= ${param_idx} OR (sentiment_score IS NOT NULL AND sentiment_score >= ${param_idx + 1}))")
+        params.extend([threshold, threshold / 10.0])
+        param_idx += 2
 
     where = " AND ".join(conditions)
 

@@ -148,26 +148,41 @@ class NewsRanker:
     ) -> Dict[str, Any]:
         """
         Get the top 10 rated news for a specific date.
-        If no date given, uses today.
+        If no date given, uses today, and falls back to latest news if today has fewer than 5.
         """
-        if target_date:
-            date_filter = target_date
-        else:
-            date_filter = str(date.today())
+        rows = []
+        date_filter = target_date or str(date.today())
 
-        # Fetch all news from that day
-        rows = await fetch(
-            """
-            SELECT id, title, url, source, published_at, sentiment,
-                   sentiment_score, impact_score, affected_stocks,
-                   dividend_detected, summary, related_symbols
-            FROM news
-            WHERE DATE(published_at) = $1::date
-            ORDER BY published_at DESC
-            LIMIT 200
-            """,
-            date_filter,
-        )
+        if target_date:
+            try:
+                parsed_d = datetime.strptime(target_date, "%Y-%m-%d").date()
+                rows = await fetch(
+                    """
+                    SELECT id, title, url, source, published_at, sentiment,
+                           sentiment_score, impact_score, affected_stocks,
+                           dividend_detected, summary, related_symbols
+                    FROM news
+                    WHERE DATE(published_at) = $1
+                    ORDER BY published_at DESC
+                    LIMIT 200
+                    """,
+                    parsed_d,
+                )
+            except Exception as e:
+                logger.warning(f"Error filtering by target_date {target_date}: {e}")
+
+        # If no target date or date query returned few rows, get latest news
+        if len(rows) < 5:
+            rows = await fetch(
+                """
+                SELECT id, title, url, source, published_at, sentiment,
+                       sentiment_score, impact_score, affected_stocks,
+                       dividend_detected, summary, related_symbols
+                FROM news
+                ORDER BY published_at DESC NULLS LAST
+                LIMIT 100
+                """
+            )
 
         # Rate each article
         rated = []
@@ -181,11 +196,19 @@ class NewsRanker:
                 rating_data["rating_reason"] = f"ML-boosted: High computed impact ({db_impact:.2f})"
 
             item = dict(r)
-            # Convert non-serializable types
+            # Convert non-serializable types for FastAPI / JSON
             if item.get("published_at"):
                 item["published_at"] = str(item["published_at"])
-            if item.get("related_symbols") and isinstance(item["related_symbols"], list):
-                item["related_symbols"] = item["related_symbols"]
+            if item.get("sentiment_score") is not None:
+                item["sentiment_score"] = float(item["sentiment_score"])
+            if item.get("impact_score") is not None:
+                item["impact_score"] = float(item["impact_score"])
+            if item.get("affected_stocks") and isinstance(item["affected_stocks"], str):
+                try:
+                    import json
+                    item["affected_stocks"] = json.loads(item["affected_stocks"])
+                except Exception:
+                    pass
 
             item.update(rating_data)
             rated.append(item)
@@ -200,6 +223,7 @@ class NewsRanker:
             "total_news_today": len(rows),
             "top_10_count": len(top_10),
             "top_10": top_10,
+            "ranked_news": top_10,
         }
 
     async def get_archive(self, days: int = 7) -> Dict[str, Any]:

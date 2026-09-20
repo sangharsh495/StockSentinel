@@ -14,11 +14,18 @@ Works 100% offline using high-performance regex heuristics + VADER sentiment.
 import re
 import logging
 from typing import Optional, Dict, Any, List
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+_vader_instance = None
 
-logger = logging.getLogger(__name__)
-
-_vader = SentimentIntensityAnalyzer()
+def get_vader():
+    global _vader_instance
+    if _vader_instance is None:
+        try:
+            from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+            _vader_instance = SentimentIntensityAnalyzer()
+        except Exception as e:
+            logger.warning(f"Could not initialize VADER analyzer: {e}")
+            _vader_instance = False
+    return _vader_instance
 
 # ---------------------------------------------------------------------------
 # Catalyst Regex Patterns & Scoring Weights
@@ -135,8 +142,12 @@ class CatalystAnalyzer:
                 break
 
         # 2. VADER sentiment
-        vader_scores = _vader.polarity_scores(text)
-        compound = vader_scores["compound"]
+        v = get_vader()
+        if v:
+            vader_scores = v.polarity_scores(text)
+            compound = vader_scores.get("compound", 0.0)
+        else:
+            compound = 0.0
 
         # 3. Check for extreme sentiment modifiers
         has_strong_bull = any(k in text_lower for k in STRONG_BULLISH_KEYWORDS)
