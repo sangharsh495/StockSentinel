@@ -1,33 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/background_dark">
 
+    <!-- Market Selector (India / US / All) -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
-        android:padding="8dp">
+        android:paddingTop="6dp"
+        android:paddingBottom="2dp">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/market_chips"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp" />
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            app:singleSelection="true" />
     </HorizontalScrollView>
 
+    <!-- AI Research Filter Chips (All, Top AI Rated, Catalyst News, High Dividend) -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:paddingBottom="6dp">
+
+        <LinearLayout
+            android:id="@+id/research_filter_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
+
+            <TextView
+                android:id="@+id/chip_filter_all"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:background="@drawable/bg_pill_dark"
+                android:paddingHorizontal="12dp"
+                android:text="📊 All Stocks"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/chip_filter_top_ai"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:background="@drawable/bg_pill_dark"
+                android:paddingHorizontal="12dp"
+                android:text="⭐ Top AI Rated (>70)"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/chip_filter_catalysts"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:background="@drawable/bg_pill_dark"
+                android:paddingHorizontal="12dp"
+                android:text="🔥 Catalyst News"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/chip_filter_dividends"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:background="@drawable/bg_pill_dark"
+                android:paddingHorizontal="12dp"
+                android:text="💰 High Dividend"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Search Bar -->
     <androidx.cardview.widget.CardView
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_margin="16dp"
+        android:layout_height="44dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
         app:cardBackgroundColor="@color/surface_dark"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="0dp"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        app:cardCornerRadius="22dp"
+        app:cardElevation="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,8 +111,8 @@
             android:paddingEnd="16dp">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 android:src="@drawable/ic_search"
                 app:tint="@color/text_secondary" />
 
@@ -49,10 +122,11 @@
                 android:layout_marginStart="12dp"
                 android:text="@string/search_hint"
                 android:textColor="@color/text_secondary"
-                android:textSize="16sp" />
+                android:textSize="14sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Swipe Refresh & Stock List -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
@@ -62,7 +136,7 @@
             android:id="@+id/stocks_recycler"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingTop="8dp"
+            android:paddingTop="4dp"
             android:paddingBottom="80dp"
             android:clipToPadding="false" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

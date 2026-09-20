@@ -180,6 +180,98 @@ def job_cleanup():
     _run_async(_run())
 
 
+def job_fetch_fundamentals():
+    """Fetch financial fundamentals for top stocks."""
+    async def _run():
+        from app.scrapers.fundamentals_scraper import fetch_fundamentals_batch
+        await _log_job("fundamentals", lambda: fetch_fundamentals_batch(limit=100))
+    _run_async(_run())
+
+
+def job_backfill_price_history():
+    """Backfill daily price history for top stocks."""
+    async def _run():
+        from app.scrapers.fundamentals_scraper import fundamentals_scraper
+        from app.database import get_pool
+        import yfinance as yf
+        import asyncio
+
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            stocks = await conn.fetch(
+                """
+                SELECT symbol, exchange FROM stocks
+                WHERE is_active = TRUE AND current_price IS NOT NULL
+                ORDER BY market_cap DESC NULLS LAST
+                LIMIT 200
+                """
+            )
+
+        count = 0
+        for stock in stocks:
+            try:
+                sym = stock["symbol"]
+                ex = stock["exchange"]
+                yf_ticker = fundamentals_scraper._get_yf_ticker(sym, ex) if hasattr(fundamentals_scraper, '_get_yf_ticker') else f"{sym}.NS"
+
+                # Simple yf_ticker resolution
+                clean = sym.strip().upper()
+                if ex.upper() == "NSE":
+                    yf_ticker = f"{clean}.NS"
+                elif ex.upper() == "BSE":
+                    yf_ticker = f"{clean}.BO"
+                else:
+                    yf_ticker = clean
+
+                loop = asyncio.get_event_loop()
+                hist = await loop.run_in_executor(
+                    None,
+                    lambda t=yf_ticker: yf.Ticker(t).history(period="1mo", interval="1d")
+                )
+
+                if hist is None or hist.empty:
+                    continue
+
+                # Get stock_id
+                async with pool.acquire() as conn:
+                    stock_row = await conn.fetchrow(
+                        "SELECT id FROM stocks WHERE UPPER(symbol) = $1 AND UPPER(exchange) = $2",
+                        sym.upper(), ex.upper(),
+                    )
+                    stock_id = stock_row["id"] if stock_row else None
+
+                    for idx, row in hist.iterrows():
+                        trade_date = idx.date() if hasattr(idx, 'date') else idx
+                        try:
+                            await conn.execute(
+                                """
+                                INSERT INTO price_history
+                                    (stock_id, symbol, exchange, trade_date,
+                                     open_price, high_price, low_price, close_price, volume)
+                                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                                ON CONFLICT (symbol, exchange, trade_date) DO UPDATE SET
+                                    close_price = EXCLUDED.close_price,
+                                    volume = EXCLUDED.volume
+                                """,
+                                stock_id, sym.upper(), ex.upper(), trade_date,
+                                round(float(row["Open"]), 4),
+                                round(float(row["High"]), 4),
+                                round(float(row["Low"]), 4),
+                                round(float(row["Close"]), 4),
+                                int(row["Volume"]),
+                            )
+                            count += 1
+                        except Exception:
+                            pass
+
+                await asyncio.sleep(1)  # Rate limit
+            except Exception as e:
+                logging.getLogger(__name__).debug(f"Price history failed for {stock['symbol']}: {e}")
+
+        return count
+    _run_async(_run())
+
+
 # ---------------------------------------------------------------------------
 # Scheduler factory
 # ---------------------------------------------------------------------------
@@ -287,6 +379,22 @@ def create_scheduler() -> BackgroundScheduler:
         CronTrigger(hour="2", minute="0"),
         id="cleanup",
         name="Data Cleanup",
+    )
+
+    # --- Financial Fundamentals: daily at 4 AM IST ---
+    scheduler.add_job(
+        job_fetch_fundamentals,
+        CronTrigger(hour="4", minute="0"),
+        id="fundamentals",
+        name="Financial Data Fetch",
+    )
+
+    # --- Price History Backfill: daily at 4:30 AM IST ---
+    scheduler.add_job(
+        job_backfill_price_history,
+        CronTrigger(hour="4", minute="30"),
+        id="price_history",
+        name="Price History Backfill",
     )
 
     logger.info(f"Scheduler configured with {len(scheduler.get_jobs())} jobs")

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,17 +23,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
+import com.stocksentinel.ui.stockdetail.StockDetailActivity;
 import com.stocksentinel.util.FormatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * News Fragment — ML-powered news with stock impact, dividend detection, and filter chips.
+ * News Fragment — ML-powered market news with 1-10 impact rating,
+ * daily top 10 rankings, stock impact, and catalyst detection.
  */
 public class NewsFragment extends Fragment {
 
@@ -41,12 +45,13 @@ public class NewsFragment extends Fragment {
     private NewsAdapter adapter;
     
     // Filters
+    private boolean isDailyTopMode = true; // Default to Daily Top 10 Ranked
     private String currentSentiment = null;
     private Boolean currentDividendOnly = null;
     private Float currentMinImpact = null;
     
     // Filter Chips
-    private TextView chipAll, chipBullish, chipBearish, chipDividend, chipHighImpact;
+    private TextView chipDailyTop, chipAll, chipBullish, chipBearish, chipDividend, chipHighImpact;
 
     @Nullable
     @Override
@@ -63,6 +68,7 @@ public class NewsFragment extends Fragment {
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
         recyclerView = view.findViewById(R.id.news_recycler);
         
+        chipDailyTop = view.findViewById(R.id.chip_daily_top);
         chipAll = view.findViewById(R.id.chip_all);
         chipBullish = view.findViewById(R.id.chip_bullish);
         chipBearish = view.findViewById(R.id.chip_bearish);
@@ -70,8 +76,10 @@ public class NewsFragment extends Fragment {
         chipHighImpact = view.findViewById(R.id.chip_high_impact);
 
         adapter = new NewsAdapter(url -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(intent);
+            if (url != null && !url.isEmpty()) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(intent);
+            }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
@@ -90,43 +98,98 @@ public class NewsFragment extends Fragment {
             currentSentiment = null;
             currentDividendOnly = null;
             currentMinImpact = null;
+            isDailyTopMode = false;
 
-            if (v == chipBullish) currentSentiment = "BULLISH";
-            else if (v == chipBearish) currentSentiment = "BEARISH";
-            else if (v == chipDividend) currentDividendOnly = true;
-            else if (v == chipHighImpact) currentMinImpact = 0.5f;
+            if (v == chipDailyTop) {
+                isDailyTopMode = true;
+                chipDailyTop.setTextColor(Color.parseColor("#FFFFD740"));
+            } else if (v == chipBullish) {
+                currentSentiment = "BULLISH";
+            } else if (v == chipBearish) {
+                currentSentiment = "BEARISH";
+            } else if (v == chipDividend) {
+                currentDividendOnly = true;
+            } else if (v == chipHighImpact) {
+                currentMinImpact = 0.5f;
+            }
 
             loadNews();
         };
 
+        chipDailyTop.setOnClickListener(listener);
         chipAll.setOnClickListener(listener);
         chipBullish.setOnClickListener(listener);
         chipBearish.setOnClickListener(listener);
         chipDividend.setOnClickListener(listener);
         chipHighImpact.setOnClickListener(listener);
+
+        // Highlight Daily Top initially
+        resetChips();
+        chipDailyTop.setTextColor(Color.parseColor("#FFFFD740"));
     }
 
     private void resetChips() {
-        int secondary = getResources().getColor(R.color.text_secondary, requireContext().getTheme());
-        chipAll.setTextColor(secondary);
-        chipBullish.setTextColor(secondary);
-        chipBearish.setTextColor(secondary);
-        chipDividend.setTextColor(secondary);
-        chipHighImpact.setTextColor(secondary);
+        int defaultColor = getResources().getColor(R.color.text_secondary, null);
+        chipDailyTop.setTextColor(defaultColor);
+        chipAll.setTextColor(defaultColor);
+        chipBullish.setTextColor(defaultColor);
+        chipBearish.setTextColor(defaultColor);
+        chipDividend.setTextColor(defaultColor);
+        chipHighImpact.setTextColor(defaultColor);
     }
 
     private void loadNews() {
         swipeRefresh.setRefreshing(true);
 
-        ApiClient.getApi().getNews(currentSentiment, null, currentDividendOnly, currentMinImpact, 50, 0)
-                .enqueue(new Callback<JsonObject>() {
+        if (isDailyTopMode) {
+            loadDailyTopNews();
+        } else {
+            loadStreamNews();
+        }
+    }
+
+    private void loadDailyTopNews() {
+        ApiClient.getApi().getDailyNewsRanked(null).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null && isAdded()) {
+                    JsonArray news = response.body().getAsJsonArray("ranked_news");
+                    List<JsonObject> items = new ArrayList<>();
+                    if (news != null) {
+                        for (JsonElement el : news) {
+                            if (el.isJsonObject()) items.add(el.getAsJsonObject());
+                        }
+                    }
+                    adapter.setItems(items);
+                }
+                if (isAdded()) swipeRefresh.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
+                if (isAdded()) swipeRefresh.setRefreshing(false);
+            }
+        });
+    }
+
+    private void loadStreamNews() {
+        ApiClient.getApi().getNews(
+                null, 
+                currentSentiment, 
+                currentDividendOnly, 
+                currentMinImpact, 
+                50, 
+                0
+        ).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (response.isSuccessful() && response.body() != null && isAdded()) {
                     JsonArray news = response.body().getAsJsonArray("news");
                     List<JsonObject> items = new ArrayList<>();
-                    for (JsonElement el : news) {
-                        items.add(el.getAsJsonObject());
+                    if (news != null) {
+                        for (JsonElement el : news) {
+                            if (el.isJsonObject()) items.add(el.getAsJsonObject());
+                        }
                     }
                     adapter.setItems(items);
                 }
@@ -141,10 +204,10 @@ public class NewsFragment extends Fragment {
     }
 
     interface OnNewsClickListener {
-        void onClick(String url);
+        void onNewsClick(String url);
     }
 
-    class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.VH> {
+    static class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.VH> {
         private final List<JsonObject> items = new ArrayList<>();
         private final OnNewsClickListener listener;
 
@@ -171,114 +234,145 @@ public class NewsFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull VH holder, int position) {
-            JsonObject news = items.get(position);
+            JsonObject item = items.get(position);
 
-            String title = news.has("title") ? news.get("title").getAsString() : "";
-            String source = news.has("source") && !news.get("source").isJsonNull()
-                    ? news.get("source").getAsString() : "";
-            String sentiment = news.has("sentiment") && !news.get("sentiment").isJsonNull()
-                    ? news.get("sentiment").getAsString() : "";
-            String published = news.has("published_at") && !news.get("published_at").isJsonNull()
-                    ? news.get("published_at").getAsString() : "";
-            String url = news.has("url") && !news.get("url").isJsonNull()
-                    ? news.get("url").getAsString() : "";
+            String title = item.has("title") ? item.get("title").getAsString() : "";
+            String source = item.has("source") ? item.get("source").getAsString() : "";
+            String date = item.has("published_at") && !item.get("published_at").isJsonNull()
+                    ? item.get("published_at").getAsString() : "";
+            String url = item.has("url") && !item.get("url").isJsonNull()
+                    ? item.get("url").getAsString() : "";
+            String sentiment = item.has("sentiment") && !item.get("sentiment").isJsonNull()
+                    ? item.get("sentiment").getAsString() : "";
 
             holder.titleText.setText(title);
             holder.sourceText.setText(source);
-            holder.timeText.setText(FormatUtils.timeAgo(published));
+            holder.timeText.setText(FormatUtils.formatRelativeTime(date));
 
-            // Sentiment badge
-            String badge;
-            int badgeColor;
-            switch (sentiment.toUpperCase()) {
-                case "BULLISH":
-                    badge = "🟢 BULLISH";
-                    badgeColor = 0xFF00E676;
-                    break;
-                case "BEARISH":
-                    badge = "🔴 BEARISH";
-                    badgeColor = 0xFFFF5252;
-                    break;
-                default:
-                    badge = "⚪ NEUTRAL";
-                    badgeColor = 0xFF9E9E9E;
-            }
-            holder.sentimentText.setText(badge);
-            holder.sentimentText.setTextColor(badgeColor);
+            // Rating badge (1–10 scale)
+            if (item.has("rating")) {
+                double rating = item.get("rating").getAsDouble();
+                String impactLevel = item.has("impact_level") ? item.get("impact_level").getAsString() : "HIGH";
+                String reason = item.has("impact_reason") && !item.get("impact_reason").isJsonNull()
+                        ? item.get("impact_reason").getAsString() : "";
 
-            // Impact Score
-            if (news.has("impact_score") && !news.get("impact_score").isJsonNull()) {
-                float impact = news.get("impact_score").getAsFloat();
-                holder.impactText.setVisibility(View.VISIBLE);
-                holder.impactText.setText(String.format("⚡ %.1f", impact));
-                if (impact > 0.6) holder.impactText.setTextColor(0xFFFFC107); // Amber for high impact
-                else holder.impactText.setTextColor(getResources().getColor(R.color.text_secondary, requireContext().getTheme()));
+                holder.ratingRow.setVisibility(View.VISIBLE);
+                holder.ratingBadge.setText(String.format(Locale.US, "⭐ %.1f / 10", rating));
+                holder.verdictBadge.setText(impactLevel + " IMPACT");
+
+                if (rating >= 8.5) {
+                    holder.ratingBadge.setTextColor(Color.parseColor("#FFFFD740"));
+                    holder.verdictBadge.setTextColor(Color.parseColor("#FFFF5252"));
+                } else if (rating >= 7.0) {
+                    holder.ratingBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    holder.verdictBadge.setTextColor(Color.parseColor("#FF00E676"));
+                } else {
+                    holder.ratingBadge.setTextColor(Color.parseColor("#FF448AFF"));
+                    holder.verdictBadge.setTextColor(Color.parseColor("#FF448AFF"));
+                }
+
+                if (!reason.isEmpty()) {
+                    holder.impactReason.setText(reason);
+                    holder.impactReason.setVisibility(View.VISIBLE);
+                } else {
+                    holder.impactReason.setVisibility(View.GONE);
+                }
             } else {
-                holder.impactText.setVisibility(View.GONE);
+                holder.ratingRow.setVisibility(View.GONE);
+                holder.impactReason.setVisibility(View.GONE);
+            }
+
+            // Sentiment Badge
+            if (!sentiment.isEmpty()) {
+                holder.sentimentText.setVisibility(View.VISIBLE);
+                if ("BULLISH".equalsIgnoreCase(sentiment)) {
+                    holder.sentimentText.setText("🟢 BULLISH");
+                    holder.sentimentText.setTextColor(Color.parseColor("#FF00E676"));
+                } else if ("BEARISH".equalsIgnoreCase(sentiment)) {
+                    holder.sentimentText.setText("🔴 BEARISH");
+                    holder.sentimentText.setTextColor(Color.parseColor("#FFFF5252"));
+                } else {
+                    holder.sentimentText.setText("⚪ NEUTRAL");
+                    holder.sentimentText.setTextColor(Color.parseColor("#FF9E9E9E"));
+                }
+            } else {
+                holder.sentimentText.setVisibility(View.GONE);
             }
 
             // Dividend Badge
-            if (news.has("dividend_detected") && news.get("dividend_detected").getAsBoolean()) {
-                holder.dividendBadge.setVisibility(View.VISIBLE);
-            } else {
-                holder.dividendBadge.setVisibility(View.GONE);
-            }
+            boolean isDiv = item.has("dividend_detected") && !item.get("dividend_detected").isJsonNull() 
+                    && item.get("dividend_detected").getAsBoolean();
+            holder.dividendBadge.setVisibility(isDiv ? View.VISIBLE : View.GONE);
 
-            // Affected Stocks
-            holder.affectedStocksContainer.removeAllViews();
-            if (news.has("affected_stocks") && !news.get("affected_stocks").isJsonNull()) {
-                JsonArray stocks = news.get("affected_stocks").getAsJsonArray();
-                if (stocks.size() > 0) {
-                    holder.affectedStocksScroll.setVisibility(View.VISIBLE);
-                    for (JsonElement el : stocks) {
-                        JsonObject s = el.getAsJsonObject();
-                        String sym = s.has("symbol") ? s.get("symbol").getAsString() : "";
-                        String dir = s.has("direction") ? s.get("direction").getAsString() : "";
-                        
-                        TextView chip = new TextView(requireContext());
-                        chip.setText(sym + (dir.equals("BULLISH") ? " ↗" : dir.equals("BEARISH") ? " ↘" : ""));
-                        chip.setTextColor(Color.WHITE);
-                        chip.setTextSize(11);
-                        chip.setPadding(16, 8, 16, 8);
-                        chip.setBackgroundResource(R.drawable.badge_bg);
-                        
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+            // Affected Stocks Pills
+            holder.stocksContainer.removeAllViews();
+            if (item.has("affected_stocks") && !item.get("affected_stocks").isJsonNull()) {
+                JsonArray arr = item.getAsJsonArray("affected_stocks");
+                if (arr != null && arr.size() > 0) {
+                    holder.stocksScroll.setVisibility(View.VISIBLE);
+                    for (JsonElement el : arr) {
+                        if (!el.isJsonObject()) continue;
+                        JsonObject st = el.getAsJsonObject();
+                        String sym = st.has("symbol") ? st.get("symbol").getAsString() : "";
+                        String dir = st.has("direction") ? st.get("direction").getAsString() : "";
+
+                        TextView pill = new TextView(holder.itemView.getContext());
+                        pill.setBackgroundResource(R.drawable.badge_bg);
+                        pill.setText(sym);
+                        pill.setTextSize(10f);
+                        pill.setPadding(12, 4, 12, 4);
+                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        params.setMarginEnd(16);
-                        chip.setLayoutParams(params);
-                        
-                        holder.affectedStocksContainer.addView(chip);
+                        lp.setMargins(0, 0, 8, 0);
+                        pill.setLayoutParams(lp);
+
+                        if ("BULLISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FF00E676"));
+                        else if ("BEARISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FFFF5252"));
+                        else pill.setTextColor(Color.WHITE);
+
+                        // Click on ticker pill opens stock details
+                        pill.setOnClickListener(v -> {
+                            Intent intent = new Intent(holder.itemView.getContext(), StockDetailActivity.class);
+                            intent.putExtra(StockDetailActivity.EXTRA_SYMBOL, sym);
+                            intent.putExtra(StockDetailActivity.EXTRA_EXCHANGE, "NSE");
+                            intent.putExtra(StockDetailActivity.EXTRA_NAME, sym);
+                            holder.itemView.getContext().startActivity(intent);
+                        });
+
+                        holder.stocksContainer.addView(pill);
                     }
                 } else {
-                    holder.affectedStocksScroll.setVisibility(View.GONE);
+                    holder.stocksScroll.setVisibility(View.GONE);
                 }
             } else {
-                holder.affectedStocksScroll.setVisibility(View.GONE);
+                holder.stocksScroll.setVisibility(View.GONE);
             }
 
             holder.itemView.setOnClickListener(v -> {
-                if (!url.isEmpty() && listener != null) {
-                    listener.onClick(url);
-                }
+                if (listener != null) listener.onNewsClick(url);
             });
         }
 
-        class VH extends RecyclerView.ViewHolder {
-            TextView titleText, sourceText, sentimentText, timeText;
-            TextView impactText, dividendBadge;
-            View affectedStocksScroll;
-            LinearLayout affectedStocksContainer;
+        static class VH extends RecyclerView.ViewHolder {
+            View ratingRow;
+            TextView ratingBadge, verdictBadge, impactReason;
+            TextView titleText, sourceText, timeText, sentimentText, dividendBadge;
+            HorizontalScrollView stocksScroll;
+            LinearLayout stocksContainer;
 
             VH(View v) {
                 super(v);
+                ratingRow = v.findViewById(R.id.news_rating_row);
+                ratingBadge = v.findViewById(R.id.news_rating_badge);
+                verdictBadge = v.findViewById(R.id.news_verdict_badge);
+                impactReason = v.findViewById(R.id.news_impact_reason);
                 titleText = v.findViewById(R.id.news_title);
                 sourceText = v.findViewById(R.id.news_source);
-                sentimentText = v.findViewById(R.id.news_sentiment);
                 timeText = v.findViewById(R.id.news_time);
-                impactText = v.findViewById(R.id.news_impact);
+                sentimentText = v.findViewById(R.id.news_sentiment);
                 dividendBadge = v.findViewById(R.id.news_dividend_badge);
-                affectedStocksScroll = v.findViewById(R.id.affected_stocks_scroll);
-                affectedStocksContainer = v.findViewById(R.id.affected_stocks_container);
+                stocksScroll = v.findViewById(R.id.affected_stocks_scroll);
+                stocksContainer = v.findViewById(R.id.affected_stocks_container);
             }
         }
     }

@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface_dark">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/ipo_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@android:drawable/ic_menu_revert"
+            app:titleTextColor="@color/text_primary">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/toolbar_ipo_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IPO Deep-Dive Report"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/toolbar_ipo_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Institutional AI Research"
+                    android:textColor="@color/purple_accent"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Loading Spinner / Status -->
+            <ProgressBar
+                android:id="@+id/ipo_loading_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Company Header Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/card_dark"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/ipo_company_name"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:text="Company Name" />
+
+                        <TextView
+                            android:id="@+id/ipo_verdict_badge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_pill_dark"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="4dp"
+                            android:textColor="@color/green_accent"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:text="SUBSCRIBE" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/ipo_verdict_rationale"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp"
+                        android:layout_marginTop="8dp"
+                        android:lineSpacingMultiplier="1.2"
+                        android:text="Verdict rationale loading..." />
+
+                    <!-- Key Issue Stats Grid -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:background="@drawable/bg_pill_dark"
+                        android:padding="10dp"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Price Band"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/ipo_stat_price"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹450 - ₹475"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="GMP (Grey Mkt)"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/ipo_stat_gmp"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="+₹120 (25%)"
+                                android:textColor="@color/green_accent"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Issue Size"
+                                android:textColor="@color/text_secondary"
+                                android:textSize="10sp" />
+
+                            <TextView
+                                android:id="@+id/ipo_stat_issue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₹1,200 Cr"
+                                android:textColor="@color/text_primary"
+                                android:textSize="13sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 1. What Company Does (Company Overview) -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="🏢 WHAT THE COMPANY DOES"
+                android:textColor="@color/purple_accent"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:cardBackgroundColor="@color/card_dark"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp">
+
+                <TextView
+                    android:id="@+id/ipo_company_overview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.3"
+                    android:text="Overview text..." />
+            </androidx.cardview.widget.CardView>
+
+            <!-- 2. Business Model & How They Make Money -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="💼 BUSINESS MODEL &amp; REVENUE STREAMS"
+                android:textColor="@color/blue_accent"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:cardBackgroundColor="@color/card_dark"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp">
+
+                <TextView
+                    android:id="@+id/ipo_business_model"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.3"
+                    android:text="Business model text..." />
+            </androidx.cardview.widget.CardView>
+
+            <!-- 3. Industry Position & Market Share -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="🌐 INDUSTRY POSITION &amp; COMPETITORS"
+                android:textColor="@color/yellow_accent"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:cardBackgroundColor="@color/card_dark"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp">
+
+                <TextView
+                    android:id="@+id/ipo_industry_position"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.3"
+                    android:text="Industry position text..." />
+            </androidx.cardview.widget.CardView>
+
+            <!-- 4. Financial Snapshot Datasheet -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="📊 FINANCIAL DATASHEET"
+                android:textColor="@color/green_accent"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:cardBackgroundColor="@color/card_dark"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:id="@+id/ipo_fin_revenue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp"
+                        android:text="Revenue: Loading..." />
+
+                    <TextView
+                        android:id="@+id/ipo_fin_profit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp"
+                        android:text="Profitability: Loading..." />
+
+                    <TextView
+                        android:id="@+id/ipo_fin_debt"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp"
+                        android:text="Debt: Loading..." />
+
+                    <TextView
+                        android:id="@+id/ipo_fin_metrics"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/purple_accent"
+                        android:textSize="13sp"
+                        android:text="Key Metrics: Loading..." />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 5. Reasons to BUY (Bullish Drivers) -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="✅ REASONS TO BUY (STRENGTHS)"
+                android:textColor="@color/green_accent"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                app:cardBackgroundColor="@color/card_dark"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp">
+
+                <TextView
+                    android:id="@+id/ipo_reasons_buy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.3"
+                    android:text="Reasons to buy..." />
+            </androidx.cardview.widget.CardView>
+
+            <!-- 6. Reasons NOT to BUY (Risks) -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="❌ REASONS NOT TO BUY (RISKS)"
+                android:textColor="@color/red_accent"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="32dp"
+                app:cardBackgroundColor="@color/card_dark"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp">
+
+                <TextView
+                    android:id="@+id/ipo_reasons_avoid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.3"
+                    android:text="Reasons to avoid..." />
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

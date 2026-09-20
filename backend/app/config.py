@@ -3,9 +3,12 @@ Configuration module — loads all environment variables.
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Explicitly locate .env to prevent Google Drive cloud-sync folder traversal hangs
+_env_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=_env_path)
 
 
 class Settings:

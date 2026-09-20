@@ -128,7 +128,109 @@ public interface StockApi {
     @POST("api/register-device")
     Call<JsonObject> registerDevice(@Body JsonObject body);
 
+    // ---- Analyst & Intelligence ----
+    @GET("api/analyst/weekly-movers")
+    Call<JsonObject> getWeeklyMovers(@Query("limit") int limit);
+
+    @GET("api/analyst/extreme-news")
+    Call<JsonObject> getExtremeNews(
+            @Query("catalyst") String catalyst,
+            @Query("limit") int limit
+    );
+
+    @GET("api/stocks/{symbol}/dossier")
+    Call<JsonObject> getStockDossier(@Path("symbol") String symbol);
+
+    @GET("api/stocks/{symbol}/chart")
+    Call<JsonObject> getStockChart(
+            @Path("symbol") String symbol,
+            @Query("exchange") String exchange,
+            @Query("range") String range
+    );
+
+    // ---- NEW: Stock Screener (AI Research Picks) ----
+    @GET("api/analyst/screener")
+    Call<JsonObject> getScreenerResults(
+            @Query("sector") String sector,
+            @Query("market") String market,
+            @Query("min_market_cap") Integer minMarketCap,
+            @Query("min_score") Float minScore,
+            @Query("has_catalyst") Boolean hasCatalyst,
+            @Query("has_dividend") Boolean hasDividend,
+            @Query("limit") int limit
+    );
+
+    // ---- NEW: Dividend Calendar & History ----
+    @GET("api/analyst/dividend-calendar")
+    Call<JsonObject> getDividendCalendar(
+            @Query("month") int month,
+            @Query("year") int year,
+            @Query("limit") int limit
+    );
+
+    @GET("api/analyst/dividend-history/{symbol}")
+    Call<JsonObject> getDividendHistory(@Path("symbol") String symbol);
+
+    // ---- NEW: IPO Research Report ----
+    @GET("api/analyst/ipo-report/{ipo_id}")
+    Call<JsonObject> getIpoReport(@Path("ipo_id") int ipoId);
+
+    // ---- NEW: Daily News Ranking ----
+    @GET("api/analyst/daily-news-ranked")
+    Call<JsonObject> getDailyNewsRanked(@Query("date") String date);
+
+    @GET("api/analyst/daily-news-ranked/archive")
+    Call<JsonObject> getNewsArchive(@Query("days") int days);
+
+    // ---- NEW: Full Research Report ----
+    @GET("api/stocks/{symbol}/research-report")
+    Call<JsonObject> getFullResearchReport(@Path("symbol") String symbol);
+
+    // ---- Phase 1 & 2: Buffett Deep Research & Fundamentals ----
+    @GET("api/stocks/{symbol}/fundamentals")
+    Call<JsonObject> getFundamentals(
+            @Path("symbol") String symbol,
+            @Query("exchange") String exchange
+    );
+
+    @GET("api/stocks/{symbol}/ratios")
+    Call<JsonObject> getRatios(
+            @Path("symbol") String symbol,
+            @Query("exchange") String exchange
+    );
+
+    @GET("api/stocks/{symbol}/technicals")
+    Call<JsonObject> getTechnicals(
+            @Path("symbol") String symbol,
+            @Query("exchange") String exchange
+    );
+
+    @GET("api/stocks/{symbol}/valuation")
+    Call<JsonObject> getValuation(
+            @Path("symbol") String symbol,
+            @Query("exchange") String exchange
+    );
+
+    @GET("api/stocks/{symbol}/quality")
+    Call<JsonObject> getQualityScorecard(
+            @Path("symbol") String symbol,
+            @Query("exchange") String exchange
+    );
+
+    @GET("api/stocks/{symbol}/shareholding")
+    Call<JsonObject> getShareholding(
+            @Path("symbol") String symbol,
+            @Query("exchange") String exchange
+    );
+
+    @GET("api/stocks/{symbol}/compare")
+    Call<JsonObject> compareStocks(
+            @Path("symbol") String symbol,
+            @Query("symbols") String compareSymbols
+    );
+
     // ---- Health ----
     @GET("health")
     Call<JsonObject> healthCheck();
 }
+

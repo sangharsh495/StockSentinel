@@ -18,292 +18,128 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Wealth Overview Card (INDmoney style) -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/wealth_card"
+            <!-- Market Terminal Header Banner -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="MARKET SENTINEL"
+                        android:textColor="@color/purple_accent"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1" />
+
+                    <TextView
+                        android:id="@+id/stock_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tracking 13,000+ Stocks"
+                        android:textColor="@color/text_primary"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/market_status_pill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_pill_dark"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="● 24/7 SENTINEL"
+                    android:textColor="@color/green_accent"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Weekly Movers Radar (Catalyst & Momentum AI) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="⚡ Likely to Move This Week"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AI Catalyst Radar"
+                    android:textColor="@color/purple_accent"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/weekly_movers_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp"
+                android:clipToPadding="false" />
+
+            <!-- AI Research Picks (Top 10 ML-Filtered) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🔬 AI Research Picks"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ML Scored"
+                    android:textColor="@color/green_accent"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/research_picks_recycler"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="18dp">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <TextView
-                            android:id="@+id/lbl_net_worth"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="TOTAL NET WORTH"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="11sp"
-                            android:letterSpacing="0.08" />
-
-                        <TextView
-                            android:id="@+id/txt_net_worth"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/lbl_net_worth"
-                            android:layout_marginTop="4dp"
-                            android:text="₹0.00"
-                            android:textColor="@color/text_primary"
-                            android:textSize="26sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/txt_wealth_change"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/txt_net_worth"
-                            android:layout_marginTop="2dp"
-                            android:text="+₹0.00 (+0.00%) Today"
-                            android:textColor="@color/green_accent"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_adjust_balances"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignTop="@id/lbl_net_worth"
-                            android:text="Adjust"
-                            android:textColor="@color/green_accent"
-                            android:textSize="12sp"
-                            app:iconSize="14dp"
-                            android:padding="0dp" />
-
-                    </RelativeLayout>
-
-                    <!-- Interactive Chart Tracing Details (dynamically showing when touching graph) -->
-                    <LinearLayout
-                        android:id="@+id/chart_trace_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="16dp"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/txt_trace_date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="24 Jun"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="12sp" />
-
-                        <View
-                            android:layout_width="1dp"
-                            android:layout_height="12dp"
-                            android:background="@color/text_tertiary"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="8dp" />
-
-                        <TextView
-                            android:id="@+id/txt_trace_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="₹24,50,000"
-                            android:textColor="@color/green_accent"
-                            android:textSize="13sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <!-- Premium Bezier Trend Chart -->
-                    <com.stocksentinel.ui.home.LineChartView
-                        android:id="@+id/wealth_trend_chart"
-                        android:layout_width="match_parent"
-                        android:layout_height="130dp"
-                        android:layout_marginTop="12dp"
-                        android:layout_marginBottom="16dp" />
-
-                    <!-- Divider -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:background="@color/text_tertiary"
-                        android:layout_marginBottom="16dp" />
-
-                    <!-- Asset Distribution Indicators (Horizontal Mini Cards) -->
-                    <GridLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:columnCount="2"
-                        android:rowCount="2"
-                        android:alignmentMode="alignMargins"
-                        android:columnOrderPreserved="false">
-
-                        <!-- Indian Stocks -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical"
-                            android:padding="6dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
-                                <View
-                                    android:layout_width="6dp"
-                                    android:layout_height="6dp"
-                                    android:background="@color/green_accent"
-                                    android:layout_marginEnd="6dp" />
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Indian Stocks"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
-                            </LinearLayout>
-                            <TextView
-                                android:id="@+id/txt_val_indian"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="₹0"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:layout_marginTop="2dp" />
-                        </LinearLayout>
-
-                        <!-- US Stocks -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical"
-                            android:padding="6dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
-                                <View
-                                    android:layout_width="6dp"
-                                    android:layout_height="6dp"
-                                    android:background="@color/blue_accent"
-                                    android:layout_marginEnd="6dp" />
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="US Stocks"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
-                            </LinearLayout>
-                            <TextView
-                                android:id="@+id/txt_val_us"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="₹0"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:layout_marginTop="2dp" />
-                        </LinearLayout>
-
-                        <!-- Mutual Funds -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical"
-                            android:padding="6dp"
-                            android:layout_marginTop="8dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
-                                <View
-                                    android:layout_width="6dp"
-                                    android:layout_height="6dp"
-                                    android:background="@color/purple_accent"
-                                    android:layout_marginEnd="6dp" />
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Mutual Funds"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
-                            </LinearLayout>
-                            <TextView
-                                android:id="@+id/txt_val_mf"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="₹0"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:layout_marginTop="2dp" />
-                        </LinearLayout>
-
-                        <!-- Cash / FD -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:orientation="vertical"
-                            android:padding="6dp"
-                            android:layout_marginTop="8dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
-                                <View
-                                    android:layout_width="6dp"
-                                    android:layout_height="6dp"
-                                    android:background="@color/yellow_accent"
-                                    android:layout_marginEnd="6dp" />
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Cash &amp; FD"
-                                    android:textColor="@color/text_secondary"
-                                    android:textSize="11sp" />
-                            </LinearLayout>
-                            <TextView
-                                android:id="@+id/txt_val_cash"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="₹0"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:layout_marginTop="2dp" />
-                        </LinearLayout>
-                    </GridLayout>
-
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Stock count -->
-            <TextView
-                android:id="@+id/stock_count"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Tracking 13,000+ stocks"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:layout_marginBottom="12dp" />
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false" />
 
             <!-- Market Indices -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="📊 Market Indices"
+
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold"

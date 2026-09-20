@@ -1,0 +1,56 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+backend/.venv/
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environment Variables & Secrets (CRITICAL SECURITY)
+.env
+*.env
+backend/.env
+firebase-credentials.json
+backend/firebase-credentials.json
+google-services.json
+android/app/google-services.json
+*.keystore
+*.jks
+secrets.xml
+
+# Android / Gradle
+.gradle/
+android/.gradle/
+build/
+android/build/
+android/app/build/
+local.properties
+android/local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild
+.cxx
+
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.tmp
+*.bak

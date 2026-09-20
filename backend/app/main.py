@@ -129,6 +129,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Grade 1 Enterprise Security Middleware
+from app.security import SecurityHeadersMiddleware, RateLimitMiddleware
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RateLimitMiddleware, max_requests=120, window_seconds=60)
+
 
 # ---------------------------------------------------------------------------
 # Health check endpoint (pinged by cron-job.org + UptimeRobot + self-ping)
@@ -157,6 +162,11 @@ async def root():
             "news": "/api/news",
             "watchlist": "/api/watchlist/{device_id}",
             "search": "/api/stocks/search?q=reliance",
+            "fundamentals": "/api/stocks/{symbol}/fundamentals",
+            "ratios": "/api/stocks/{symbol}/ratios",
+            "technicals": "/api/stocks/{symbol}/technicals",
+            "valuation": "/api/stocks/{symbol}/valuation",
+            "compare": "/api/stocks/{symbol}/compare?symbols=TCS,WIPRO",
             "health": "/health",
         },
     }
@@ -165,7 +175,7 @@ async def root():
 # ---------------------------------------------------------------------------
 # Register API routers
 # ---------------------------------------------------------------------------
-from app.api import stocks, dividends, ipos, news, watchlist, notifications
+from app.api import stocks, dividends, ipos, news, watchlist, notifications, analyst, fundamentals
 
 app.include_router(stocks.router, prefix="/api", tags=["Stocks"])
 app.include_router(dividends.router, prefix="/api", tags=["Dividends"])
@@ -173,3 +183,6 @@ app.include_router(ipos.router, prefix="/api", tags=["IPOs"])
 app.include_router(news.router, prefix="/api", tags=["News"])
 app.include_router(watchlist.router, prefix="/api", tags=["Watchlist"])
 app.include_router(notifications.router, prefix="/api", tags=["Notifications"])
+app.include_router(analyst.router, prefix="/api", tags=["Analyst"])
+app.include_router(fundamentals.router, prefix="/api", tags=["Fundamentals"])
+

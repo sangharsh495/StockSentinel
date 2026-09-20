@@ -1,42 +1,41 @@
 package com.stocksentinel.ui.home;
 
-import android.animation.ValueAnimator;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
+import com.stocksentinel.ui.stockdetail.StockDetailActivity;
 import com.stocksentinel.util.FormatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Home Fragment — Upgraded INDmoney-style Wealth Dashboard with interactive settings,
- * canvas-based trend charts, and original market stats.
+ * Home Fragment — Institutional Market Intelligence Terminal
+ * Displays Weekly Movers Radar, live indices, sentiment pulse, and top market movers.
  */
-public class HomeFragment extends Fragment implements WealthSettingsBottomSheet.OnWealthSavedListener {
+public class HomeFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefresh;
     private LinearLayout indicesContainer;
@@ -47,29 +46,13 @@ public class HomeFragment extends Fragment implements WealthSettingsBottomSheet.
     private TextView sentimentNeutral;
     private TextView stockCountText;
 
-    // Wealth UI components
-    private View wealthCard;
-    private TextView txtNetWorth;
-    private TextView txtWealthChange;
-    private MaterialButton btnAdjustBalances;
-    private LineChartView wealthTrendChart;
-    private View chartTraceContainer;
-    private TextView txtTraceDate;
-    private TextView txtTraceValue;
+    // Weekly Movers Radar
+    private RecyclerView weeklyMoversRecycler;
+    private WeeklyMoversAdapter weeklyMoversAdapter;
 
-    private TextView txtValIndian;
-    private TextView txtValUs;
-    private TextView txtValMf;
-    private TextView txtValCash;
-
-    // Wealth state
-    private float valIndian;
-    private float valUs;
-    private float valMf;
-    private float valCash;
-    private float totalNetWorth;
-
-    private SharedPreferences prefs;
+    // AI Research Picks (Top 10)
+    private RecyclerView researchPicksRecycler;
+    private ResearchPicksAdapter researchPicksAdapter;
 
     @Nullable
     @Override
@@ -83,8 +66,6 @@ public class HomeFragment extends Fragment implements WealthSettingsBottomSheet.
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        prefs = requireContext().getSharedPreferences("stocksentinel_wealth", Context.MODE_PRIVATE);
-
         // Core bindings
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
         indicesContainer = view.findViewById(R.id.indices_container);
@@ -95,149 +76,93 @@ public class HomeFragment extends Fragment implements WealthSettingsBottomSheet.
         sentimentNeutral = view.findViewById(R.id.sentiment_neutral);
         stockCountText = view.findViewById(R.id.stock_count);
 
-        // Wealth bindings
-        wealthCard = view.findViewById(R.id.wealth_card);
-        txtNetWorth = view.findViewById(R.id.txt_net_worth);
-        txtWealthChange = view.findViewById(R.id.txt_wealth_change);
-        btnAdjustBalances = view.findViewById(R.id.btn_adjust_balances);
-        wealthTrendChart = view.findViewById(R.id.wealth_trend_chart);
-        chartTraceContainer = view.findViewById(R.id.chart_trace_container);
-        txtTraceDate = view.findViewById(R.id.txt_trace_date);
-        txtTraceValue = view.findViewById(R.id.txt_trace_value);
+        // Weekly Movers Radar setup
+        weeklyMoversRecycler = view.findViewById(R.id.weekly_movers_recycler);
+        weeklyMoversRecycler.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        weeklyMoversAdapter = new WeeklyMoversAdapter(mover -> {
+            String sym = mover.has("symbol") ? mover.get("symbol").getAsString() : "";
+            String ex = mover.has("exchange") ? mover.get("exchange").getAsString() : "NSE";
+            String name = mover.has("name") ? mover.get("name").getAsString() : sym;
 
-        txtValIndian = view.findViewById(R.id.txt_val_indian);
-        txtValUs = view.findViewById(R.id.txt_val_us);
-        txtValMf = view.findViewById(R.id.txt_val_mf);
-        txtValCash = view.findViewById(R.id.txt_val_cash);
+            Intent intent = new Intent(requireContext(), StockDetailActivity.class);
+            intent.putExtra(StockDetailActivity.EXTRA_SYMBOL, sym);
+            intent.putExtra(StockDetailActivity.EXTRA_EXCHANGE, ex);
+            intent.putExtra(StockDetailActivity.EXTRA_NAME, name);
+            startActivity(intent);
+        });
+        weeklyMoversRecycler.setAdapter(weeklyMoversAdapter);
 
-        // Set SwipeRefresh Layout setup
+        // AI Research Picks setup
+        researchPicksRecycler = view.findViewById(R.id.research_picks_recycler);
+        researchPicksRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
+        researchPicksRecycler.setNestedScrollingEnabled(false);
+        researchPicksAdapter = new ResearchPicksAdapter(pick -> {
+            String sym = pick.has("symbol") ? pick.get("symbol").getAsString() : "";
+            String ex = pick.has("exchange") ? pick.get("exchange").getAsString() : "NSE";
+            String name = pick.has("name") ? pick.get("name").getAsString() : sym;
+
+            Intent intent = new Intent(requireContext(), StockDetailActivity.class);
+            intent.putExtra(StockDetailActivity.EXTRA_SYMBOL, sym);
+            intent.putExtra(StockDetailActivity.EXTRA_EXCHANGE, ex);
+            intent.putExtra(StockDetailActivity.EXTRA_NAME, name);
+            startActivity(intent);
+        });
+        researchPicksRecycler.setAdapter(researchPicksAdapter);
+
+        // SwipeRefresh setup
         swipeRefresh.setOnRefreshListener(this::loadAllData);
         swipeRefresh.setColorSchemeResources(R.color.green_accent, R.color.red_accent, R.color.blue_accent);
-
-        // Load wealth data first
-        loadWealthData();
-
-        // Dynamic adjust buttons
-        btnAdjustBalances.setOnClickListener(v -> showWealthSettings());
-
-        // Dynamic interactive line chart touch trace listener
-        wealthTrendChart.setOnSelectedPointListener(new LineChartView.OnSelectedPointListener() {
-            @Override
-            public void onPointSelected(int index, float value, String label) {
-                chartTraceContainer.setVisibility(View.VISIBLE);
-                txtTraceDate.setText(label);
-                txtTraceValue.setText(FormatUtils.formatPrice((double) value, "INR"));
-            }
-
-            @Override
-            public void onSelectionCleared() {
-                chartTraceContainer.setVisibility(View.GONE);
-            }
-        });
-
-        // Trigger entrance animations
-        wealthCard.setAlpha(0f);
-        wealthCard.setTranslationY(100f);
-        wealthCard.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(600)
-                .setInterpolator(new DecelerateInterpolator())
-                .start();
 
         loadAllData();
     }
 
-    private void loadWealthData() {
-        // Load default values (10L, 5L, 8L, 1.5L) if not set
-        valIndian = prefs.getFloat("val_indian", 1000000f);
-        valUs = prefs.getFloat("val_us", 500000f);
-        valMf = prefs.getFloat("val_mf", 800000f);
-        valCash = prefs.getFloat("val_cash", 150000f);
-
-        float oldTotal = totalNetWorth;
-        totalNetWorth = valIndian + valUs + valMf + valCash;
-
-        // Dynamic counter rolling animation
-        animateNetWorthCounter(oldTotal, totalNetWorth);
-
-        // Update static asset distribution texts
-        txtValIndian.setText(FormatUtils.formatPrice((double) valIndian, "INR"));
-        txtValUs.setText(FormatUtils.formatPrice((double) valUs, "INR"));
-        txtValMf.setText(FormatUtils.formatPrice((double) valMf, "INR"));
-        txtValCash.setText(FormatUtils.formatPrice((double) valCash, "INR"));
-
-        // Build premium line chart dataset (historical 7 days based on current assets + random variations)
-        updateWealthChart();
-    }
-
-    private void animateNetWorthCounter(float fromValue, float toValue) {
-        ValueAnimator animator = ValueAnimator.ofFloat(fromValue, toValue);
-        animator.setDuration(1000);
-        animator.setInterpolator(new DecelerateInterpolator());
-        animator.addUpdateListener(animation -> {
-            float val = (float) animation.getAnimatedValue();
-            txtNetWorth.setText(FormatUtils.formatPrice((double) val, "INR"));
-        });
-        animator.start();
-
-        // Calculate and format daily percentage change (randomized mockup change)
-        double simulatedChangePct = 0.68;
-        double simulatedChangeVal = toValue * (simulatedChangePct / 100.0);
-        txtWealthChange.setText(String.format(Locale.getDefault(), 
-                "+%s (+%.2f%%) Today", 
-                FormatUtils.formatPrice(simulatedChangeVal, "INR"), 
-                simulatedChangePct
-        ));
-    }
-
-    private void updateWealthChart() {
-        List<Float> points = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
-
-        // Generate 7 days of simulated history ending in the current net worth
-        float baseNetWorth = totalNetWorth;
-        float[] factors = { 0.962f, 0.978f, 0.971f, 0.985f, 0.981f, 0.994f, 1.0f };
-        String[] days = { "21 Jun", "22 Jun", "23 Jun", "24 Jun", "25 Jun", "26 Jun", "Today" };
-
-        for (int i = 0; i < 7; i++) {
-            points.add(baseNetWorth * factors[i]);
-            labels.add(days[i]);
-        }
-
-        wealthTrendChart.setData(points, labels);
-    }
-
-    private void showWealthSettings() {
-        WealthSettingsBottomSheet bottomSheet = WealthSettingsBottomSheet.newInstance(
-                valIndian, valUs, valMf, valCash
-        );
-        bottomSheet.setOnWealthSavedListener(this);
-        bottomSheet.show(getParentFragmentManager(), "wealth_settings");
-    }
-
-    @Override
-    public void onWealthSaved(float indian, float us, float mf, float cash) {
-        // Save back to preferences
-        prefs.edit()
-                .putFloat("val_indian", indian)
-                .putFloat("val_us", us)
-                .putFloat("val_mf", mf)
-                .putFloat("val_cash", cash)
-                .apply();
-
-        // Reload wealth layout and values
-        loadWealthData();
-    }
-
     private void loadAllData() {
         swipeRefresh.setRefreshing(true);
+        loadWeeklyMovers();
+        loadResearchPicks();
         loadIndices();
         loadGainers();
         loadLosers();
         loadSentiment();
         loadStockCount();
     }
+
+
+    private void loadWeeklyMovers() {
+        ApiClient.getApi().getWeeklyMovers(10).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null && isAdded()) {
+                    JsonArray movers = response.body().getAsJsonArray("movers");
+                    if (movers != null && weeklyMoversAdapter != null) {
+                        weeklyMoversAdapter.setItems(movers);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) { }
+        });
+    }
+
+    private void loadResearchPicks() {
+        ApiClient.getApi().getScreenerResults(null, null, null, 50f, false, false, 10)
+                .enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null && isAdded()) {
+                    JsonArray stocks = response.body().getAsJsonArray("stocks");
+                    if (stocks != null && researchPicksAdapter != null) {
+                        researchPicksAdapter.setItems(stocks);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) { }
+        });
+    }
+
 
     private void loadIndices() {
         ApiClient.getApi().getMarketIndices().enqueue(new Callback<JsonObject>() {
@@ -343,6 +268,17 @@ public class HomeFragment extends Fragment implements WealthSettingsBottomSheet.
         change.setText(FormatUtils.formatChangePercent(pct));
         change.setTextColor(FormatUtils.getChangeColor(pct));
 
+        final String finalSym = sym;
+        final String finalEx = stock.has("exchange") ? stock.get("exchange").getAsString() : "NSE";
+        final String finalName = stock.has("name") ? stock.get("name").getAsString() : sym;
+        row.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), StockDetailActivity.class);
+            intent.putExtra(StockDetailActivity.EXTRA_SYMBOL, finalSym);
+            intent.putExtra(StockDetailActivity.EXTRA_EXCHANGE, finalEx);
+            intent.putExtra(StockDetailActivity.EXTRA_NAME, finalName);
+            startActivity(intent);
+        });
+
         container.addView(row);
     }
 
@@ -380,5 +316,195 @@ public class HomeFragment extends Fragment implements WealthSettingsBottomSheet.
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) { }
         });
+    }
+
+    // ---------------------------------------------------------------------------
+    // Weekly Movers Adapter
+    // ---------------------------------------------------------------------------
+    private static class WeeklyMoversAdapter extends RecyclerView.Adapter<WeeklyMoversAdapter.VH> {
+        private final List<JsonObject> items = new ArrayList<>();
+        private final OnMoverClickListener listener;
+
+        interface OnMoverClickListener {
+            void onMoverClick(JsonObject mover);
+        }
+
+        WeeklyMoversAdapter(OnMoverClickListener listener) {
+            this.listener = listener;
+        }
+
+        void setItems(JsonArray array) {
+            items.clear();
+            for (JsonElement el : array) {
+                items.add(el.getAsJsonObject());
+            }
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_weekly_mover, parent, false);
+            return new VH(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            JsonObject item = items.get(position);
+            String symbol = item.has("symbol") ? item.get("symbol").getAsString() : "";
+            String name = item.has("name") ? item.get("name").getAsString() : symbol;
+            String trend = item.has("expected_trend") ? item.get("expected_trend").getAsString() : "BULLISH";
+            String badge = item.has("catalyst_badge") ? item.get("catalyst_badge").getAsString() : "Catalyst";
+            String summary = item.has("catalyst_summary") ? item.get("catalyst_summary").getAsString() : "";
+            Double price = item.has("current_price") && !item.get("current_price").isJsonNull()
+                    ? item.get("current_price").getAsDouble() : null;
+            Double pct = item.has("change_pct") && !item.get("change_pct").isJsonNull()
+                    ? item.get("change_pct").getAsDouble() : null;
+            String currency = item.has("currency") ? item.get("currency").getAsString() : "INR";
+
+            holder.symbolText.setText(symbol);
+            holder.nameText.setText(name);
+            holder.trendBadge.setText(trend.replace("_", " "));
+            holder.catalystBadge.setText(badge);
+            holder.summaryText.setText(summary);
+            holder.priceText.setText(FormatUtils.formatPrice(price, currency));
+            holder.changeText.setText(FormatUtils.formatChangePercent(pct));
+            holder.changeText.setTextColor(FormatUtils.getChangeColor(pct));
+
+            if (trend.contains("BULLISH")) {
+                holder.trendBadge.setTextColor(Color.parseColor("#FF00E676"));
+            } else if (trend.contains("BEARISH")) {
+                holder.trendBadge.setTextColor(Color.parseColor("#FFFF5252"));
+            } else {
+                holder.trendBadge.setTextColor(Color.parseColor("#FFFFD740"));
+            }
+
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onMoverClick(item);
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        static class VH extends RecyclerView.ViewHolder {
+            TextView symbolText, trendBadge, nameText, catalystBadge, summaryText, priceText, changeText;
+
+            VH(View v) {
+                super(v);
+                symbolText = v.findViewById(R.id.mover_symbol);
+                trendBadge = v.findViewById(R.id.mover_trend_badge);
+                nameText = v.findViewById(R.id.mover_name);
+                catalystBadge = v.findViewById(R.id.mover_catalyst_badge);
+                summaryText = v.findViewById(R.id.mover_summary);
+                priceText = v.findViewById(R.id.mover_price);
+                changeText = v.findViewById(R.id.mover_change);
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // AI Research Picks Adapter
+    // -------------------------------------------------------------------------
+    interface OnPickClickListener {
+        void onPickClick(JsonObject pick);
+    }
+
+    static class ResearchPicksAdapter extends RecyclerView.Adapter<ResearchPicksAdapter.VH> {
+        private final List<JsonObject> items = new ArrayList<>();
+        private final OnPickClickListener listener;
+
+        ResearchPicksAdapter(OnPickClickListener listener) {
+            this.listener = listener;
+        }
+
+        public void setItems(JsonArray array) {
+            items.clear();
+            if (array != null) {
+                for (JsonElement el : array) {
+                    if (el.isJsonObject()) items.add(el.getAsJsonObject());
+                }
+            }
+            notifyDataSetChanged();
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_research_pick, parent, false);
+            return new VH(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH holder, int position) {
+            JsonObject item = items.get(position);
+            String symbol = item.has("symbol") ? item.get("symbol").getAsString() : "";
+            String grade = item.has("research_grade") ? item.get("research_grade").getAsString() : "B";
+            String action = item.has("action") ? item.get("action").getAsString() : "ACCUMULATE";
+            String reason = item.has("key_reason") ? item.get("key_reason").getAsString() : "";
+            double score = item.has("composite_score") ? item.get("composite_score").getAsDouble() : 0.0;
+            Double price = item.has("current_price") && !item.get("current_price").isJsonNull()
+                    ? item.get("current_price").getAsDouble() : null;
+            Double pct = item.has("change_pct") && !item.get("change_pct").isJsonNull()
+                    ? item.get("change_pct").getAsDouble() : null;
+            String currency = item.has("currency") ? item.get("currency").getAsString() : "INR";
+
+            holder.gradeText.setText(grade);
+            holder.symbolText.setText(symbol);
+            holder.actionText.setText(action.replace("_", " "));
+            holder.reasonText.setText(reason.isEmpty() ? "Multi-factor ML screened" : reason);
+            holder.scoreText.setText(String.format(java.util.Locale.US, "AI Score: %.1f/100", score));
+            holder.priceText.setText(FormatUtils.formatPrice(price, currency));
+            holder.changeText.setText(FormatUtils.formatChangePercent(pct));
+            holder.changeText.setTextColor(FormatUtils.getChangeColor(pct));
+
+            // Grade styling
+            if (grade.startsWith("A")) {
+                holder.gradeText.setTextColor(Color.parseColor("#FF00E676"));
+            } else if (grade.startsWith("B")) {
+                holder.gradeText.setTextColor(Color.parseColor("#FF2979FF"));
+            } else if (grade.startsWith("C")) {
+                holder.gradeText.setTextColor(Color.parseColor("#FFFFD740"));
+            } else {
+                holder.gradeText.setTextColor(Color.parseColor("#FFFF5252"));
+            }
+
+            // Action badge styling
+            if (action.contains("BUY") || action.contains("ACCUMULATE")) {
+                holder.actionText.setTextColor(Color.parseColor("#FF00E676"));
+            } else if (action.contains("SELL") || action.contains("AVOID")) {
+                holder.actionText.setTextColor(Color.parseColor("#FFFF5252"));
+            } else {
+                holder.actionText.setTextColor(Color.parseColor("#FFFFD740"));
+            }
+
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onPickClick(item);
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        static class VH extends RecyclerView.ViewHolder {
+            TextView gradeText, symbolText, actionText, reasonText, scoreText, priceText, changeText;
+
+            VH(View v) {
+                super(v);
+                gradeText = v.findViewById(R.id.pick_grade);
+                symbolText = v.findViewById(R.id.pick_symbol);
+                actionText = v.findViewById(R.id.pick_action);
+                reasonText = v.findViewById(R.id.pick_reason);
+                scoreText = v.findViewById(R.id.pick_score);
+                priceText = v.findViewById(R.id.pick_price);
+                changeText = v.findViewById(R.id.pick_change);
+            }
+        }
     }
 }

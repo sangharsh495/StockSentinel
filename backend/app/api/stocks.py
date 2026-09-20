@@ -168,35 +168,12 @@ async def top_losers(
     return {"stocks": stocks}
 
 
+from app.ml.live_quote_service import live_quote_service
+
 @router.get("/stocks/indices")
 async def market_indices():
-    """Get key market indices — NIFTY 50, SENSEX, S&P 500, NASDAQ."""
-    index_symbols = [
-        ("^NSEI", "NIFTY 50", "IN"),
-        ("^BSESN", "SENSEX", "IN"),
-        ("^GSPC", "S&P 500", "US"),
-        ("^IXIC", "NASDAQ", "US"),
-    ]
-
-    indices = []
-    for symbol, name, market in index_symbols:
-        row = await fetchrow(
-            """
-            SELECT current_price, prev_close, change_pct, last_updated
-            FROM stocks WHERE symbol = $1
-            """,
-            symbol,
-        )
-        indices.append({
-            "symbol": symbol,
-            "name": name,
-            "market": market,
-            "current_price": row["current_price"] if row else None,
-            "prev_close": row["prev_close"] if row else None,
-            "change_pct": row["change_pct"] if row else None,
-            "last_updated": row["last_updated"] if row else None,
-        })
-
+    """Get live real-time market indices — NIFTY 50, SENSEX, S&P 500, NASDAQ."""
+    indices = await live_quote_service.get_live_indices()
     return {"indices": indices}
 
 
@@ -217,7 +194,9 @@ async def stock_count():
 
 @router.get("/stocks/{symbol}")
 async def get_stock(symbol: str, exchange: Optional[str] = None):
-    """Get detailed info for a single stock."""
+    """
+    Get detailed info for a single stock with guaranteed live, up-to-date pricing.
+    """
     if exchange:
         stock = await fetchrow(
             """
@@ -239,9 +218,44 @@ async def get_stock(symbol: str, exchange: Optional[str] = None):
         )
 
     if not stock:
+        # Check if live quote can be resolved for ticker directly
+        live_q = await live_quote_service.get_live_quote(symbol, exchange or "NSE")
+        if live_q:
+            return {
+                "stock": {
+                    "symbol": symbol.upper(),
+                    "name": symbol.upper(),
+                    "exchange": exchange or "NSE",
+                    "market": "IN" if (exchange or "NSE").upper() in ("NSE", "BSE") else "US",
+                    "current_price": live_q["current_price"],
+                    "prev_close": live_q["prev_close"],
+                    "change_pct": live_q["change_pct"],
+                    "day_high": live_q.get("day_high"),
+                    "day_low": live_q.get("day_low"),
+                    "volume": live_q.get("volume"),
+                    "is_live": True,
+                }
+            }
         return {"error": "Stock not found", "symbol": symbol}
 
-    return {"stock": stock}
+    stock_dict = dict(stock)
+
+    # Sync live quote if missing or older than 5 minutes
+    ex = stock_dict.get("exchange") or exchange or "NSE"
+    live_q = await live_quote_service.get_live_quote(symbol, ex)
+    if live_q:
+        stock_dict["current_price"] = live_q["current_price"]
+        stock_dict["prev_close"] = live_q["prev_close"]
+        stock_dict["change_pct"] = live_q["change_pct"]
+        if live_q.get("day_high"):
+            stock_dict["day_high"] = live_q["day_high"]
+        if live_q.get("day_low"):
+            stock_dict["day_low"] = live_q["day_low"]
+        if live_q.get("volume"):
+            stock_dict["volume"] = live_q["volume"]
+        stock_dict["is_live"] = True
+
+    return {"stock": stock_dict}
 
 
 @router.get("/stocks/{symbol}/news")

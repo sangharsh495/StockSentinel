@@ -6,14 +6,63 @@
     android:padding="16dp"
     android:background="?attr/selectableItemBackground">
 
+    <!-- Top Row: Rating Badge (e.g. 9.5/10) + Impact Level (e.g. CRITICAL) -->
+    <LinearLayout
+        android:id="@+id/news_rating_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/news_rating_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_pill_dark"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="3dp"
+            android:textColor="@color/yellow_accent"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:text="⭐ 9.5 / 10" />
+
+        <TextView
+            android:id="@+id/news_verdict_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/badge_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:textColor="@color/green_accent"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:text="CRITICAL IMPACT" />
+    </LinearLayout>
+
     <TextView
         android:id="@+id/news_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
-        android:textSize="16sp"
+        android:textSize="15sp"
         android:textStyle="bold"
+        android:lineSpacingMultiplier="1.2"
         android:text="Markets hit record highs as IT stocks surge" />
+
+    <TextView
+        android:id="@+id/news_impact_reason"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/purple_accent"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:visibility="gone"
+        android:text="Q3 revenue growth beats street estimate by 4.2%" />
 
     <LinearLayout
         android:layout_width="match_parent"

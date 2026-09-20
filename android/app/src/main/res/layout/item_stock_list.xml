@@ -3,13 +3,28 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="14dp"
     android:background="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Optional Grade Badge (shown when screened) -->
+        <TextView
+            android:id="@+id/stock_grade_badge"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:gravity="center"
+            android:background="@drawable/bg_pill_dark"
+            android:text="A"
+            android:textColor="@color/green_accent"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="10dp"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -17,14 +32,35 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/stock_symbol"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:text="RELIANCE" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/stock_symbol"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:text="RELIANCE" />
+
+                <TextView
+                    android:id="@+id/stock_action_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_pill_dark"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="1dp"
+                    android:textColor="@color/green_accent"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:text="STRONG BUY"
+                    android:visibility="gone" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/stock_name"
@@ -33,7 +69,21 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp"
                 android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:text="Reliance Industries Ltd." />
+
+            <TextView
+                android:id="@+id/stock_screener_reason"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/purple_accent"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:visibility="gone"
+                android:text="High catalyst momentum" />
         </LinearLayout>
 
         <LinearLayout
@@ -47,7 +97,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_primary"
-                android:textSize="16sp"
+                android:textSize="15sp"
                 android:textStyle="bold"
                 android:text="₹2,456.80" />
 
@@ -56,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/green_accent"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:layout_marginTop="2dp"
                 android:text="+2.30%" />
         </LinearLayout>
@@ -93,14 +143,11 @@
             android:layout_height="wrap_content"
             android:textColor="@color/green_accent"
             android:textSize="12sp"
-            android:text="+ Add"
+            android:text="+ Watchlist"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
-            android:background="@drawable/change_badge_bg"
-            android:visibility="gone" />
-
+            android:background="@drawable/badge_bg" />
     </LinearLayout>
-
 </LinearLayout>

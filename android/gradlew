@@ -116,6 +116,20 @@ esac
 
 
 
+# Auto-detect JAVA_HOME on macOS if unset
+if [ -z "$JAVA_HOME" ] ; then
+    if [ -d "/opt/homebrew/opt/openjdk" ] ; then
+        export JAVA_HOME="/opt/homebrew/opt/openjdk"
+    elif [ -d "/Applications/Android Studio.app/Contents/jbr/Contents/Home" ] ; then
+        export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+    elif [ -d "/Library/Java/JavaVirtualMachines" ] ; then
+        _found_jvm=$(find /Library/Java/JavaVirtualMachines -maxdepth 3 -name "Home" 2>/dev/null | head -n 1)
+        if [ -n "$_found_jvm" ] ; then
+            export JAVA_HOME="$_found_jvm"
+        fi
+    fi
+fi
+
 # Determine the Java command to use to start the JVM.
 if [ -n "$JAVA_HOME" ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then

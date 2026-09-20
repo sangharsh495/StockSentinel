@@ -87,6 +87,15 @@ public class FormatUtils {
         }
     }
 
+    public static String formatNumber(Long num) {
+        if (num == null) return "—";
+        return formatVolume(num);
+    }
+
+    public static String formatRelativeTime(String isoTimestamp) {
+        return timeAgo(isoTimestamp);
+    }
+
     public static int getChangeColor(Double pct) {
         if (pct == null || pct == 0) return 0xFF9E9E9E; // Gray
         return pct > 0 ? 0xFF00E676 : 0xFFFF5252; // Green or Red

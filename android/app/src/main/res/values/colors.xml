@@ -14,6 +14,7 @@
     <color name="purple_accent">#FF7C4DFF</color>
 
     <!-- Text -->
+    <color name="white">#FFFFFFFF</color>
     <color name="text_primary">#FFE6EDF3</color>
     <color name="text_secondary">#FF8B949E</color>
     <color name="text_tertiary">#FF484F58</color>

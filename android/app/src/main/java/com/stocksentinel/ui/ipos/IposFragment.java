@@ -1,5 +1,6 @@
 package com.stocksentinel.ui.ipos;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +29,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * IPOs Fragment — upcoming, open, and recently listed IPOs.
+ * IPOs Fragment — upcoming, open, and recently listed IPOs with AI Deep-Dive Reports.
  */
 public class IposFragment extends Fragment {
 
@@ -51,7 +52,16 @@ public class IposFragment extends Fragment {
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
         recyclerView = view.findViewById(R.id.ipos_recycler);
 
-        adapter = new IpoAdapter();
+        adapter = new IpoAdapter(ipo -> {
+            int ipoId = ipo.has("id") ? ipo.get("id").getAsInt() : 0;
+            String name = ipo.has("company_name") ? ipo.get("company_name").getAsString() : "IPO Report";
+
+            Intent intent = new Intent(requireContext(), IpoDetailActivity.class);
+            intent.putExtra(IpoDetailActivity.EXTRA_IPO_ID, ipoId);
+            intent.putExtra(IpoDetailActivity.EXTRA_COMPANY_NAME, name);
+            startActivity(intent);
+        });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
@@ -68,8 +78,10 @@ public class IposFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null && isAdded()) {
                     JsonArray ipos = response.body().getAsJsonArray("ipos");
                     List<JsonObject> items = new ArrayList<>();
-                    for (JsonElement el : ipos) {
-                        items.add(el.getAsJsonObject());
+                    if (ipos != null) {
+                        for (JsonElement el : ipos) {
+                            if (el.isJsonObject()) items.add(el.getAsJsonObject());
+                        }
                     }
                     adapter.setItems(items);
                 }
@@ -83,8 +95,17 @@ public class IposFragment extends Fragment {
         });
     }
 
+    interface OnIpoClickListener {
+        void onIpoClick(JsonObject ipo);
+    }
+
     static class IpoAdapter extends RecyclerView.Adapter<IpoAdapter.VH> {
         private final List<JsonObject> items = new ArrayList<>();
+        private final OnIpoClickListener listener;
+
+        IpoAdapter(OnIpoClickListener listener) {
+            this.listener = listener;
+        }
 
         void setItems(List<JsonObject> newItems) {
             items.clear();
@@ -109,7 +130,7 @@ public class IposFragment extends Fragment {
 
             String name = ipo.has("company_name") ? ipo.get("company_name").getAsString() : "";
             String market = ipo.has("market") && !ipo.get("market").isJsonNull()
-                    ? ipo.get("market").getAsString() : "";
+                    ? ipo.get("market").getAsString() : "IN";
             String status = ipo.has("status") && !ipo.get("status").isJsonNull()
                     ? ipo.get("status").getAsString() : "";
             String openDate = ipo.has("open_date") && !ipo.get("open_date").isJsonNull()
@@ -124,7 +145,6 @@ public class IposFragment extends Fragment {
                     ? ipo.get("lot_size").getAsString() : "";
 
             holder.nameText.setText(name);
-            holder.marketText.setText(market);
             holder.statusText.setText(status.toUpperCase());
             holder.dateText.setText(FormatUtils.formatDate(openDate) +
                     (closeDate.isEmpty() ? "" : " – " + FormatUtils.formatDate(closeDate)));
@@ -148,19 +168,26 @@ public class IposFragment extends Fragment {
                 default: statusColor = 0xFF9E9E9E;
             }
             holder.statusText.setTextColor(statusColor);
+
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null) listener.onIpoClick(ipo);
+            });
+            holder.btnReport.setOnClickListener(v -> {
+                if (listener != null) listener.onIpoClick(ipo);
+            });
         }
 
         static class VH extends RecyclerView.ViewHolder {
-            TextView nameText, marketText, statusText, dateText, priceText, lotText;
+            TextView nameText, statusText, dateText, priceText, lotText, btnReport;
 
             VH(View v) {
                 super(v);
                 nameText = v.findViewById(R.id.ipo_name);
-                marketText = v.findViewById(R.id.ipo_market);
                 statusText = v.findViewById(R.id.ipo_status);
                 dateText = v.findViewById(R.id.ipo_dates);
                 priceText = v.findViewById(R.id.ipo_price);
                 lotText = v.findViewById(R.id.ipo_lot);
+                btnReport = v.findViewById(R.id.ipo_btn_report);
             }
         }
     }

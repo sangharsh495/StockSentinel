@@ -16,3 +16,9 @@ local.properties
 
 # App build outputs (APK, DEX, intermediates)
 app/build/
+
+# Grade 1 Security: Keystores and private configs
+*.jks
+*.keystore
+google-services.json
+secrets.xml

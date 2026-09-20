@@ -35,8 +35,9 @@ public class LineChartView extends View {
     private float animationProgress = 0f;
     private float touchX = -1f;
     private int selectedIndex = -1;
-
     private OnSelectedPointListener listener;
+
+    private int primaryColor = Color.parseColor("#FF00E676");
 
     public interface OnSelectedPointListener {
         void onPointSelected(int index, float value, String label);
@@ -54,9 +55,19 @@ public class LineChartView extends View {
     }
 
     private void init() {
-        // Line Paint (glowing green/purple accent)
+        applyPaints();
+    }
+
+    public void setThemeColor(int color) {
+        this.primaryColor = color;
+        applyPaints();
+        invalidate();
+    }
+
+    private void applyPaints() {
+        // Line Paint
         linePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        linePaint.setColor(Color.parseColor("#FF00E676")); // green_accent
+        linePaint.setColor(primaryColor);
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(8f);
         linePaint.setStrokeCap(Paint.Cap.ROUND);
@@ -68,21 +79,23 @@ public class LineChartView extends View {
 
         // Tracker Dot Paint
         dotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        dotPaint.setColor(Color.parseColor("#FF00E676"));
+        dotPaint.setColor(primaryColor);
         dotPaint.setStyle(Paint.Style.FILL);
 
         dotOuterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        dotOuterPaint.setColor(Color.parseColor("#3300E676"));
+        int outerColor = Color.argb(60, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor));
+        dotOuterPaint.setColor(outerColor);
         dotOuterPaint.setStyle(Paint.Style.FILL);
 
         // Vertical Guide Line Paint
         guidePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        guidePaint.setColor(Color.parseColor("#22FFE676"));
+        int guideColor = Color.argb(40, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor));
+        guidePaint.setColor(guideColor);
         guidePaint.setStyle(Paint.Style.STROKE);
         guidePaint.setStrokeWidth(3f);
-        // Dash effect
         guidePaint.setPathEffect(new android.graphics.DashPathEffect(new float[]{10, 10}, 0));
     }
+
 
     public void setData(List<Float> points, List<String> labels) {
         this.dataPoints = points;
@@ -204,9 +217,10 @@ public class LineChartView extends View {
         fillPath.close();
 
         // Update fill paint shader with linear gradient dynamically
+        int topGradient = Color.argb(68, Color.red(primaryColor), Color.green(primaryColor), Color.blue(primaryColor));
         fillPaint.setShader(new LinearGradient(
                 0, paddingTop, 0, height - paddingBottom,
-                Color.parseColor("#4400E676"), // green tint translucent
+                topGradient,
                 Color.TRANSPARENT,
                 Shader.TileMode.CLAMP
         ));

@@ -1,5 +1,7 @@
 package com.stocksentinel.ui.search;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -156,6 +158,15 @@ public class SearchActivity extends AppCompatActivity {
             holder.priceText.setText(FormatUtils.formatPrice(price, currency));
             holder.changeText.setText(FormatUtils.formatChangePercent(pct));
             holder.changeText.setTextColor(FormatUtils.getChangeColor(pct));
+
+            holder.itemView.setOnClickListener(v -> {
+                Context ctx = v.getContext();
+                Intent intent = new Intent(ctx, com.stocksentinel.ui.stockdetail.StockDetailActivity.class);
+                intent.putExtra(com.stocksentinel.ui.stockdetail.StockDetailActivity.EXTRA_SYMBOL, symbol);
+                intent.putExtra(com.stocksentinel.ui.stockdetail.StockDetailActivity.EXTRA_EXCHANGE, exchange);
+                intent.putExtra(com.stocksentinel.ui.stockdetail.StockDetailActivity.EXTRA_NAME, name);
+                ctx.startActivity(intent);
+            });
         }
 
         static class VH extends RecyclerView.ViewHolder {
