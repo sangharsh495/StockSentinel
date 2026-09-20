@@ -74,7 +74,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void checkConnectionPing() {
         textPingLatency.setText("Measuring...");
-        textPingLatency.setTextColor(Color.parseColor("#FFFFD740"));
+        textPingLatency.setTextColor(Color.parseColor("#FFD97706"));
 
         long startTime = System.currentTimeMillis();
 
@@ -88,10 +88,10 @@ public class SettingsActivity extends AppCompatActivity {
 
                     // Server status
                     textServerStatusBadge.setText("🟢 ONLINE");
-                    textServerStatusBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    textServerStatusBadge.setTextColor(Color.parseColor("#FF059669"));
 
                     textPingLatency.setText(String.format(Locale.US, "%d ms (Ultra-Fast)", duration));
-                    textPingLatency.setTextColor(Color.parseColor("#FF00E676"));
+                    textPingLatency.setTextColor(Color.parseColor("#FF059669"));
 
                     // Database stats
                     if (body.has("database") && body.get("database").isJsonObject()) {
@@ -126,9 +126,9 @@ public class SettingsActivity extends AppCompatActivity {
                 long duration = System.currentTimeMillis() - startTime;
                 if (response.isSuccessful()) {
                     textServerStatusBadge.setText("🟢 ONLINE");
-                    textServerStatusBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    textServerStatusBadge.setTextColor(Color.parseColor("#FF059669"));
                     textPingLatency.setText(String.format(Locale.US, "%d ms (Connected)", duration));
-                    textPingLatency.setTextColor(Color.parseColor("#FF00E676"));
+                    textPingLatency.setTextColor(Color.parseColor("#FF059669"));
 
                     statDbStocks.setText("43 Active Listed Stocks");
                     statDbDividends.setText("39 Corporate Payouts");
@@ -148,9 +148,9 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void showOfflineState() {
         textServerStatusBadge.setText("🔴 RETRYING");
-        textServerStatusBadge.setTextColor(Color.parseColor("#FFFF5252"));
+        textServerStatusBadge.setTextColor(Color.parseColor("#FFDC2626"));
         textPingLatency.setText("Render service waking up...");
-        textPingLatency.setTextColor(Color.parseColor("#FFFFD740"));
+        textPingLatency.setTextColor(Color.parseColor("#FFD97706"));
     }
 
     private void syncAllFeeds() {

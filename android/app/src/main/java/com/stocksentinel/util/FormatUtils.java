@@ -97,7 +97,7 @@ public class FormatUtils {
     }
 
     public static int getChangeColor(Double pct) {
-        if (pct == null || pct == 0) return 0xFF9E9E9E; // Gray
-        return pct > 0 ? 0xFF00E676 : 0xFFFF5252; // Green or Red
+        if (pct == null || pct == 0) return 0xFF64748B; // Slate 500
+        return pct > 0 ? 0xFF059669 : 0xFFDC2626; // Emerald 600 or Crimson 600
     }
 }

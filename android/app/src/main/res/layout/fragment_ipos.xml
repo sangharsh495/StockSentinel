@@ -23,11 +23,11 @@
                 android:id="@+id/chip_ipo_all"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="6dp"
                 android:text="🌟 All Issues"
-                android:textColor="@color/white"
+                android:textColor="@color/blue_accent"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:layout_marginEnd="8dp" />
@@ -36,7 +36,7 @@
                 android:id="@+id/chip_ipo_open"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="6dp"
                 android:text="🟢 Open Now"
@@ -49,7 +49,7 @@
                 android:id="@+id/chip_ipo_upcoming"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="6dp"
                 android:text="⏳ Upcoming"
@@ -62,7 +62,7 @@
                 android:id="@+id/chip_ipo_high_gmp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="6dp"
                 android:text="🚀 High GMP (>₹50)"
@@ -71,6 +71,12 @@
                 android:textStyle="bold" />
         </LinearLayout>
     </HorizontalScrollView>
+
+    <!-- Hairline Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"

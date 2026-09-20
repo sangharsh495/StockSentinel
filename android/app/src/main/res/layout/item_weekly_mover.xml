@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginEnd="12dp"
     android:background="@drawable/bg_ai_card"
+    android:foreground="?attr/selectableItemBackground"
     android:orientation="vertical"
     android:padding="12dp">
 
@@ -29,11 +30,11 @@
             android:id="@+id/mover_trend_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_pill_dark"
+            android:background="@drawable/badge_bg"
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
             android:text="BULLISH"
-            android:textColor="@color/green_accent"
+            android:textColor="@color/bullish"
             android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -56,7 +57,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:background="#207C4DFF"
+        android:background="@drawable/badge_bg"
         android:paddingHorizontal="8dp"
         android:paddingVertical="2dp"
         android:text="Order Win"
@@ -100,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="+0.0%"
-            android:textColor="@color/green_accent"
+            android:textColor="@color/bullish"
             android:textSize="12sp"
             android:textStyle="bold" />
     </LinearLayout>

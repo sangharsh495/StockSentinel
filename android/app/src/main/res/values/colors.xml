@@ -1,34 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary dark theme -->
-    <color name="background_dark">#FF0D1117</color>
-    <color name="surface_dark">#FF161B22</color>
-    <color name="surface_elevated">#FF1C2333</color>
-    <color name="card_dark">#FF21262D</color>
+    <!-- Modern Light Financial Canvas -->
+    <color name="background_dark">#FFF8FAFC</color>
+    <color name="surface_dark">#FFFFFFFF</color>
+    <color name="surface_elevated">#FFF1F5F9</color>
+    <color name="card_dark">#FFFFFFFF</color>
+    <color name="card_border">#FFE2E8F0</color>
+    <color name="card_border_subtle">#FFF1F5F9</color>
+    <color name="card_shadow">#1A0F172A</color>
 
-    <!-- Accent colors -->
-    <color name="green_accent">#FF00E676</color>
-    <color name="red_accent">#FFFF5252</color>
-    <color name="blue_accent">#FF448AFF</color>
-    <color name="yellow_accent">#FFFFD740</color>
-    <color name="purple_accent">#FF7C4DFF</color>
+    <!-- Institutional Financial Accents -->
+    <color name="green_accent">#FF059669</color>
+    <color name="red_accent">#FFDC2626</color>
+    <color name="blue_accent">#FF2563EB</color>
+    <color name="yellow_accent">#FFD97706</color>
+    <color name="purple_accent">#FF7C3AED</color>
 
-    <!-- Text -->
+    <!-- High-Contrast Typography -->
     <color name="white">#FFFFFFFF</color>
-    <color name="text_primary">#FFE6EDF3</color>
-    <color name="text_secondary">#FF8B949E</color>
-    <color name="text_tertiary">#FF484F58</color>
+    <color name="text_primary">#FF0F172A</color>
+    <color name="text_secondary">#FF475569</color>
+    <color name="text_tertiary">#FF94A3B8</color>
 
-    <!-- Sentiment -->
-    <color name="bullish">#FF00E676</color>
-    <color name="bearish">#FFFF5252</color>
-    <color name="neutral">#FF9E9E9E</color>
+    <!-- Market Sentiment -->
+    <color name="bullish">#FF059669</color>
+    <color name="bearish">#FFDC2626</color>
+    <color name="neutral">#FF64748B</color>
 
-    <!-- Bottom nav -->
-    <color name="nav_background">#FF0D1117</color>
-    <color name="nav_selected">#FF00E676</color>
-    <color name="nav_unselected">#FF8B949E</color>
+    <!-- Soft Badge Backgrounds (Tints for Light Theme) -->
+    <color name="badge_green_bg">#FFECFDF5</color>
+    <color name="badge_red_bg">#FFFFF1F2</color>
+    <color name="badge_blue_bg">#FFEFF6FF</color>
+    <color name="badge_yellow_bg">#FFFEF3C7</color>
+    <color name="badge_purple_bg">#FFF5F3FF</color>
+    <color name="divider_color">#FFE2E8F0</color>
 
-    <!-- Status bar -->
-    <color name="status_bar">#FF0D1117</color>
+    <!-- Navigation Bar -->
+    <color name="nav_background">#FFFFFFFF</color>
+    <color name="nav_selected">#FF2563EB</color>
+    <color name="nav_unselected">#FF64748B</color>
+
+    <!-- Status Bar -->
+    <color name="status_bar">#FFFFFFFF</color>
 </resources>

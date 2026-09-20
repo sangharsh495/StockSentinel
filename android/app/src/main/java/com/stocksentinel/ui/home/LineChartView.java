@@ -37,7 +37,7 @@ public class LineChartView extends View {
     private int selectedIndex = -1;
     private OnSelectedPointListener listener;
 
-    private int primaryColor = Color.parseColor("#FF00E676");
+    private int primaryColor = Color.parseColor("#FF059669");
 
     public interface OnSelectedPointListener {
         void onPointSelected(int index, float value, String label);

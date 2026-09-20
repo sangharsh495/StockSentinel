@@ -6,15 +6,23 @@
     android:background="@color/background_dark"
     android:orientation="vertical">
 
-    <!-- Toolbar -->
+    <!-- Premium Institutional Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/surface_dark"
+        app:elevation="1dp"
         app:title="StockSentinel"
-        app:titleTextColor="@color/green_accent"
+        app:titleTextColor="@color/text_primary"
+        app:titleCentered="false"
         app:menu="@menu/toolbar_menu" />
+
+    <!-- Thin Hairline Separator -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color" />
 
     <!-- Nav Host Fragment -->
     <androidx.fragment.app.FragmentContainerView
@@ -26,12 +34,19 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- Bottom Navigation -->
+    <!-- Hairline Separator above Bottom Nav -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color" />
+
+    <!-- Modern Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/nav_background"
+        app:elevation="8dp"
         app:itemIconTint="@color/bottom_nav_colors"
         app:itemTextColor="@color/bottom_nav_colors"
         app:labelVisibilityMode="labeled"

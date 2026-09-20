@@ -43,10 +43,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:gravity="center"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:paddingHorizontal="12dp"
                 android:text="📊 All Stocks"
-                android:textColor="@color/text_primary"
+                android:textColor="@color/blue_accent"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:layout_marginEnd="6dp" />
@@ -56,7 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:gravity="center"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:paddingHorizontal="12dp"
                 android:text="⭐ Top AI Rated (>70)"
                 android:textColor="@color/text_secondary"
@@ -69,7 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:gravity="center"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:paddingHorizontal="12dp"
                 android:text="🔥 Catalyst News"
                 android:textColor="@color/text_secondary"
@@ -82,7 +82,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
                 android:gravity="center"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:paddingHorizontal="12dp"
                 android:text="💰 High Dividend"
                 android:textColor="@color/text_secondary"
@@ -98,9 +98,10 @@
         android:layout_height="44dp"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="8dp"
-        app:cardBackgroundColor="@color/surface_dark"
+        app:cardBackgroundColor="@color/card_dark"
         app:cardCornerRadius="22dp"
-        app:cardElevation="0dp">
+        app:cardElevation="1dp"
+        android:foreground="?attr/selectableItemBackground">
 
         <LinearLayout
             android:layout_width="match_parent"

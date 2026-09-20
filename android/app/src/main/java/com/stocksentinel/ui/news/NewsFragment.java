@@ -93,7 +93,7 @@ public class NewsFragment extends Fragment {
     private void setupFilterChips() {
         View.OnClickListener listener = v -> {
             resetChips();
-            ((TextView) v).setTextColor(Color.WHITE);
+            ((TextView) v).setTextColor(getResources().getColor(R.color.blue_accent, null));
             
             currentSentiment = null;
             currentDividendOnly = null;
@@ -102,7 +102,7 @@ public class NewsFragment extends Fragment {
 
             if (v == chipDailyTop) {
                 isDailyTopMode = true;
-                chipDailyTop.setTextColor(Color.parseColor("#FFFFD740"));
+                chipDailyTop.setTextColor(getResources().getColor(R.color.yellow_accent, null));
             } else if (v == chipBullish) {
                 currentSentiment = "BULLISH";
             } else if (v == chipBearish) {
@@ -125,7 +125,7 @@ public class NewsFragment extends Fragment {
 
         // Highlight Daily Top initially
         resetChips();
-        chipDailyTop.setTextColor(Color.parseColor("#FFFFD740"));
+        chipDailyTop.setTextColor(getResources().getColor(R.color.yellow_accent, null));
     }
 
     private void resetChips() {
@@ -278,14 +278,14 @@ public class NewsFragment extends Fragment {
                 holder.verdictBadge.setText(impactLevel + " IMPACT");
 
                 if (rating >= 8.5) {
-                    holder.ratingBadge.setTextColor(Color.parseColor("#FFFFD740"));
-                    holder.verdictBadge.setTextColor(Color.parseColor("#FFFF5252"));
+                    holder.ratingBadge.setTextColor(Color.parseColor("#FFD97706"));
+                    holder.verdictBadge.setTextColor(Color.parseColor("#FFDC2626"));
                 } else if (rating >= 7.0) {
-                    holder.ratingBadge.setTextColor(Color.parseColor("#FF00E676"));
-                    holder.verdictBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    holder.ratingBadge.setTextColor(Color.parseColor("#FF059669"));
+                    holder.verdictBadge.setTextColor(Color.parseColor("#FF059669"));
                 } else {
-                    holder.ratingBadge.setTextColor(Color.parseColor("#FF448AFF"));
-                    holder.verdictBadge.setTextColor(Color.parseColor("#FF448AFF"));
+                    holder.ratingBadge.setTextColor(Color.parseColor("#FF2563EB"));
+                    holder.verdictBadge.setTextColor(Color.parseColor("#FF2563EB"));
                 }
 
                 if (!reason.isEmpty()) {
@@ -304,13 +304,13 @@ public class NewsFragment extends Fragment {
                 holder.sentimentText.setVisibility(View.VISIBLE);
                 if ("BULLISH".equalsIgnoreCase(sentiment)) {
                     holder.sentimentText.setText("🟢 BULLISH");
-                    holder.sentimentText.setTextColor(Color.parseColor("#FF00E676"));
+                    holder.sentimentText.setTextColor(Color.parseColor("#FF059669"));
                 } else if ("BEARISH".equalsIgnoreCase(sentiment)) {
                     holder.sentimentText.setText("🔴 BEARISH");
-                    holder.sentimentText.setTextColor(Color.parseColor("#FFFF5252"));
+                    holder.sentimentText.setTextColor(Color.parseColor("#FFDC2626"));
                 } else {
                     holder.sentimentText.setText("⚪ NEUTRAL");
-                    holder.sentimentText.setTextColor(Color.parseColor("#FF9E9E9E"));
+                    holder.sentimentText.setTextColor(Color.parseColor("#FF64748B"));
                 }
             } else {
                 holder.sentimentText.setVisibility(View.GONE);
@@ -355,9 +355,9 @@ public class NewsFragment extends Fragment {
                     lp.setMargins(0, 0, 8, 0);
                     pill.setLayoutParams(lp);
 
-                    if ("BULLISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FF00E676"));
-                    else if ("BEARISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FFFF5252"));
-                    else pill.setTextColor(Color.parseColor("#FF448AFF"));
+                    if ("BULLISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FF059669"));
+                    else if ("BEARISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FFDC2626"));
+                    else pill.setTextColor(Color.parseColor("#FF2563EB"));
 
                     // Click on ticker pill opens stock details
                     pill.setOnClickListener(v -> {

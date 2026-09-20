@@ -18,9 +18,9 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:gravity="center"
-            android:background="@drawable/bg_pill_dark"
+            android:background="@drawable/badge_bg"
             android:text="A"
-            android:textColor="@color/green_accent"
+            android:textColor="@color/bullish"
             android:textSize="13sp"
             android:textStyle="bold"
             android:layout_marginEnd="10dp"
@@ -52,10 +52,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_pill_dark"
+                    android:background="@drawable/badge_bg"
                     android:paddingHorizontal="6dp"
                     android:paddingVertical="1dp"
-                    android:textColor="@color/green_accent"
+                    android:textColor="@color/bullish"
                     android:textSize="10sp"
                     android:textStyle="bold"
                     android:text="STRONG BUY"
@@ -105,7 +105,7 @@
                 android:id="@+id/stock_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/green_accent"
+                android:textColor="@color/bullish"
                 android:textSize="12sp"
                 android:layout_marginTop="2dp"
                 android:text="+2.30%" />
@@ -141,7 +141,7 @@
             android:id="@+id/add_watchlist_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/green_accent"
+            android:textColor="@color/blue_accent"
             android:textSize="12sp"
             android:text="+ Watchlist"
             android:paddingStart="10dp"
@@ -150,4 +150,10 @@
             android:paddingBottom="4dp"
             android:background="@drawable/badge_bg" />
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/divider_color" />
 </LinearLayout>

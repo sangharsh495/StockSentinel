@@ -151,7 +151,7 @@ public class StocksFragment extends Fragment {
             chipCatalysts.setTextColor(getResources().getColor(R.color.text_secondary, null));
             chipDividends.setTextColor(getResources().getColor(R.color.text_secondary, null));
 
-            ((TextView) v).setTextColor(getResources().getColor(R.color.text_primary, null));
+            ((TextView) v).setTextColor(getResources().getColor(R.color.blue_accent, null));
 
             if (v == chipAll) currentResearchMode = "ALL";
             else if (v == chipTopAi) currentResearchMode = "TOP_AI";
@@ -326,11 +326,11 @@ public class StocksFragment extends Fragment {
                 holder.gradeBadge.setText(grade);
                 holder.gradeBadge.setVisibility(View.VISIBLE);
                 if (grade.startsWith("A")) {
-                    holder.gradeBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    holder.gradeBadge.setTextColor(Color.parseColor("#FF059669"));
                 } else if (grade.startsWith("B")) {
-                    holder.gradeBadge.setTextColor(Color.parseColor("#FF2979FF"));
+                    holder.gradeBadge.setTextColor(Color.parseColor("#FF2563EB"));
                 } else {
-                    holder.gradeBadge.setTextColor(Color.parseColor("#FFFFD740"));
+                    holder.gradeBadge.setTextColor(Color.parseColor("#FFD97706"));
                 }
             } else {
                 holder.gradeBadge.setVisibility(View.GONE);
@@ -341,11 +341,11 @@ public class StocksFragment extends Fragment {
                 holder.actionBadge.setText(action.replace("_", " "));
                 holder.actionBadge.setVisibility(View.VISIBLE);
                 if (action.contains("BUY") || action.contains("ACCUMULATE")) {
-                    holder.actionBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    holder.actionBadge.setTextColor(Color.parseColor("#FF059669"));
                 } else if (action.contains("SELL") || action.contains("AVOID")) {
-                    holder.actionBadge.setTextColor(Color.parseColor("#FFFF5252"));
+                    holder.actionBadge.setTextColor(Color.parseColor("#FFDC2626"));
                 } else {
-                    holder.actionBadge.setTextColor(Color.parseColor("#FFFFD740"));
+                    holder.actionBadge.setTextColor(Color.parseColor("#FFD97706"));
                 }
             } else {
                 holder.actionBadge.setVisibility(View.GONE);

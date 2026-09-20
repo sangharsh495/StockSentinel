@@ -282,11 +282,11 @@ public class DividendsFragment extends Fragment {
 
             // Status & badge colors
             if ("paid".equalsIgnoreCase(status)) {
-                holder.statusText.setTextColor(Color.parseColor("#FF9E9E9E"));
+                holder.statusText.setTextColor(Color.parseColor("#FF64748B"));
             } else if ("pending".equalsIgnoreCase(status)) {
-                holder.statusText.setTextColor(Color.parseColor("#FFFFD740"));
+                holder.statusText.setTextColor(Color.parseColor("#FFD97706"));
             } else {
-                holder.statusText.setTextColor(Color.parseColor("#FF448AFF"));
+                holder.statusText.setTextColor(Color.parseColor("#FF2563EB"));
             }
 
             holder.itemView.setOnClickListener(v -> {

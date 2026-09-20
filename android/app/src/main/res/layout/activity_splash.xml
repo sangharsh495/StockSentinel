@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="StockSentinel"
-            android:textColor="@color/green_accent"
+            android:textColor="@color/text_primary"
             android:textSize="28sp"
             android:textStyle="bold"
             android:letterSpacing="0.05" />

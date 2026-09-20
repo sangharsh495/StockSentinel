@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:background="@color/surface_dark">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -20,7 +21,7 @@
                 android:id="@+id/chip_daily_top"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_pill_dark"
+                android:background="@drawable/badge_bg"
                 android:text="⭐ Daily Top 10 (1-10 Rated)"
                 android:textColor="@color/yellow_accent"
                 android:textStyle="bold"
@@ -34,8 +35,9 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/badge_bg"
                 android:text="All Stream"
-                android:textColor="@color/white"
-                android:padding="8dp"
+                android:textColor="@color/blue_accent"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
                 android:layout_marginEnd="8dp"/>
 
             <TextView
@@ -45,7 +47,8 @@
                 android:background="@drawable/badge_bg"
                 android:text="Bullish"
                 android:textColor="@color/text_secondary"
-                android:padding="8dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
                 android:layout_marginEnd="8dp"/>
 
             <TextView
@@ -55,7 +58,8 @@
                 android:background="@drawable/badge_bg"
                 android:text="Bearish"
                 android:textColor="@color/text_secondary"
-                android:padding="8dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
                 android:layout_marginEnd="8dp"/>
 
             <TextView
@@ -65,7 +69,8 @@
                 android:background="@drawable/badge_bg"
                 android:text="💰 Dividends"
                 android:textColor="@color/text_secondary"
-                android:padding="8dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
                 android:layout_marginEnd="8dp"/>
                 
             <TextView
@@ -75,10 +80,17 @@
                 android:background="@drawable/badge_bg"
                 android:text="⚡ High Impact"
                 android:textColor="@color/text_secondary"
-                android:padding="8dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
                 android:layout_marginEnd="8dp"/>
         </LinearLayout>
     </HorizontalScrollView>
+
+    <!-- Hairline Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider_color" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"

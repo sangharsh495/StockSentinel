@@ -88,7 +88,7 @@ public class IposFragment extends Fragment {
     private void setupFilterChips() {
         View.OnClickListener listener = v -> {
             resetChips();
-            ((TextView) v).setTextColor(Color.WHITE);
+            ((TextView) v).setTextColor(getResources().getColor(R.color.blue_accent, null));
 
             if (v == chipAll) {
                 currentFilter = "ALL";
@@ -237,7 +237,7 @@ public class IposFragment extends Fragment {
             if (gmp != null && gmp > 0) {
                 holder.gmpText.setVisibility(View.VISIBLE);
                 holder.gmpText.setText(String.format(Locale.US, "GMP: +₹%.0f", gmp));
-                holder.gmpText.setTextColor(Color.parseColor("#FFFFD740"));
+                holder.gmpText.setTextColor(Color.parseColor("#FFD97706"));
             } else {
                 holder.gmpText.setVisibility(View.GONE);
             }
@@ -245,11 +245,11 @@ public class IposFragment extends Fragment {
             // Color status
             int statusColor;
             switch (status.toLowerCase()) {
-                case "open": statusColor = 0xFF00E676; break;
-                case "upcoming": statusColor = 0xFF448AFF; break;
-                case "closed": statusColor = 0xFFFFD740; break;
-                case "listed": statusColor = 0xFF9E9E9E; break;
-                default: statusColor = 0xFF9E9E9E;
+                case "open": statusColor = 0xFF059669; break;
+                case "upcoming": statusColor = 0xFF2563EB; break;
+                case "closed": statusColor = 0xFFD97706; break;
+                case "listed": statusColor = 0xFF64748B; break;
+                default: statusColor = 0xFF64748B;
             }
             holder.statusText.setTextColor(statusColor);
 

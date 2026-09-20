@@ -330,7 +330,7 @@ public class StockDetailActivity extends AppCompatActivity {
                 }
 
                 double pct = data.has("change_pct") ? data.get("change_pct").getAsDouble() : 0.0;
-                int themeColor = pct >= 0 ? Color.parseColor("#FF00E676") : Color.parseColor("#FFFF5252");
+                int themeColor = pct >= 0 ? Color.parseColor("#FF059669") : Color.parseColor("#FFDC2626");
                 chartView.setThemeColor(themeColor);
                 chartView.setData(points, labels);
             }
@@ -356,11 +356,11 @@ public class StockDetailActivity extends AppCompatActivity {
                 aiVerdictBadge.setText(verdict.replace("_", " "));
 
                 if (verdict.contains("BUY") || verdict.contains("BULLISH")) {
-                    aiVerdictBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    aiVerdictBadge.setTextColor(Color.parseColor("#FF059669"));
                 } else if (verdict.contains("RISK") || verdict.contains("BEARISH")) {
-                    aiVerdictBadge.setTextColor(Color.parseColor("#FFFF5252"));
+                    aiVerdictBadge.setTextColor(Color.parseColor("#FFDC2626"));
                 } else {
-                    aiVerdictBadge.setTextColor(Color.parseColor("#FFFFD740"));
+                    aiVerdictBadge.setTextColor(Color.parseColor("#FFD97706"));
                 }
 
                 if (dossier.has("trend_forecast") && !dossier.get("trend_forecast").isJsonNull()) {
@@ -407,21 +407,21 @@ public class StockDetailActivity extends AppCompatActivity {
                 String grade = report.has("research_grade") ? report.get("research_grade").getAsString() : "A";
                 reportGradeBadge.setText("GRADE " + grade);
                 if (grade.startsWith("A")) {
-                    reportGradeBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    reportGradeBadge.setTextColor(Color.parseColor("#FF059669"));
                 } else if (grade.startsWith("B")) {
-                    reportGradeBadge.setTextColor(Color.parseColor("#FF2979FF"));
+                    reportGradeBadge.setTextColor(Color.parseColor("#FF2563EB"));
                 } else {
-                    reportGradeBadge.setTextColor(Color.parseColor("#FFFFD740"));
+                    reportGradeBadge.setTextColor(Color.parseColor("#FFD97706"));
                 }
 
                 String action = report.has("action") ? report.get("action").getAsString() : "ACCUMULATE";
                 reportActionBadge.setText(action.replace("_", " "));
                 if (action.contains("BUY") || action.contains("ACCUMULATE")) {
-                    reportActionBadge.setTextColor(Color.parseColor("#FF00E676"));
+                    reportActionBadge.setTextColor(Color.parseColor("#FF059669"));
                 } else if (action.contains("SELL") || action.contains("AVOID")) {
-                    reportActionBadge.setTextColor(Color.parseColor("#FFFF5252"));
+                    reportActionBadge.setTextColor(Color.parseColor("#FFDC2626"));
                 } else {
-                    reportActionBadge.setTextColor(Color.parseColor("#FFFFD740"));
+                    reportActionBadge.setTextColor(Color.parseColor("#FFD97706"));
                 }
 
                 if (report.has("composite_score")) {
@@ -529,7 +529,7 @@ public class StockDetailActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                     isWatchlisted = true;
-                    btnWatchlist.setColorFilter(Color.parseColor("#FF00E676"));
+                    btnWatchlist.setColorFilter(Color.parseColor("#FF059669"));
                     Toast.makeText(StockDetailActivity.this, "Added to Watchlist", Toast.LENGTH_SHORT).show();
                 }
 
@@ -769,11 +769,11 @@ public class StockDetailActivity extends AppCompatActivity {
             holder.sentimentBadge.setText(sentiment);
 
             if ("BULLISH".equalsIgnoreCase(sentiment)) {
-                holder.sentimentBadge.setTextColor(Color.parseColor("#FF00E676"));
+                holder.sentimentBadge.setTextColor(Color.parseColor("#FF059669"));
             } else if ("BEARISH".equalsIgnoreCase(sentiment)) {
-                holder.sentimentBadge.setTextColor(Color.parseColor("#FFFF5252"));
+                holder.sentimentBadge.setTextColor(Color.parseColor("#FFDC2626"));
             } else {
-                holder.sentimentBadge.setTextColor(Color.parseColor("#FF9E9E9E"));
+                holder.sentimentBadge.setTextColor(Color.parseColor("#FF64748B"));
             }
 
             holder.itemView.setOnClickListener(v -> {
