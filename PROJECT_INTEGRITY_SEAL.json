@@ -2,9 +2,9 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-09-20T20:40:49.231385+00:00",
-  "master_root_hash": "21f687a29a08664d1a527c31ad0828f4da0768e9e9a759d6fc06622a7413a694",
-  "total_sealed_files": 124,
+  "sealed_at_utc": "2026-09-20T23:06:14.803971+00:00",
+  "master_root_hash": "364715a65bc9718f82ef7609d5895ee7c4e75d7cfa2d1d59e1b708b2c5e8d234",
+  "total_sealed_files": 128,
   "files": [
     {
       "path": ".gitignore",
@@ -28,8 +28,8 @@
     },
     {
       "path": "android/app/src/main/AndroidManifest.xml",
-      "sha256": "f536c857eefaa9edbc3a073e7340243b971ca8048006fa7ac4707c8a9be31abc",
-      "size_bytes": 2424
+      "sha256": "b858cde04987c9ef63d78301c448c1106edfc793baa0ca6e537231f11db3af2f",
+      "size_bytes": 2646
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/StockSentinelApp.java",
@@ -43,13 +43,13 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/data/api/StockApi.java",
-      "sha256": "4406aaea71ef9f0c6624c3213413275cc21e88b1c741fbec4d4219473efb565b",
-      "size_bytes": 7131
+      "sha256": "faa02634be970f80f6f7735d3f88ea7beebd1522cd39076c28eb6b74cc0d6ba1",
+      "size_bytes": 7218
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/MainActivity.java",
-      "sha256": "72cc7118a06d6ad99dcac257594506fc435fe590fe9bf756e0776f7e8e937799",
-      "size_bytes": 3089
+      "sha256": "3ad9a6b70ce982c47aa2d14a3188a32de57faccfeedbdb518488f286f76515a5",
+      "size_bytes": 3276
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/SplashActivity.java",
@@ -58,13 +58,13 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/dividends/DividendsFragment.java",
-      "sha256": "b86dbf3f90dfe712ba9d0647e65302fde41924bc9f3e1177e2d3028cfb1cde71",
-      "size_bytes": 11576
+      "sha256": "2e33c4339416af3c3f3d63a4daa147e061ef8c71bf0a23039d60ec3ab691dd81",
+      "size_bytes": 13573
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/home/HomeFragment.java",
-      "sha256": "7983def0f2e57d1242b6dd5d06dfb0d0826859d0ed7302d7a6a568037e038cee",
-      "size_bytes": 23062
+      "sha256": "9de10b35e21e040f526d98165e33406dc86f00a6949ca6d42952b8e770bf1079",
+      "size_bytes": 24038
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/home/LineChartView.java",
@@ -78,18 +78,23 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/ipos/IposFragment.java",
-      "sha256": "c9d371d80c523a9757da1c3fec12d469077b74fbc1d8d677360c4cf5cffd0c76",
-      "size_bytes": 7745
+      "sha256": "6702009e5a0360110c492c882abb763b412035b27267c7e6de91838b423c76e7",
+      "size_bytes": 11030
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/news/NewsFragment.java",
-      "sha256": "95ade6e9a4ad50200932ff8421c679338c073515364cff515e06fcf33aec01f8",
-      "size_bytes": 15951
+      "sha256": "955565c4b067e0602beb931c61a738b206384c7563ad800b7a828ef034143c26",
+      "size_bytes": 17486
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/search/SearchActivity.java",
       "sha256": "68778b41eb28ae9fadc36e12d7dacfc100d3b8f2e2575a80b12b3dc361a022c3",
       "size_bytes": 7385
+    },
+    {
+      "path": "android/app/src/main/java/com/stocksentinel/ui/settings/SettingsActivity.java",
+      "sha256": "e4cd2312ebd866b86ad58a3b9f5dafad8a49da27ec2ea105a675b40393a1711e",
+      "size_bytes": 6647
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/stockdetail/StockDetailActivity.java",
@@ -182,6 +187,11 @@
       "size_bytes": 484
     },
     {
+      "path": "android/app/src/main/res/drawable/ic_settings.xml",
+      "sha256": "97fc29cc89ff6ec17aaf104955edf06602fe3a8c1f830634e6ad72a570dfaf7b",
+      "size_bytes": 1229
+    },
+    {
       "path": "android/app/src/main/res/drawable/ic_stocks.xml",
       "sha256": "5abe4403f6f3eb467bcd85eb34ad4afe035681af6eff79ea27979c84e9dadcda",
       "size_bytes": 304
@@ -207,6 +217,11 @@
       "size_bytes": 2760
     },
     {
+      "path": "android/app/src/main/res/layout/activity_settings.xml",
+      "sha256": "a363fe0cac17a0f4b1f1a6faf171783cafa461e0dee2a5c5f1f21a102579e3f5",
+      "size_bytes": 24305
+    },
+    {
       "path": "android/app/src/main/res/layout/activity_splash.xml",
       "sha256": "7d325e7045b3049ed668a1858a03b777048e68ef7313b151327e167898b34084",
       "size_bytes": 2124
@@ -228,8 +243,8 @@
     },
     {
       "path": "android/app/src/main/res/layout/fragment_ipos.xml",
-      "sha256": "7f88ee084784e8665a2574a412154cf630c29360d218e8ddd32ad940bbaf317f",
-      "size_bytes": 861
+      "sha256": "78e922264f526cb050d08655b20300f4ca2036ea6d942c441da32d2592609b20",
+      "size_bytes": 4284
     },
     {
       "path": "android/app/src/main/res/layout/fragment_news.xml",
@@ -258,8 +273,8 @@
     },
     {
       "path": "android/app/src/main/res/layout/item_ipo.xml",
-      "sha256": "76fd14731f1712d0c04b0925be390e1c9c12dcde18881a627fa3ddb241c53a8c",
-      "size_bytes": 3787
+      "sha256": "189cb539f2266493396cdb132bab60d6dfcf9f75981b9e2bcfd3953fa76780f1",
+      "size_bytes": 4388
     },
     {
       "path": "android/app/src/main/res/layout/item_news.xml",
@@ -293,8 +308,8 @@
     },
     {
       "path": "android/app/src/main/res/menu/toolbar_menu.xml",
-      "sha256": "f4c0118c0cbb551e7570c040a6887f1057674adb32c3f05dfca0ab21aebab978",
-      "size_bytes": 330
+      "sha256": "ee5fa64a275924a97f6d3a780771c524c97ae21eaa004f175152773b0f7d3c19",
+      "size_bytes": 497
     },
     {
       "path": "android/app/src/main/res/navigation/nav_graph.xml",
@@ -403,8 +418,8 @@
     },
     {
       "path": "backend/app/api/news.py",
-      "sha256": "fe8bf57f0cf118aa1d42abee1e73392106f53c79634d9c1ba16e29910331fd32",
-      "size_bytes": 5102
+      "sha256": "d6aed2a3c67ccd01b758804feeec9ef3c9e85d3a778b6ec5e6650ad6b0b9410c",
+      "size_bytes": 5339
     },
     {
       "path": "backend/app/api/notifications.py",
@@ -433,8 +448,8 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "5e7b2db55f7a9f760073f674d8c97eb8c571aca35b37fd5ff3e30521a0a0e0e8",
-      "size_bytes": 6538
+      "sha256": "9f555d72240b45c305d799a51333348d1e5d8bd6b914d8ac90ca5f9ac7a36bb0",
+      "size_bytes": 8649
     },
     {
       "path": "backend/app/ml/__init__.py",
@@ -448,8 +463,8 @@
     },
     {
       "path": "backend/app/ml/catalyst_analyzer.py",
-      "sha256": "02187b8fffdb67a2e8d2dae519b265ee272f3ebc071ef2839177560101d54c1e",
-      "size_bytes": 9076
+      "sha256": "227b060cd28c7b48be34386a47e16f892e1b52ab4cd8e82e4d11b377e8aecbb9",
+      "size_bytes": 9440
     },
     {
       "path": "backend/app/ml/chart_service.py",
@@ -458,8 +473,8 @@
     },
     {
       "path": "backend/app/ml/dividend_tracker.py",
-      "sha256": "1a0cb4e9e611e0146b2bfdf9066d2f9583ac3644789150f22fd1acb8b6eec3d2",
-      "size_bytes": 9835
+      "sha256": "98a7069856706693a6fdbbfbef05db9125856841698a8f42ba152f36f33638d5",
+      "size_bytes": 10086
     },
     {
       "path": "backend/app/ml/ipo_researcher.py",
@@ -468,8 +483,8 @@
     },
     {
       "path": "backend/app/ml/live_quote_service.py",
-      "sha256": "0aab3c2be3e5dcfcacbaeaa39deb997ee8dc1a70924b6b6aa7de38818c094748",
-      "size_bytes": 6654
+      "sha256": "1c3e280f8f575fcd0794e5383273ac467e4633230900caee36a36fa7ed349728",
+      "size_bytes": 7393
     },
     {
       "path": "backend/app/ml/moat_scorecard.py",
@@ -478,8 +493,8 @@
     },
     {
       "path": "backend/app/ml/news_ranker.py",
-      "sha256": "f3c6f108347ca940cfac214f59b427bcf5e41625c4af230aba39f949082b65bc",
-      "size_bytes": 8468
+      "sha256": "7d23e7230b68237e30cdb8be731b6ffa405c591cbddf4a0191f3ca0a16542e1b",
+      "size_bytes": 9700
     },
     {
       "path": "backend/app/ml/ratio_calculator.py",
@@ -620,6 +635,11 @@
       "path": "scripts/seal_project.py",
       "sha256": "c63140a89ac4a3d065750ea205c7e84e67d8a782515b05d4f10aa633c1c36183",
       "size_bytes": 4267
+    },
+    {
+      "path": "scripts/seed_live_data.py",
+      "sha256": "c779b87d42b893155ae04be12c90b6974fbd48e9a59453c77550d1e71e90ac6c",
+      "size_bytes": 22760
     },
     {
       "path": "scripts/verify_integrity.py",

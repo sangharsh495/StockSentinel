@@ -229,8 +229,11 @@ public interface StockApi {
             @Query("symbols") String compareSymbols
     );
 
-    // ---- Health ----
+    // ---- Health & System Status ----
     @GET("health")
     Call<JsonObject> healthCheck();
+
+    @GET("api/system/status")
+    Call<JsonObject> getSystemStatus();
 }
 

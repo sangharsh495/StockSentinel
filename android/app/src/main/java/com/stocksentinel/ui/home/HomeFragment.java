@@ -146,8 +146,30 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadResearchPicks() {
-        ApiClient.getApi().getScreenerResults(null, null, null, 50f, false, false, 10)
+        ApiClient.getApi().getScreenerResults(null, null, null, 0f, false, false, 15)
                 .enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null && isAdded()) {
+                    JsonArray stocks = response.body().getAsJsonArray("stocks");
+                    if (stocks != null && stocks.size() >= 5 && researchPicksAdapter != null) {
+                        researchPicksAdapter.setItems(stocks);
+                        return;
+                    }
+                }
+                // Fallback to top market stocks if screener has few
+                loadFallbackTopStocks();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
+                loadFallbackTopStocks();
+            }
+        });
+    }
+
+    private void loadFallbackTopStocks() {
+        ApiClient.getApi().getStocks(null, null, 15, 0).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (response.isSuccessful() && response.body() != null && isAdded()) {

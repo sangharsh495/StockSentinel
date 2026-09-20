@@ -77,8 +77,22 @@
                 android:layout_weight="1"
                 android:layout_marginStart="10dp"
                 android:textColor="@color/text_secondary"
-                android:textSize="13sp"
-                android:text="Lot: 30" />
+                android:textSize="12sp"
+                android:text="Lot: 30 shares" />
+
+            <TextView
+                android:id="@+id/ipo_gmp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/badge_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="3dp"
+                android:textColor="@color/yellow_accent"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:text="GMP: +₹145" />
 
             <TextView
                 android:id="@+id/ipo_btn_report"

@@ -145,6 +145,14 @@ public class DividendsFragment extends Fragment {
                         statTotalPayouts.setText(String.valueOf(count));
                         statAvgYield.setText(String.format(Locale.US, "%.2f%%", avgYield));
                         statHighYieldCount.setText(String.valueOf(highYield));
+                    } else if (body.has("total_payouts")) {
+                        int count = body.get("total_payouts").getAsInt();
+                        double avgYield = body.has("avg_yield_pct") ? body.get("avg_yield_pct").getAsDouble() : 0.0;
+                        int highYield = body.has("high_yield_count") ? body.get("high_yield_count").getAsInt() : 0;
+
+                        statTotalPayouts.setText(String.valueOf(count));
+                        statAvgYield.setText(String.format(Locale.US, "%.2f%%", avgYield));
+                        statHighYieldCount.setText(String.valueOf(highYield));
                     }
 
                     // Parse dividends list
@@ -155,15 +163,46 @@ public class DividendsFragment extends Fragment {
                             if (el.isJsonObject()) items.add(el.getAsJsonObject());
                         }
                     }
-                    adapter.setItems(items);
+                    if (items.isEmpty()) {
+                        loadUpcomingFallback();
+                    } else {
+                        adapter.setItems(items);
+                    }
+                } else if (isAdded()) {
+                    loadUpcomingFallback();
                 }
                 if (isAdded()) swipeRefresh.setRefreshing(false);
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                if (isAdded()) swipeRefresh.setRefreshing(false);
+                if (isAdded()) {
+                    swipeRefresh.setRefreshing(false);
+                    loadUpcomingFallback();
+                }
             }
+        });
+    }
+
+    private void loadUpcomingFallback() {
+        ApiClient.getApi().getDividends(null, 50, 0).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (response.isSuccessful() && response.body() != null && isAdded()) {
+                    JsonArray divs = response.body().getAsJsonArray("dividends");
+                    if (divs != null && divs.size() > 0) {
+                        List<JsonObject> fallbackItems = new ArrayList<>();
+                        for (JsonElement el : divs) {
+                            if (el.isJsonObject()) fallbackItems.add(el.getAsJsonObject());
+                        }
+                        adapter.setItems(fallbackItems);
+                        statTotalPayouts.setText(String.valueOf(fallbackItems.size()));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {}
         });
     }
 

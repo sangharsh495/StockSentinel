@@ -73,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_search) {
             startActivity(new Intent(this, SearchActivity.class));
             return true;
+        } else if (item.getItemId() == R.id.action_settings) {
+            startActivity(new Intent(this, com.stocksentinel.ui.settings.SettingsActivity.class));
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

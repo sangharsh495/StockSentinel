@@ -1,6 +1,7 @@
 package com.stocksentinel.ui.ipos;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.stocksentinel.util.FormatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,7 +37,13 @@ public class IposFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recyclerView;
+    private TextView emptyStateText;
     private IpoAdapter adapter;
+
+    private List<JsonObject> allIpos = new ArrayList<>();
+    private String currentFilter = "ALL"; // ALL, OPEN, UPCOMING, HIGH_GMP
+
+    private TextView chipAll, chipOpen, chipUpcoming, chipHighGmp;
 
     @Nullable
     @Override
@@ -51,6 +59,14 @@ public class IposFragment extends Fragment {
 
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
         recyclerView = view.findViewById(R.id.ipos_recycler);
+        emptyStateText = view.findViewById(R.id.empty_state_text);
+
+        chipAll = view.findViewById(R.id.chip_ipo_all);
+        chipOpen = view.findViewById(R.id.chip_ipo_open);
+        chipUpcoming = view.findViewById(R.id.chip_ipo_upcoming);
+        chipHighGmp = view.findViewById(R.id.chip_ipo_high_gmp);
+
+        setupFilterChips();
 
         adapter = new IpoAdapter(ipo -> {
             int ipoId = ipo.has("id") ? ipo.get("id").getAsInt() : 0;
@@ -69,6 +85,63 @@ public class IposFragment extends Fragment {
         loadIpos();
     }
 
+    private void setupFilterChips() {
+        View.OnClickListener listener = v -> {
+            resetChips();
+            ((TextView) v).setTextColor(Color.WHITE);
+
+            if (v == chipAll) {
+                currentFilter = "ALL";
+            } else if (v == chipOpen) {
+                currentFilter = "OPEN";
+            } else if (v == chipUpcoming) {
+                currentFilter = "UPCOMING";
+            } else if (v == chipHighGmp) {
+                currentFilter = "HIGH_GMP";
+            }
+
+            applyFilter();
+        };
+
+        chipAll.setOnClickListener(listener);
+        chipOpen.setOnClickListener(listener);
+        chipUpcoming.setOnClickListener(listener);
+        chipHighGmp.setOnClickListener(listener);
+    }
+
+    private void resetChips() {
+        int defaultColor = getResources().getColor(R.color.text_secondary, null);
+        chipAll.setTextColor(defaultColor);
+        chipOpen.setTextColor(defaultColor);
+        chipUpcoming.setTextColor(defaultColor);
+        chipHighGmp.setTextColor(defaultColor);
+    }
+
+    private void applyFilter() {
+        List<JsonObject> filtered = new ArrayList<>();
+        for (JsonObject ipo : allIpos) {
+            String status = ipo.has("status") && !ipo.get("status").isJsonNull()
+                    ? ipo.get("status").getAsString().toLowerCase() : "";
+            double gmp = ipo.has("gmp") && !ipo.get("gmp").isJsonNull()
+                    ? ipo.get("gmp").getAsDouble() : 0.0;
+
+            if ("ALL".equals(currentFilter)) {
+                filtered.add(ipo);
+            } else if ("OPEN".equals(currentFilter) && "open".equals(status)) {
+                filtered.add(ipo);
+            } else if ("UPCOMING".equals(currentFilter) && "upcoming".equals(status)) {
+                filtered.add(ipo);
+            } else if ("HIGH_GMP".equals(currentFilter) && gmp >= 50.0) {
+                filtered.add(ipo);
+            }
+        }
+
+        adapter.setItems(filtered);
+        if (emptyStateText != null) {
+            emptyStateText.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+        }
+    }
+
     private void loadIpos() {
         swipeRefresh.setRefreshing(true);
 
@@ -77,13 +150,13 @@ public class IposFragment extends Fragment {
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (response.isSuccessful() && response.body() != null && isAdded()) {
                     JsonArray ipos = response.body().getAsJsonArray("ipos");
-                    List<JsonObject> items = new ArrayList<>();
+                    allIpos.clear();
                     if (ipos != null) {
                         for (JsonElement el : ipos) {
-                            if (el.isJsonObject()) items.add(el.getAsJsonObject());
+                            if (el.isJsonObject()) allIpos.add(el.getAsJsonObject());
                         }
                     }
-                    adapter.setItems(items);
+                    applyFilter();
                 }
                 if (isAdded()) swipeRefresh.setRefreshing(false);
             }
@@ -143,6 +216,8 @@ public class IposFragment extends Fragment {
                     ? ipo.get("price_band_high").getAsDouble() : null;
             String lotSize = ipo.has("lot_size") && !ipo.get("lot_size").isJsonNull()
                     ? ipo.get("lot_size").getAsString() : "";
+            Double gmp = ipo.has("gmp") && !ipo.get("gmp").isJsonNull()
+                    ? ipo.get("gmp").getAsDouble() : null;
 
             holder.nameText.setText(name);
             holder.statusText.setText(status.toUpperCase());
@@ -157,6 +232,15 @@ public class IposFragment extends Fragment {
             }
 
             holder.lotText.setText(lotSize.isEmpty() ? "" : "Lot: " + lotSize);
+
+            // GMP Badge
+            if (gmp != null && gmp > 0) {
+                holder.gmpText.setVisibility(View.VISIBLE);
+                holder.gmpText.setText(String.format(Locale.US, "GMP: +₹%.0f", gmp));
+                holder.gmpText.setTextColor(Color.parseColor("#FFFFD740"));
+            } else {
+                holder.gmpText.setVisibility(View.GONE);
+            }
 
             // Color status
             int statusColor;
@@ -178,7 +262,7 @@ public class IposFragment extends Fragment {
         }
 
         static class VH extends RecyclerView.ViewHolder {
-            TextView nameText, statusText, dateText, priceText, lotText, btnReport;
+            TextView nameText, statusText, dateText, priceText, lotText, gmpText, btnReport;
 
             VH(View v) {
                 super(v);
@@ -187,6 +271,7 @@ public class IposFragment extends Fragment {
                 dateText = v.findViewById(R.id.ipo_dates);
                 priceText = v.findViewById(R.id.ipo_price);
                 lotText = v.findViewById(R.id.ipo_lot);
+                gmpText = v.findViewById(R.id.ipo_gmp);
                 btnReport = v.findViewById(R.id.ipo_btn_report);
             }
         }

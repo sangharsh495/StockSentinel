@@ -153,29 +153,38 @@ public class NewsFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (response.isSuccessful() && response.body() != null && isAdded()) {
-                    JsonArray news = response.body().getAsJsonArray("ranked_news");
-                    List<JsonObject> items = new ArrayList<>();
-                    if (news != null) {
+                    JsonArray news = null;
+                    if (response.body().has("ranked_news") && response.body().get("ranked_news").isJsonArray()) {
+                        news = response.body().getAsJsonArray("ranked_news");
+                    } else if (response.body().has("top_10") && response.body().get("top_10").isJsonArray()) {
+                        news = response.body().getAsJsonArray("top_10");
+                    }
+
+                    if (news != null && news.size() > 0) {
+                        List<JsonObject> items = new ArrayList<>();
                         for (JsonElement el : news) {
                             if (el.isJsonObject()) items.add(el.getAsJsonObject());
                         }
+                        adapter.setItems(items);
+                        if (isAdded()) swipeRefresh.setRefreshing(false);
+                        return;
                     }
-                    adapter.setItems(items);
                 }
-                if (isAdded()) swipeRefresh.setRefreshing(false);
+                // Fallback to latest news stream if top 10 ranked is empty
+                loadStreamNews();
             }
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                if (isAdded()) swipeRefresh.setRefreshing(false);
+                loadStreamNews();
             }
         });
     }
 
     private void loadStreamNews() {
         ApiClient.getApi().getNews(
-                null, 
                 currentSentiment, 
+                null, 
                 currentDividendOnly, 
                 currentMinImpact, 
                 50, 
@@ -250,11 +259,19 @@ public class NewsFragment extends Fragment {
             holder.timeText.setText(FormatUtils.formatRelativeTime(date));
 
             // Rating badge (1–10 scale)
-            if (item.has("rating")) {
-                double rating = item.get("rating").getAsDouble();
-                String impactLevel = item.has("impact_level") ? item.get("impact_level").getAsString() : "HIGH";
-                String reason = item.has("impact_reason") && !item.get("impact_reason").isJsonNull()
-                        ? item.get("impact_reason").getAsString() : "";
+            double rating = 0;
+            if (item.has("rating") && !item.get("rating").isJsonNull()) {
+                rating = item.get("rating").getAsDouble();
+            } else if (item.has("impact_score") && !item.get("impact_score").isJsonNull()) {
+                rating = item.get("impact_score").getAsDouble();
+                if (rating <= 1.0 && rating > 0) rating = rating * 10.0;
+            }
+
+            if (rating > 0) {
+                String impactLevel = item.has("impact_level") ? item.get("impact_level").getAsString() : 
+                        (rating >= 8.5 ? "EXTREME" : (rating >= 7.0 ? "HIGH" : "MODERATE"));
+                String reason = item.has("rating_reason") && !item.get("rating_reason").isJsonNull()
+                        ? item.get("rating_reason").getAsString() : (item.has("impact_reason") && !item.get("impact_reason").isJsonNull() ? item.get("impact_reason").getAsString() : "");
 
                 holder.ratingRow.setVisibility(View.VISIBLE);
                 holder.ratingBadge.setText(String.format(Locale.US, "⭐ %.1f / 10", rating));
@@ -300,49 +317,58 @@ public class NewsFragment extends Fragment {
             }
 
             // Dividend Badge
-            boolean isDiv = item.has("dividend_detected") && !item.get("dividend_detected").isJsonNull() 
-                    && item.get("dividend_detected").getAsBoolean();
+            boolean isDiv = (item.has("dividend_detected") && !item.get("dividend_detected").isJsonNull() 
+                    && item.get("dividend_detected").getAsBoolean())
+                    || title.toLowerCase().contains("dividend") || title.toLowerCase().contains("bonus");
             holder.dividendBadge.setVisibility(isDiv ? View.VISIBLE : View.GONE);
 
             // Affected Stocks Pills
             holder.stocksContainer.removeAllViews();
+            JsonArray arr = null;
             if (item.has("affected_stocks") && !item.get("affected_stocks").isJsonNull()) {
-                JsonArray arr = item.getAsJsonArray("affected_stocks");
-                if (arr != null && arr.size() > 0) {
-                    holder.stocksScroll.setVisibility(View.VISIBLE);
-                    for (JsonElement el : arr) {
-                        if (!el.isJsonObject()) continue;
-                        JsonObject st = el.getAsJsonObject();
-                        String sym = st.has("symbol") ? st.get("symbol").getAsString() : "";
-                        String dir = st.has("direction") ? st.get("direction").getAsString() : "";
-
-                        TextView pill = new TextView(holder.itemView.getContext());
-                        pill.setBackgroundResource(R.drawable.badge_bg);
-                        pill.setText(sym);
-                        pill.setTextSize(10f);
-                        pill.setPadding(12, 4, 12, 4);
-                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                        lp.setMargins(0, 0, 8, 0);
-                        pill.setLayoutParams(lp);
-
-                        if ("BULLISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FF00E676"));
-                        else if ("BEARISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FFFF5252"));
-                        else pill.setTextColor(Color.WHITE);
-
-                        // Click on ticker pill opens stock details
-                        pill.setOnClickListener(v -> {
-                            Intent intent = new Intent(holder.itemView.getContext(), StockDetailActivity.class);
-                            intent.putExtra(StockDetailActivity.EXTRA_SYMBOL, sym);
-                            intent.putExtra(StockDetailActivity.EXTRA_EXCHANGE, "NSE");
-                            intent.putExtra(StockDetailActivity.EXTRA_NAME, sym);
-                            holder.itemView.getContext().startActivity(intent);
-                        });
-
-                        holder.stocksContainer.addView(pill);
+                try {
+                    if (item.get("affected_stocks").isJsonArray()) {
+                        arr = item.getAsJsonArray("affected_stocks");
+                    } else if (item.get("affected_stocks").isJsonPrimitive()) {
+                        com.google.gson.JsonElement parsed = com.google.gson.JsonParser.parseString(item.get("affected_stocks").getAsString());
+                        if (parsed.isJsonArray()) arr = parsed.getAsJsonArray();
                     }
-                } else {
-                    holder.stocksScroll.setVisibility(View.GONE);
+                } catch (Exception ignored) {}
+            }
+
+            if (arr != null && arr.size() > 0) {
+                holder.stocksScroll.setVisibility(View.VISIBLE);
+                for (JsonElement el : arr) {
+                    if (!el.isJsonObject()) continue;
+                    JsonObject st = el.getAsJsonObject();
+                    String sym = st.has("symbol") ? st.get("symbol").getAsString() : "";
+                    String dir = st.has("direction") ? st.get("direction").getAsString() : 
+                            (st.has("impact") ? st.get("impact").getAsString() : "");
+
+                    TextView pill = new TextView(holder.itemView.getContext());
+                    pill.setBackgroundResource(R.drawable.badge_bg);
+                    pill.setText(sym);
+                    pill.setTextSize(10f);
+                    pill.setPadding(12, 4, 12, 4);
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    lp.setMargins(0, 0, 8, 0);
+                    pill.setLayoutParams(lp);
+
+                    if ("BULLISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FF00E676"));
+                    else if ("BEARISH".equalsIgnoreCase(dir)) pill.setTextColor(Color.parseColor("#FFFF5252"));
+                    else pill.setTextColor(Color.parseColor("#FF448AFF"));
+
+                    // Click on ticker pill opens stock details
+                    pill.setOnClickListener(v -> {
+                        Intent intent = new Intent(holder.itemView.getContext(), StockDetailActivity.class);
+                        intent.putExtra(StockDetailActivity.EXTRA_SYMBOL, sym);
+                        intent.putExtra(StockDetailActivity.EXTRA_EXCHANGE, "NSE");
+                        intent.putExtra(StockDetailActivity.EXTRA_NAME, sym);
+                        holder.itemView.getContext().startActivity(intent);
+                    });
+
+                    holder.stocksContainer.addView(pill);
                 }
             } else {
                 holder.stocksScroll.setVisibility(View.GONE);
