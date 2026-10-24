@@ -1,7 +1,6 @@
 package com.stocksentinel.ui.ipos;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +22,12 @@ import com.stocksentinel.data.api.ApiClient;
 import com.stocksentinel.util.FormatUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -41,9 +44,13 @@ public class IposFragment extends Fragment {
     private IpoAdapter adapter;
 
     private List<JsonObject> allIpos = new ArrayList<>();
-    private String currentFilter = "ALL"; // ALL, OPEN, UPCOMING, HIGH_GMP
+    private String currentFilter = "ALL"; // ALL, OPEN, UPCOMING, HIGH_GMP, BEST_ODDS
 
-    private TextView chipAll, chipOpen, chipUpcoming, chipHighGmp;
+    private TextView chipAll, chipOpen, chipUpcoming, chipHighGmp, chipBestOdds;
+
+    // Tested listing odds from the quant engine, keyed by normalised company name
+    private final Map<String, JsonObject> oddsByName = new HashMap<>();
+    private final List<JsonObject> oddsList = new ArrayList<>();
 
     @Nullable
     @Override
@@ -65,11 +72,13 @@ public class IposFragment extends Fragment {
         chipOpen = view.findViewById(R.id.chip_ipo_open);
         chipUpcoming = view.findViewById(R.id.chip_ipo_upcoming);
         chipHighGmp = view.findViewById(R.id.chip_ipo_high_gmp);
+        chipBestOdds = view.findViewById(R.id.chip_ipo_best_odds);
 
         setupFilterChips();
 
         adapter = new IpoAdapter(ipo -> {
-            int ipoId = ipo.has("id") ? ipo.get("id").getAsInt() : 0;
+            if (!ipo.has("id")) return; // scored by the model but not in our IPO list yet
+            int ipoId = ipo.get("id").getAsInt();
             String name = ipo.has("company_name") ? ipo.get("company_name").getAsString() : "IPO Report";
 
             Intent intent = new Intent(requireContext(), IpoDetailActivity.class);
@@ -80,9 +89,14 @@ public class IposFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
+        adapter.setOdds(oddsByName);
 
-        swipeRefresh.setOnRefreshListener(this::loadIpos);
+        swipeRefresh.setOnRefreshListener(() -> {
+            loadIpos();
+            loadOdds();
+        });
         loadIpos();
+        loadOdds();
     }
 
     private void setupFilterChips() {
@@ -98,6 +112,8 @@ public class IposFragment extends Fragment {
                 currentFilter = "UPCOMING";
             } else if (v == chipHighGmp) {
                 currentFilter = "HIGH_GMP";
+            } else if (v == chipBestOdds) {
+                currentFilter = "BEST_ODDS";
             }
 
             applyFilter();
@@ -107,6 +123,7 @@ public class IposFragment extends Fragment {
         chipOpen.setOnClickListener(listener);
         chipUpcoming.setOnClickListener(listener);
         chipHighGmp.setOnClickListener(listener);
+        chipBestOdds.setOnClickListener(listener);
     }
 
     private void resetChips() {
@@ -115,10 +132,32 @@ public class IposFragment extends Fragment {
         chipOpen.setTextColor(defaultColor);
         chipUpcoming.setTextColor(defaultColor);
         chipHighGmp.setTextColor(defaultColor);
+        chipBestOdds.setTextColor(defaultColor);
     }
 
     private void applyFilter() {
         List<JsonObject> filtered = new ArrayList<>();
+        if ("BEST_ODDS".equals(currentFilter)) {
+            // Every IPO the model scored, best expected listing first (already ranked by the API)
+            Set<String> shown = new HashSet<>();
+            for (JsonObject odds : oddsList) {
+                JsonObject match = null;
+                for (JsonObject ipo : allIpos) {
+                    if (normalise(str(ipo, "company_name")).equals(normalise(str(odds, "name")))) {
+                        match = ipo;
+                        break;
+                    }
+                }
+                JsonObject row = match != null ? match : ipoFromOdds(odds);
+                String key = normalise(str(row, "company_name"));
+                if (shown.add(key)) filtered.add(row);
+            }
+            adapter.setItems(filtered);
+            if (emptyStateText != null) {
+                emptyStateText.setVisibility(filtered.isEmpty() ? View.VISIBLE : View.GONE);
+            }
+            return;
+        }
         for (JsonObject ipo : allIpos) {
             String status = ipo.has("status") && !ipo.get("status").isJsonNull()
                     ? ipo.get("status").getAsString().toLowerCase() : "";
@@ -168,6 +207,58 @@ public class IposFragment extends Fragment {
         });
     }
 
+    private void loadOdds() {
+        ApiClient.getApi().getIpoOdds().enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (!response.isSuccessful() || response.body() == null || !isAdded()) return;
+                JsonArray ipos = response.body().has("ipos") ? response.body().getAsJsonArray("ipos") : null;
+                oddsByName.clear();
+                oddsList.clear();
+                if (ipos != null) {
+                    for (JsonElement el : ipos) {
+                        if (!el.isJsonObject()) continue;
+                        JsonObject o = el.getAsJsonObject();
+                        oddsList.add(o);
+                        oddsByName.put(normalise(str(o, "name")), o);
+                    }
+                }
+                applyFilter();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) { }
+        });
+    }
+
+    /** A row for a scored IPO our IPO list doesn't have yet. */
+    private static JsonObject ipoFromOdds(JsonObject odds) {
+        JsonObject row = new JsonObject();
+        row.addProperty("company_name", str(odds, "name"));
+        row.addProperty("market", "IN");
+        row.addProperty("status", "upcoming");
+        if (odds.has("issue_price") && !odds.get("issue_price").isJsonNull()) {
+            row.add("price_band_low", odds.get("issue_price"));
+            row.add("price_band_high", odds.get("issue_price"));
+        }
+        if (odds.has("gmp") && !odds.get("gmp").isJsonNull()) row.add("gmp", odds.get("gmp"));
+        if (odds.has("issue_close_date") && !odds.get("issue_close_date").isJsonNull()) {
+            row.add("close_date", odds.get("issue_close_date"));
+        }
+        return row;
+    }
+
+    static String normalise(String name) {
+        String n = name.toLowerCase(Locale.US)
+                .replaceAll("\\b(limited|ltd|ipo|india|private|pvt)\\b", "")
+                .replaceAll("[^a-z0-9]", "");
+        return n.length() > 14 ? n.substring(0, 14) : n;
+    }
+
+    private static String str(JsonObject o, String k) {
+        return o != null && o.has(k) && !o.get(k).isJsonNull() ? o.get(k).getAsString() : "";
+    }
+
     interface OnIpoClickListener {
         void onIpoClick(JsonObject ipo);
     }
@@ -175,9 +266,14 @@ public class IposFragment extends Fragment {
     static class IpoAdapter extends RecyclerView.Adapter<IpoAdapter.VH> {
         private final List<JsonObject> items = new ArrayList<>();
         private final OnIpoClickListener listener;
+        private Map<String, JsonObject> odds = new HashMap<>();
 
         IpoAdapter(OnIpoClickListener listener) {
             this.listener = listener;
+        }
+
+        void setOdds(Map<String, JsonObject> odds) {
+            this.odds = odds;
         }
 
         void setItems(List<JsonObject> newItems) {
@@ -237,7 +333,7 @@ public class IposFragment extends Fragment {
             if (gmp != null && gmp > 0) {
                 holder.gmpText.setVisibility(View.VISIBLE);
                 holder.gmpText.setText(String.format(Locale.US, "GMP: +₹%.0f", gmp));
-                holder.gmpText.setTextColor(Color.parseColor("#FFD97706"));
+                holder.gmpText.setTextColor(holder.itemView.getResources().getColor(R.color.yellow_accent, null));
             } else {
                 holder.gmpText.setVisibility(View.GONE);
             }
@@ -245,13 +341,28 @@ public class IposFragment extends Fragment {
             // Color status
             int statusColor;
             switch (status.toLowerCase()) {
-                case "open": statusColor = 0xFF059669; break;
-                case "upcoming": statusColor = 0xFF2563EB; break;
-                case "closed": statusColor = 0xFFD97706; break;
-                case "listed": statusColor = 0xFF64748B; break;
-                default: statusColor = 0xFF64748B;
+                case "open": statusColor = R.color.bullish; break;
+                case "upcoming": statusColor = R.color.blue_accent; break;
+                case "closed": statusColor = R.color.yellow_accent; break;
+                default: statusColor = R.color.neutral;
             }
-            holder.statusText.setTextColor(statusColor);
+            holder.statusText.setTextColor(holder.itemView.getResources().getColor(statusColor, null));
+
+            // Tested listing odds
+            JsonObject o = odds.get(normalise(name));
+            if (o != null && o.has("probability") && !o.get("probability").isJsonNull()) {
+                double p = o.get("probability").getAsDouble();
+                Double exp = o.has("expected_gain_pct") && !o.get("expected_gain_pct").isJsonNull()
+                        ? o.get("expected_gain_pct").getAsDouble() : null;
+                holder.oddsText.setVisibility(View.VISIBLE);
+                holder.oddsText.setText(String.format(Locale.US, "🎯 Listing %s · %.0f%% up · %s",
+                        exp == null ? "—" : String.format(Locale.US, "%+.0f%%", exp), p * 100,
+                        str(o, "verdict").replaceAll(" \\(.*\\)", "")));
+                int oddsColor = p >= 0.6 ? R.color.bullish : (p >= 0.45 ? R.color.yellow_accent : R.color.bearish);
+                holder.oddsText.setTextColor(holder.itemView.getResources().getColor(oddsColor, null));
+            } else {
+                holder.oddsText.setVisibility(View.GONE);
+            }
 
             holder.itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onIpoClick(ipo);
@@ -262,7 +373,7 @@ public class IposFragment extends Fragment {
         }
 
         static class VH extends RecyclerView.ViewHolder {
-            TextView nameText, statusText, dateText, priceText, lotText, gmpText, btnReport;
+            TextView nameText, statusText, dateText, priceText, lotText, gmpText, btnReport, oddsText;
 
             VH(View v) {
                 super(v);
@@ -273,6 +384,7 @@ public class IposFragment extends Fragment {
                 lotText = v.findViewById(R.id.ipo_lot);
                 gmpText = v.findViewById(R.id.ipo_gmp);
                 btnReport = v.findViewById(R.id.ipo_btn_report);
+                oddsText = v.findViewById(R.id.ipo_odds);
             }
         }
     }

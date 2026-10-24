@@ -2,9 +2,9 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-24T16:20:56.974661+00:00",
-  "master_root_hash": "b935cf265f126debc60fc3d4daa66b60451dbde01c9d4cfaf0894d7a0dd5e481",
-  "total_sealed_files": 648,
+  "sealed_at_utc": "2026-10-24T16:44:24.432485+00:00",
+  "master_root_hash": "f3bb89f010eb20886ebc32b2def9984ae9930f5d19ec3b7cfbdf05490b1d1803",
+  "total_sealed_files": 650,
   "files": [
     {
       "path": ".github/workflows/train-quant.yml",
@@ -33,8 +33,8 @@
     },
     {
       "path": "android/app/src/main/AndroidManifest.xml",
-      "sha256": "b858cde04987c9ef63d78301c448c1106edfc793baa0ca6e537231f11db3af2f",
-      "size_bytes": 2646
+      "sha256": "c73d99a6cd0f6ce60797909c56dcd08dfe1e5b607c94fac10de952986d669ec2",
+      "size_bytes": 2870
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/StockSentinelApp.java",
@@ -48,8 +48,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/data/api/StockApi.java",
-      "sha256": "faa02634be970f80f6f7735d3f88ea7beebd1522cd39076c28eb6b74cc0d6ba1",
-      "size_bytes": 7218
+      "sha256": "76b98ffabac9aad7176f1377054c8c6a70402e7997931260595c0f2d63ca6f0f",
+      "size_bytes": 7685
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/MainActivity.java",
@@ -68,8 +68,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/home/HomeFragment.java",
-      "sha256": "9de10b35e21e040f526d98165e33406dc86f00a6949ca6d42952b8e770bf1079",
-      "size_bytes": 24038
+      "sha256": "5b0ce4e9be8b2fe7d827fdf93564cb5c08861aa10808e164750829d24ac6c47d",
+      "size_bytes": 28889
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/home/LineChartView.java",
@@ -83,13 +83,18 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/ipos/IposFragment.java",
-      "sha256": "6e56bee0f08b8ce4c9d2bd7cb61aeaf82801e2696e481b55f15f458767827ac5",
-      "size_bytes": 11069
+      "sha256": "32f01fcae00078fd5ec5783d7a4f47c08f75a6685c7a684f31fff3e136dd972c",
+      "size_bytes": 16436
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/news/NewsFragment.java",
       "sha256": "80f4216aad77ec29da8bd866b1d17241056bd45c683faffed8a74eff3a64755d",
       "size_bytes": 17571
+    },
+    {
+      "path": "android/app/src/main/java/com/stocksentinel/ui/quant/QuantPicksActivity.java",
+      "sha256": "f6fbab494646dd7ca4c2e8b9bf20a49fcbf5c369bf01e4a27f06d89c9326c33b",
+      "size_bytes": 12338
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/search/SearchActivity.java",
@@ -217,6 +222,11 @@
       "size_bytes": 2086
     },
     {
+      "path": "android/app/src/main/res/layout/activity_quant_picks.xml",
+      "sha256": "665dd259b0f4c469fd41166a27acecd3728023864afe880675250989bd3be324",
+      "size_bytes": 7452
+    },
+    {
       "path": "android/app/src/main/res/layout/activity_search.xml",
       "sha256": "0c6dc79d8216654e54bae3c2ce06deda56324c03b7567704e83b4593a66a1a56",
       "size_bytes": 2904
@@ -243,13 +253,13 @@
     },
     {
       "path": "android/app/src/main/res/layout/fragment_home.xml",
-      "sha256": "55a516c196b3982a61c14180cb54a3356496aa542ff5dff1f2bf4a91bb841fbd",
-      "size_bytes": 10489
+      "sha256": "8dde602106313374d3f030fa83bbe801e3ab7a1e41280cb0dcbcdf673df68356",
+      "size_bytes": 15933
     },
     {
       "path": "android/app/src/main/res/layout/fragment_ipos.xml",
-      "sha256": "200ef017f3244ab907be3c83f58b73c74f7305b8a7149e26b3e9e03e311a0073",
-      "size_bytes": 4448
+      "sha256": "05f860d4943912628b2d2928a5d14647587e07c3fa5a94a77cdc980b676a84f4",
+      "size_bytes": 5015
     },
     {
       "path": "android/app/src/main/res/layout/fragment_news.xml",
@@ -278,8 +288,8 @@
     },
     {
       "path": "android/app/src/main/res/layout/item_ipo.xml",
-      "sha256": "8b25124873696074f7807b6b4fcea8c4f1eccafdc9b4bdcae1b136afb312f340",
-      "size_bytes": 4375
+      "sha256": "077f4cc9133b727c1958aa90d3fed11e452b0536ae507c079bc698cba9dee646",
+      "size_bytes": 5002
     },
     {
       "path": "android/app/src/main/res/layout/item_news.xml",

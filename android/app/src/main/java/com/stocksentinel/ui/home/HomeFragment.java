@@ -21,11 +21,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
+import com.stocksentinel.ui.quant.QuantPicksActivity;
 import com.stocksentinel.ui.stockdetail.StockDetailActivity;
 import com.stocksentinel.util.FormatUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -51,6 +53,10 @@ public class HomeFragment extends Fragment {
     private WeeklyMoversAdapter weeklyMoversAdapter;
 
     // AI Research Picks (Top 10)
+    // Quant engine: market outlook + tested picks
+    private TextView outlook5d, outlook20d, outlookRegime, outlookTrust;
+    private QuantPicksActivity.PicksAdapter quantPicksAdapter;
+
     private RecyclerView researchPicksRecycler;
     private ResearchPicksAdapter researchPicksAdapter;
 
@@ -109,6 +115,20 @@ public class HomeFragment extends Fragment {
         });
         researchPicksRecycler.setAdapter(researchPicksAdapter);
 
+        // Market outlook + tested picks setup
+        outlook5d = view.findViewById(R.id.outlook_5d);
+        outlook20d = view.findViewById(R.id.outlook_20d);
+        outlookRegime = view.findViewById(R.id.outlook_regime);
+        outlookTrust = view.findViewById(R.id.outlook_trust);
+        RecyclerView quantPicksRecycler = view.findViewById(R.id.quant_picks_recycler);
+        quantPicksRecycler.setLayoutManager(new LinearLayoutManager(requireContext()));
+        quantPicksRecycler.setNestedScrollingEnabled(false);
+        quantPicksAdapter = new QuantPicksActivity.PicksAdapter(
+                pick -> QuantPicksActivity.openStock(requireContext(), pick));
+        quantPicksRecycler.setAdapter(quantPicksAdapter);
+        view.findViewById(R.id.btn_see_all_picks).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), QuantPicksActivity.class)));
+
         // SwipeRefresh setup
         swipeRefresh.setOnRefreshListener(this::loadAllData);
         swipeRefresh.setColorSchemeResources(R.color.green_accent, R.color.red_accent, R.color.blue_accent);
@@ -118,6 +138,8 @@ public class HomeFragment extends Fragment {
 
     private void loadAllData() {
         swipeRefresh.setRefreshing(true);
+        loadMarketOutlook();
+        loadQuantPicks();
         loadWeeklyMovers();
         loadResearchPicks();
         loadIndices();
@@ -127,6 +149,70 @@ public class HomeFragment extends Fragment {
         loadStockCount();
     }
 
+
+    private void loadMarketOutlook() {
+        ApiClient.getApi().getMarketOutlook().enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (!response.isSuccessful() || response.body() == null || !isAdded()) return;
+                JsonObject outlook = response.body().has("outlook") && response.body().get("outlook").isJsonObject()
+                        ? response.body().getAsJsonObject("outlook") : null;
+                if (outlook == null) return;
+                bindOutlook(outlook, "5d", outlook5d);
+                bindOutlook(outlook, "20d", outlook20d);
+
+                JsonObject five = outlook.has("5d") ? outlook.getAsJsonObject("5d") : null;
+                JsonObject regime = five != null && five.has("current_regime")
+                        ? five.getAsJsonObject("current_regime") : null;
+                if (regime != null) {
+                    Double fii = QuantPicksActivity.dbl(regime, "fii_idxfut_long_ratio");
+                    Double breadth = QuantPicksActivity.dbl(regime, "breadth_50");
+                    Double vix = QuantPicksActivity.dbl(regime, "vix");
+                    outlookRegime.setText(String.format(Locale.US,
+                            "FII index-futures long %s · Stocks above 50-DMA %s · VIX %s",
+                            fii == null ? "—" : String.format(Locale.US, "%.0f%%", fii * 100),
+                            breadth == null ? "—" : String.format(Locale.US, "%.0f%%", breadth * 100),
+                            vix == null ? "—" : String.format(Locale.US, "%.1f", vix)));
+                }
+                JsonObject trust = five != null && five.has("trust") ? five.getAsJsonObject("trust") : null;
+                if (trust != null) outlookTrust.setText(QuantPicksActivity.str(trust, "verdict"));
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) { }
+        });
+    }
+
+    private void bindOutlook(JsonObject outlook, String key, TextView target) {
+        JsonObject o = outlook.has(key) && outlook.get(key).isJsonObject() ? outlook.getAsJsonObject(key) : null;
+        Double p = QuantPicksActivity.dbl(o, "probability");
+        if (p == null) return;
+        String days = "5d".equals(key) ? "5 days" : "20 days";
+        target.setText(String.format(Locale.US, "Nifty up in %s: %.0f%%", days, p * 100));
+        target.setTextColor(getResources().getColor(
+                p >= 0.55 ? R.color.bullish : (p <= 0.45 ? R.color.bearish : R.color.text_primary), null));
+    }
+
+    private void loadQuantPicks() {
+        ApiClient.getApi().getQuantPicks(QuantPicksActivity.STRATEGY_INVESTOR, 5)
+                .enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (!response.isSuccessful() || response.body() == null || !isAdded()) return;
+                JsonArray picks = response.body().has("picks") ? response.body().getAsJsonArray("picks") : null;
+                List<JsonObject> items = new ArrayList<>();
+                if (picks != null) {
+                    for (JsonElement el : picks) {
+                        if (el.isJsonObject()) items.add(el.getAsJsonObject());
+                    }
+                }
+                quantPicksAdapter.setItems(items);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) { }
+        });
+    }
 
     private void loadWeeklyMovers() {
         ApiClient.getApi().getWeeklyMovers(10).enqueue(new Callback<JsonObject>() {

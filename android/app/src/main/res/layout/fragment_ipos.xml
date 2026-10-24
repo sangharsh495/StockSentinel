@@ -68,6 +68,19 @@
                 android:text="🚀 High GMP (>₹50)"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/chip_ipo_best_odds"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/badge_bg"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
+                android:text="🎯 Best Odds"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp"
                 android:textStyle="bold" />
         </LinearLayout>
     </HorizontalScrollView>

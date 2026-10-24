@@ -52,6 +52,12 @@
             android:exported="false"
             android:theme="@style/Theme.StockSentinel" />
 
+        <!-- Tested Picks Activity (quant engine) -->
+        <activity
+            android:name=".ui.quant.QuantPicksActivity"
+            android:exported="false"
+            android:theme="@style/Theme.StockSentinel" />
+
         <!-- Settings & System Status Activity -->
         <activity
             android:name=".ui.settings.SettingsActivity"
