@@ -69,7 +69,7 @@ def test_labels_start_at_next_open(prices):
 
 def test_walk_forward_embargo(prices):
     h = 20
-    df = build_dataset(prices, h)
+    df = build_dataset(prices, h, extras=False)
     y = (df["fwd_excess"] > 0).where(df["fwd_excess"].notna())
     wf = walk_forward(df, feature_columns(df), y, h, min_train_days=300, test_days=100)
     udates = sorted(df.index.get_level_values("date").unique())
@@ -83,7 +83,7 @@ def test_walk_forward_embargo(prices):
 
 def test_noise_is_not_an_edge(prices):
     h = 5
-    df = build_dataset(prices, h)
+    df = build_dataset(prices, h, extras=False)
     y = (df["fwd_excess"] > 0).where(df["fwd_excess"].notna())
     wf = walk_forward(df, feature_columns(df), y, h, min_train_days=300, test_days=100)
     m = evaluate(wf.oos, h)
@@ -94,7 +94,7 @@ def test_noise_is_not_an_edge(prices):
 def test_planted_signal_is_detected():
     p = synthetic_prices(seed=1)
     h = 5
-    df = build_dataset(p, h)
+    df = build_dataset(p, h, extras=False)
     # Plant a real signal: an observable feature that predicts the future.
     rng = np.random.default_rng(3)
     df["signal"] = df["fwd_excess"].fillna(0) + rng.normal(0, df["fwd_excess"].std(), len(df))

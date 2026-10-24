@@ -9,7 +9,7 @@ on:
 jobs:
   train:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,6 +17,12 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: backend/requirements.txt
+      - name: Restore downloaded market data
+        uses: actions/cache@v4
+        with:
+          path: backend/.quant_cache
+          key: quant-cache-${{ github.run_id }}
+          restore-keys: quant-cache-
       - name: Install dependencies
         run: pip install -r backend/requirements.txt
       - name: Run tests

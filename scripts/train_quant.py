@@ -27,6 +27,10 @@ log = logging.getLogger("train_quant")
 
 def summary_line(r):
     m = r.get("metrics") or {}
+    if r.get("model_key") == "ipo_listing" and m:
+        return (f"ipo_listing      edge_verified={r.get('edge_verified')!s:<5} IPOs={m.get('oos_ipos')} "
+                f"MAE model={m.get('model_mae_pct')} vs GMP rule={m.get('gmp_rule_mae_pct')} "
+                f"AUC model={m.get('model_auc_positive_listing')} vs GMP={m.get('gmp_rule_auc_positive_listing')}")
     bt = (r.get("backtest") or {}).get("model") or {}
     return (f"{r['model_key']:<16} edge_verified={r.get('edge_verified')!s:<5} "
             f"AUC={m.get('auc')} acc={m.get('accuracy')} (majority {m.get('accuracy_always_majority')}) "
@@ -34,7 +38,7 @@ def summary_line(r):
 
 
 async def main(args):
-    results = await asyncio.to_thread(run_all, args.strategies, args.period)
+    results = await asyncio.to_thread(run_all, args.strategies, args.period, not args.no_ipo)
 
     if not args.no_db:
         from app.database import close_pool, create_pool
@@ -68,5 +72,6 @@ if __name__ == "__main__":
     ap.add_argument("--no-db", action="store_true", help="don't write to the database")
     ap.add_argument("--out", help="write the full JSON report here")
     ap.add_argument("--period", default="10y")
+    ap.add_argument("--no-ipo", action="store_true", help="skip the IPO scrape and model")
     ap.add_argument("--strategies", nargs="*", choices=["trader", "swing", "investor"])
     asyncio.run(main(ap.parse_args()))

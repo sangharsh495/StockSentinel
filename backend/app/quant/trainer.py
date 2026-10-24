@@ -100,13 +100,94 @@ def train_stock_strategy(prices: Dict[str, pd.DataFrame], strategy: str) -> Dict
         "model_key": f"stock_{strategy}", "strategy": strategy, "horizon_days": h,
         "description": STRATEGY_INFO[strategy], "model_type": "gradient_boosting_rank",
         "trained_at": datetime.now(timezone.utc).isoformat(), "data_end": str(last_date.date()),
-        "edge_verified": metrics.get("edge_verified", False),
-        "metrics": metrics, "backtest": bt, "folds": wf.folds, "predictions": preds,
+        "edge_verified": _useful_edge(metrics, bt),
+        "metrics": {**metrics, "ranking_skill_verified": metrics.get("edge_verified", False)},
+        "backtest": bt, "folds": wf.folds, "predictions": preds,
+    }
+
+
+def _useful_edge(metrics: Dict, bt: Dict) -> bool:
+    """
+    A stock model counts as having an edge only if (1) its ranking skill is
+    statistically significant AND (2) its top-10 portfolio, after trading
+    costs, beat simply holding the whole universe equally weighted.
+    Skill that trading costs eat is not useful to an investor.
+    """
+    m, ew = (bt.get("model") or {}), (bt.get("equal_weight") or {})
+    return bool(metrics.get("edge_verified") and m.get("cagr_pct") is not None
+                and ew.get("cagr_pct") is not None and m["cagr_pct"] > ew["cagr_pct"])
+
+
+def train_investor_factor(prices: Dict[str, pd.DataFrame], horizon: int = 60) -> Dict:
+    """
+    Transparent investor score — no fitting: equal-weight blend of three
+    well-documented factors (12-1 month momentum, low volatility, EPS
+    growth), each as a cross-sectional rank. Because nothing is fitted, the
+    whole backtest period is out-of-sample; it is still checked against
+    the equal-weight basket after costs.
+    """
+    df = build_dataset(prices, horizon)
+    d = df[df.index.get_level_values("date") >= "2020-11-01"].copy()
+    rk = lambda c: d.groupby(level="date")[c].rank(pct=True) - 0.5  # noqa: E731
+    d["f_momentum"] = rk("ret_250_skip20")
+    d["f_low_vol"] = -rk("vol_60")
+    d["f_eps_growth"] = rk("eps_yoy_growth").fillna(0) if "eps_yoy_growth" in d else 0.0
+    d["factor_score"] = d["f_momentum"] + d["f_low_vol"] + d["f_eps_growth"]
+
+    lab = d.dropna(subset=["fwd_excess"])
+    med = lab.groupby(level="date")["fwd_excess"].transform("median")
+    oos = lab[["fwd_ret", "fwd_excess"]].copy()
+    oos["prob_raw"] = lab["factor_score"]
+    oos["y"] = (lab["fwd_excess"] > med).astype(int)
+    oos["fold"] = 0
+    oos["score"] = oos.groupby(level="date")["prob_raw"].rank(pct=True)
+    oos["prob"] = np.nan
+    metrics = evaluate(oos.assign(prob=0.5), horizon)
+    for k in ("accuracy", "accuracy_always_majority", "brier", "brier_skill_vs_base_rate", "calibration"):
+        metrics.pop(k, None)
+    bt = backtest(oos, d, horizon, baseline_col="ret_250_skip20")
+    bt["rule_description"] = "Buy the 10 strongest 12-month momentum stocks"
+    calibrator = fit_calibrator(oos)
+
+    last = d.index.get_level_values("date").max()
+    today = d.xs(last, level="date")
+    score = today["factor_score"].rank(pct=True)
+    preds = []
+    for rank, sym in enumerate(today["factor_score"].sort_values(ascending=False).index, start=1):
+        r = today.loc[sym]
+        preds.append({
+            "symbol": sym, "as_of": str(last.date()), "rank": rank,
+            "score_percentile": _r(score[sym] * 100, 1),
+            "probability": _r(calibrator.predict([score[sym]])[0], 4),
+            **bucket_outcome(calibrator, score[sym]),
+            "factors": {"momentum_pct": _r((r["f_momentum"] + 0.5) * 100, 0),
+                        "low_volatility_pct": _r((r["f_low_vol"] + 0.5) * 100, 0),
+                        "eps_growth_pct": _r((r["f_eps_growth"] + 0.5) * 100, 0)},
+            "signals": {"ret_1y_pct": _r(r["ret_250"] * 100, 2), "volatility_pct": _r(r["vol_60"] * 100, 1),
+                        "eps_yoy_growth_pct": _r(r.get("eps_yoy_growth", np.nan) * 100, 1),
+                        "last_surprise_pct": _r(r.get("last_surprise_pct", np.nan), 1),
+                        "dist_52w_high_pct": _r(r["dist_52w_high"] * 100, 1)},
+        })
+    return {
+        "model_key": "stock_investor_factor", "strategy": "investor_factor", "horizon_days": horizon,
+        "description": "Investor factor score: momentum + low volatility + EPS growth, rebalanced every 60 days.",
+        "model_type": "transparent_factor_blend", "trained_at": datetime.now(timezone.utc).isoformat(),
+        "data_end": str(last.date()), "edge_verified": _useful_edge(metrics, bt),
+        "metrics": {**metrics, "ranking_skill_verified": metrics.get("edge_verified", False)},
+        "backtest": bt, "folds": None, "predictions": preds,
     }
 
 
 def train_market_outlook(prices: Dict[str, pd.DataFrame], horizon: int) -> Dict:
     m = market_features(prices).dropna()
+    from app.quant.participants import participant_features
+    part = participant_features(m.index)
+    if part is not None:
+        # Logistic regression needs complete rows: fill pre-2020 positioning
+        # with the neutral (median) value and flag it.
+        part = part.reindex(m.index)
+        m["has_positioning"] = part.notna().all(axis=1).astype(float)
+        m = m.join(part.fillna(part.median()))
     no = prices["nifty"]["Open"]
     fwd = np.log(no.shift(-1 - horizon) / no.shift(-1)).reindex(m.index)
     df = m.copy()
@@ -149,13 +230,33 @@ def train_market_outlook(prices: Dict[str, pd.DataFrame], horizon: int) -> Dict:
     }
 
 
-def run_all(strategies: Optional[List[str]] = None, period: str = "10y") -> List[Dict]:
+def run_all(strategies: Optional[List[str]] = None, period: str = "10y",
+            include_ipo: bool = True) -> List[Dict]:
     prices = load_prices(period=period)
     results = []
     for s in strategies or list(HORIZONS):
         logger.info(f"Training stock strategy: {s}")
         results.append(train_stock_strategy(prices, s))
+    logger.info("Scoring investor factor blend")
+    results.append(train_investor_factor(prices))
     for h in (5, 20):
         logger.info(f"Training market outlook: {h}d")
         results.append(train_market_outlook(prices, h))
+    if include_ipo:
+        try:
+            results.append(train_ipo(prices))
+        except Exception as e:  # source site down: keep the stock models
+            logger.warning(f"IPO model skipped: {e}")
     return results
+
+
+def train_ipo(prices: Dict[str, pd.DataFrame]) -> Dict:
+    from app.quant.ipo_model import train_ipo_model
+    from app.scrapers.ipo_history import scrape_current, scrape_history
+
+    logger.info("Scraping IPO history (cached) and current IPOs")
+    hist = scrape_history(2019)
+    cur = scrape_current()
+    listed = {r["ig_id"] for r in hist}
+    cur = [c for c in cur if c["ig_id"] not in listed]
+    return train_ipo_model(hist, cur, prices)

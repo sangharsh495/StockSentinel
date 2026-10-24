@@ -109,13 +109,27 @@ def forward_labels(prices: Dict[str, pd.DataFrame], horizon: int) -> pd.DataFram
     return lab
 
 
-def build_dataset(prices: Dict[str, pd.DataFrame], horizon: int) -> pd.DataFrame:
-    """Features + market regime + labels. Rows without a label are kept (they are 'today')."""
+def build_dataset(prices: Dict[str, pd.DataFrame], horizon: int, extras: bool = True) -> pd.DataFrame:
+    """
+    Features + market regime + labels. Rows without a label are kept (they are 'today').
+    extras=True adds delivery %, FII/DII positioning and results-surprise
+    features where available (blank before 2020; the model handles blanks).
+    """
     panel = stock_features(prices)
     mkt = market_features(prices)
     panel = panel.join(mkt, on="date")
+    panel = panel.dropna(subset=list(panel.columns), how="any")
+    if extras:
+        from app.quant.delivery import delivery_features
+        from app.quant.earnings import earnings_features
+        from app.quant.participants import participant_features
+        for extra in (delivery_features(prices), earnings_features(prices)):
+            if extra is not None:
+                panel = panel.join(extra, how="left")
+        part = participant_features(prices["Close"].index)
+        if part is not None:
+            panel = panel.join(part, on="date")
     panel = panel.join(forward_labels(prices, horizon))
-    panel = panel.dropna(subset=[c for c in feature_columns(panel)], how="any")
     return panel
 
 

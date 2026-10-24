@@ -176,6 +176,7 @@ def evaluate(oos: pd.DataFrame, horizon: int, cross_sectional: bool = True) -> D
     base = float(y.mean())
     g = oos.groupby("fold")["y"].agg(["sum", "count"]).cumsum().shift(1)
     prior = (g["sum"] / g["count"]).reindex(pc_df["fold"]).values
+    prior = np.where(np.isnan(prior), base, prior)
     brier = brier_score_loss(yc, pc)
     brier_ref = brier_score_loss(yc, prior)
     metrics = {

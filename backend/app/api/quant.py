@@ -14,7 +14,8 @@ from app.database import fetch, fetchrow
 
 router = APIRouter(prefix="/quant")
 
-STRATEGIES = {"trader": "stock_trader", "swing": "stock_swing", "investor": "stock_investor"}
+STRATEGIES = {"trader": "stock_trader", "swing": "stock_swing", "investor": "stock_investor",
+              "investor_factor": "stock_investor_factor"}
 
 
 def _j(v):
@@ -28,12 +29,9 @@ def _trust(run: dict) -> dict:
     edge = bool(run.get("edge_verified"))
     return {
         "edge_verified": edge,
-        "verdict": (
-            "Tested edge: the model beat chance on years of unseen data."
-            if edge else
-            "No proven edge yet: on unseen data this model was close to a coin flip. "
-            "Treat its probabilities as near 50/50 context, not a signal."
-        ),
+        "verdict": _verdict(edge, m, bt),
+        "ranking_skill_verified": m.get("ranking_skill_verified"),
+        "backtest_equal_weight_cagr_pct": (bt.get("equal_weight") or {}).get("cagr_pct"),
         "oos_period": [m.get("oos_start"), m.get("oos_end")],
         "auc": m.get("auc"),
         "accuracy": m.get("accuracy"),
@@ -46,6 +44,18 @@ def _trust(run: dict) -> dict:
     }
 
 
+def _verdict(edge: bool, m: dict, bt: dict) -> str:
+    if edge:
+        return "Tested edge: beat chance and the hold-everything basket after costs on years of unseen data."
+    if m.get("ranking_skill_verified"):
+        return ("Ranks stocks better than chance, but after trading costs its picks did not beat "
+                "simply holding all stocks. Use as context, not a buy signal.")
+    if "gmp_rule_mae_pct" in m:
+        return "Did not beat the simple GMP rule on past IPOs; the expected gain shown is GMP-based."
+    return ("No proven edge yet: on unseen data this was close to a coin flip. "
+            "Treat its probabilities as near 50/50 context, not a signal.")
+
+
 async def _latest_run(model_key: str) -> Optional[dict]:
     return await fetchrow(
         "SELECT * FROM quant_model_runs WHERE model_key = $1 ORDER BY trained_at DESC LIMIT 1",
@@ -55,7 +65,7 @@ async def _latest_run(model_key: str) -> Optional[dict]:
 
 @router.get("/picks")
 async def picks(
-    strategy: str = Query("swing", description="trader (5d), swing (20d) or investor (60d)"),
+    strategy: str = Query("swing", description="trader (5d), swing (20d), investor (60d) or investor_factor"),
     limit: int = Query(20, ge=1, le=100),
     min_probability: float = Query(0.0, ge=0, le=1),
 ):
@@ -183,4 +193,25 @@ async def news_impact(
             "trust": _trust(news_run) if news_run else None,
         },
         "groups": summarize(df, col, min_samples) if total else [],
+    }
+
+
+@router.get("/ipo-odds")
+async def ipo_odds():
+    """Open/upcoming IPOs with expected listing gain, chance of a positive listing and the model's track record."""
+    run = await _latest_run("ipo_listing")
+    if not run:
+        return {"status": "not_trained", "ipos": []}
+    rows = await fetch(
+        "SELECT payload FROM quant_predictions WHERE model_key = 'ipo_listing' ORDER BY rank ASC"
+    )
+    m = _j(run.get("metrics")) or {}
+    return {
+        "status": "ok", "trust": _trust(run),
+        "track_record": {k: m.get(k) for k in (
+            "oos_ipos", "oos_start", "oos_end", "model_mae_pct", "gmp_rule_mae_pct",
+            "model_auc_positive_listing", "gmp_rule_auc_positive_listing",
+            "model_direction_accuracy", "gmp_rule_direction_accuracy",
+            "apply_model_p60", "apply_gmp_positive", "apply_all", "top_drivers")},
+        "ipos": [_j(r["payload"]) for r in rows],
     }
