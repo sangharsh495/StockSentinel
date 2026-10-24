@@ -51,7 +51,7 @@ def build_frame(rows: List[Dict], prices: Optional[Dict[str, pd.DataFrame]] = No
         return _f(df[name]) if name in df else pd.Series(np.nan, index=df.index)
 
     price = _f(df["issue_price"])
-    gmp = col("gmp_latest").fillna(col("gmp")) if "gmp_latest" in df else col("gmp")
+    gmp = col("gmp").fillna(col("gmp_latest"))  # live/final GMP first if "gmp_latest" in df else col("gmp")
     df["gmp_pct"] = gmp / price * 100
     df["gmp_first_pct"] = col("gmp_first") / price * 100
     df["gmp_change_pct"] = (gmp - col("gmp_first")) / price * 100
@@ -238,6 +238,9 @@ def train_ipo_model(history_rows: List[Dict], current_rows: List[Dict],
                     "probability": _r(p, 4),
                     "source": "model" if use_model else "gmp_rule",
                     "subscription_x": _r(r.get("subscription_x"), 2),
+                    "subscription_known": bool(pd.notna(r.get("subscription_x"))),
+                    "note": None if pd.notna(r.get("subscription_x")) else
+                    "Bidding not started: estimate uses GMP only and is less reliable.",
                     "issue_close_date": str(r["decision_date"].date()) if pd.notna(r.get("decision_date")) else None,
                     "listing_date": str(r["listing_date"].date()) if pd.notna(r.get("listing_date")) else None,
                     "verdict": _verdict(p, exp),

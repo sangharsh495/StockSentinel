@@ -220,7 +220,7 @@ def scrape_current() -> List[Dict]:
     """Upcoming/open IPOs from the live GMP page, with details, for scoring."""
     out = []
     with httpx.Client(headers={"User-Agent": UA}, timeout=30, follow_redirects=True) as client:
-        html = _get(client, BASE + "/report/ipo-gmp-live/331/ipo/")
+        html = _get(client, BASE + "/report/ipo-gmp-live/331/")
         if not html:
             return out
         t = rsc_text(html)
