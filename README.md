@@ -146,10 +146,20 @@ Every probability shown by the app comes from a trained model tested on data it 
 | `stock_investor` | …over the next **60** days? |
 | `market_5d` / `market_20d` | Will the Nifty be higher in 5 / 20 days? (Falls back to the historical base rate when there's no edge.) |
 | `news_5d` | Which news is really followed by out-performance? (Trains after 400+ measured news outcomes.) |
+| `stock_investor_factor` | Transparent investor score: 12-1 momentum + low volatility + EPS growth (no fitting). |
+| `ipo_listing` | Listing-day open vs issue price for mainboard IPOs. Learns the *correction* to the GMP-implied gain; must beat the plain GMP rule. |
+
+**Extra data (all point-in-time, free, public):**
+- NSE daily delivery % (`sec_bhavdata_full` archive, from 2020)
+- FII / DII / Client / Pro index futures & options positioning (NSE participant-wise OI archive, from 2020)
+- Quarterly EPS surprises (Yahoo; a result counts only from the next trading day)
+- IPO history: GMP and its trend, subscription, fresh issue vs OFS, valuation, financials, listing gain (investorgain.com public pages, fetched politely and cached)
+
+**Stricter edge rule for stock models:** ranking skill must be significant *and* the top-10 portfolio must beat the equal-weight basket of the same stocks **after trading costs**.
 
 **News outcome tracking:** every news→stock tag gets its actual move vs the market measured after 1, 5 and 20 days (`news_outcomes` table, daily job at 5:30 PM IST). `/api/quant/news-impact` reports hit rates with 95% confidence intervals per news category.
 
-**API:** `/api/quant/picks?strategy=trader|swing|investor`, `/api/quant/stock/{symbol}`, `/api/quant/market-outlook`, `/api/quant/news-impact`, `/api/quant/models` (full validation report).
+**API:** `/api/quant/picks?strategy=trader|swing|investor|investor_factor`, `/api/quant/ipo-odds`, `/api/quant/stock/{symbol}`, `/api/quant/market-outlook`, `/api/quant/news-impact`, `/api/quant/models` (full validation report).
 
 **Training runs in GitHub Actions** (`.github/workflows/train-quant.yml`, weekdays 6 PM IST), because Render's free CPU is too slow. Add a repo secret `DATABASE_URL` (your Neon connection string) to enable it. Run locally with:
 ```
