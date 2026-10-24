@@ -122,7 +122,7 @@ public class QuantPicksActivity extends AppCompatActivity {
                 List<JsonObject> items = new ArrayList<>();
                 if (response.isSuccessful() && response.body() != null) {
                     JsonObject body = response.body();
-                    JsonArray picks = body.has("picks") ? body.getAsJsonArray("picks") : null;
+                    JsonArray picks = arr(body, "picks");
                     if (picks != null) {
                         for (JsonElement el : picks) {
                             if (el.isJsonObject()) items.add(el.getAsJsonObject());
@@ -145,8 +145,7 @@ public class QuantPicksActivity extends AppCompatActivity {
     private void bindTrust(JsonObject body) {
         String desc = str(body, "description");
         if (!desc.isEmpty()) subtitle.setText(desc);
-        JsonObject trust = body.has("trust") && body.get("trust").isJsonObject()
-                ? body.getAsJsonObject("trust") : null;
+        JsonObject trust = obj(body, "trust");
         if (trust == null) {
             trustBadge.setText("NOT TRAINED YET");
             trustBadge.setTextColor(getResources().getColor(R.color.text_secondary, null));
@@ -154,9 +153,8 @@ public class QuantPicksActivity extends AppCompatActivity {
             trustStats.setText("");
             return;
         }
-        boolean edge = trust.has("edge_verified") && trust.get("edge_verified").getAsBoolean();
-        boolean skill = trust.has("ranking_skill_verified") && !trust.get("ranking_skill_verified").isJsonNull()
-                && trust.get("ranking_skill_verified").getAsBoolean();
+        boolean edge = bool(trust, "edge_verified");
+        boolean skill = bool(trust, "ranking_skill_verified");
         trustBadge.setText(edge ? "✓ TESTED EDGE" : (skill ? "RANKING SKILL ONLY" : "NO PROVEN EDGE"));
         trustBadge.setTextColor(getResources().getColor(
                 edge ? R.color.bullish : (skill ? R.color.yellow_accent : R.color.neutral), null));
@@ -171,6 +169,20 @@ public class QuantPicksActivity extends AppCompatActivity {
 
     public static String str(JsonObject o, String k) {
         return o != null && o.has(k) && !o.get(k).isJsonNull() ? o.get(k).getAsString() : "";
+    }
+
+    /** Object field, or null when missing or JSON null. */
+    public static JsonObject obj(JsonObject o, String k) {
+        return o != null && o.has(k) && o.get(k).isJsonObject() ? o.getAsJsonObject(k) : null;
+    }
+
+    /** Array field, or null when missing or JSON null. */
+    public static JsonArray arr(JsonObject o, String k) {
+        return o != null && o.has(k) && o.get(k).isJsonArray() ? o.getAsJsonArray(k) : null;
+    }
+
+    public static boolean bool(JsonObject o, String k) {
+        return o != null && o.has(k) && !o.get(k).isJsonNull() && o.get(k).getAsBoolean();
     }
 
     public static Double dbl(JsonObject o, String k) {
@@ -233,8 +245,7 @@ public class QuantPicksActivity extends AppCompatActivity {
             Double prob = dbl(p, "probability");
             Double exp = dbl(p, "expected_excess_pct");
             Double hit = dbl(p, "historical_hit_rate_pct");
-            JsonArray range = p.has("typical_range_pct") && p.get("typical_range_pct").isJsonArray()
-                    ? p.getAsJsonArray("typical_range_pct") : null;
+            JsonArray range = arr(p, "typical_range_pct");
 
             holder.gradeText.setText(prob == null ? "—" : String.format(Locale.US, "%.0f%%", prob * 100));
             holder.symbolText.setText(str(p, "symbol"));

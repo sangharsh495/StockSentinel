@@ -2,8 +2,8 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-24T16:44:24.432485+00:00",
-  "master_root_hash": "f3bb89f010eb20886ebc32b2def9984ae9930f5d19ec3b7cfbdf05490b1d1803",
+  "sealed_at_utc": "2026-10-24T16:48:35.446831+00:00",
+  "master_root_hash": "dcd2c53ae019158370c98c87dfd9ca1fc978a388464727fd9b3ea7fa8bba49fb",
   "total_sealed_files": 650,
   "files": [
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "android/app/build.gradle",
-      "sha256": "793d50f01dae24868e0f8788fdc07ff495fb576925228e777b7d4b8faf7258d9",
-      "size_bytes": 2315
+      "sha256": "2a7dd8a3047d7b0c9eae657598f9c579d9c94aa13b9af4027781e533e5830715",
+      "size_bytes": 2229
     },
     {
       "path": "android/app/src/main/AndroidManifest.xml",
@@ -68,8 +68,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/home/HomeFragment.java",
-      "sha256": "5b0ce4e9be8b2fe7d827fdf93564cb5c08861aa10808e164750829d24ac6c47d",
-      "size_bytes": 28889
+      "sha256": "bd1b05808dde583acd99f0429c8035a40bfc78577d93890daa5829f20ab30839",
+      "size_bytes": 28580
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/home/LineChartView.java",
@@ -83,8 +83,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/ipos/IposFragment.java",
-      "sha256": "32f01fcae00078fd5ec5783d7a4f47c08f75a6685c7a684f31fff3e136dd972c",
-      "size_bytes": 16436
+      "sha256": "60f391af8d951a7dd41202d2e6b594c0d2f3a58dd8cbe5954cf0ddcaca20e5ab",
+      "size_bytes": 16938
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/news/NewsFragment.java",
@@ -93,8 +93,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/quant/QuantPicksActivity.java",
-      "sha256": "f6fbab494646dd7ca4c2e8b9bf20a49fcbf5c369bf01e4a27f06d89c9326c33b",
-      "size_bytes": 12338
+      "sha256": "17d61db3e3be23488bf0761fd6dab6cd9143afd37ed8f9dee8373d2a0843b5f4",
+      "size_bytes": 12530
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/search/SearchActivity.java",

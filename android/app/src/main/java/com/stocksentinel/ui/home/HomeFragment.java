@@ -155,15 +155,13 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (!response.isSuccessful() || response.body() == null || !isAdded()) return;
-                JsonObject outlook = response.body().has("outlook") && response.body().get("outlook").isJsonObject()
-                        ? response.body().getAsJsonObject("outlook") : null;
+                JsonObject outlook = QuantPicksActivity.obj(response.body(), "outlook");
                 if (outlook == null) return;
                 bindOutlook(outlook, "5d", outlook5d);
                 bindOutlook(outlook, "20d", outlook20d);
 
-                JsonObject five = outlook.has("5d") ? outlook.getAsJsonObject("5d") : null;
-                JsonObject regime = five != null && five.has("current_regime")
-                        ? five.getAsJsonObject("current_regime") : null;
+                JsonObject five = QuantPicksActivity.obj(outlook, "5d");
+                JsonObject regime = QuantPicksActivity.obj(five, "current_regime");
                 if (regime != null) {
                     Double fii = QuantPicksActivity.dbl(regime, "fii_idxfut_long_ratio");
                     Double breadth = QuantPicksActivity.dbl(regime, "breadth_50");
@@ -174,7 +172,7 @@ public class HomeFragment extends Fragment {
                             breadth == null ? "—" : String.format(Locale.US, "%.0f%%", breadth * 100),
                             vix == null ? "—" : String.format(Locale.US, "%.1f", vix)));
                 }
-                JsonObject trust = five != null && five.has("trust") ? five.getAsJsonObject("trust") : null;
+                JsonObject trust = QuantPicksActivity.obj(five, "trust");
                 if (trust != null) outlookTrust.setText(QuantPicksActivity.str(trust, "verdict"));
             }
 
@@ -184,7 +182,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void bindOutlook(JsonObject outlook, String key, TextView target) {
-        JsonObject o = outlook.has(key) && outlook.get(key).isJsonObject() ? outlook.getAsJsonObject(key) : null;
+        JsonObject o = QuantPicksActivity.obj(outlook, key);
         Double p = QuantPicksActivity.dbl(o, "probability");
         if (p == null) return;
         String days = "5d".equals(key) ? "5 days" : "20 days";
@@ -199,7 +197,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (!response.isSuccessful() || response.body() == null || !isAdded()) return;
-                JsonArray picks = response.body().has("picks") ? response.body().getAsJsonArray("picks") : null;
+                JsonArray picks = QuantPicksActivity.arr(response.body(), "picks");
                 List<JsonObject> items = new ArrayList<>();
                 if (picks != null) {
                     for (JsonElement el : picks) {

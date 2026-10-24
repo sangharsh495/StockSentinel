@@ -77,7 +77,7 @@ public class IposFragment extends Fragment {
         setupFilterChips();
 
         adapter = new IpoAdapter(ipo -> {
-            if (!ipo.has("id")) return; // scored by the model but not in our IPO list yet
+            if (!ipo.has("id") || ipo.get("id").isJsonNull()) return; // scored, but not in our IPO list yet
             int ipoId = ipo.get("id").getAsInt();
             String name = ipo.has("company_name") ? ipo.get("company_name").getAsString() : "IPO Report";
 
@@ -212,7 +212,7 @@ public class IposFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (!response.isSuccessful() || response.body() == null || !isAdded()) return;
-                JsonArray ipos = response.body().has("ipos") ? response.body().getAsJsonArray("ipos") : null;
+                JsonArray ipos = com.stocksentinel.ui.quant.QuantPicksActivity.arr(response.body(), "ipos");
                 oddsByName.clear();
                 oddsList.clear();
                 if (ipos != null) {
@@ -236,7 +236,7 @@ public class IposFragment extends Fragment {
         JsonObject row = new JsonObject();
         row.addProperty("company_name", str(odds, "name"));
         row.addProperty("market", "IN");
-        row.addProperty("status", "upcoming");
+        row.addProperty("status", statusFromDates(str(odds, "issue_close_date"), str(odds, "listing_date")));
         if (odds.has("issue_price") && !odds.get("issue_price").isJsonNull()) {
             row.add("price_band_low", odds.get("issue_price"));
             row.add("price_band_high", odds.get("issue_price"));
@@ -252,7 +252,15 @@ public class IposFragment extends Fragment {
         String n = name.toLowerCase(Locale.US)
                 .replaceAll("\\b(limited|ltd|ipo|india|private|pvt)\\b", "")
                 .replaceAll("[^a-z0-9]", "");
-        return n.length() > 14 ? n.substring(0, 14) : n;
+        return n;
+    }
+
+    /** Status for a model-only row from its dates (yyyy-MM-dd strings compare as dates). */
+    static String statusFromDates(String close, String listing) {
+        String today = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new java.util.Date());
+        if (!listing.isEmpty() && listing.compareTo(today) <= 0) return "listed";
+        if (!close.isEmpty() && close.compareTo(today) < 0) return "closed";
+        return "upcoming";
     }
 
     private static String str(JsonObject o, String k) {
