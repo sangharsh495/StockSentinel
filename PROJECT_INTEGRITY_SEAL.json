@@ -2,9 +2,9 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-24T12:29:57.936959+00:00",
-  "master_root_hash": "ab89f4c32bfdf1d79929cfc76a7c1abfd350b7db32e7e70505628b6bb3157149",
-  "total_sealed_files": 145,
+  "sealed_at_utc": "2026-10-24T12:30:17.621738+00:00",
+  "master_root_hash": "76522245e165e113c4757da091263b769e0825ba49e66bf2150df7f8c5b3a24e",
+  "total_sealed_files": 141,
   "files": [
     {
       "path": ".github/workflows/train-quant.yml",
@@ -383,28 +383,8 @@
     },
     {
       "path": "backend/.gitignore",
-      "sha256": "e2f0bacfcc4141aad886de6c92be5641a75cc7166d15531fec01219e8ac7d2dc",
-      "size_bytes": 164
-    },
-    {
-      "path": "backend/.pytest_cache/.gitignore",
-      "sha256": "3ed731b65d06150c138e2dadb0be0697550888a6b47eb8c45ecc9adba8b8e9bd",
-      "size_bytes": 37
-    },
-    {
-      "path": "backend/.pytest_cache/CACHEDIR.TAG",
-      "sha256": "37dc88ef9a0abeddbe81053a6dd8fdfb13afb613045ea1eb4a5c815a74a3bde4",
-      "size_bytes": 191
-    },
-    {
-      "path": "backend/.pytest_cache/README.md",
-      "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
-      "size_bytes": 302
-    },
-    {
-      "path": "backend/.pytest_cache/v/cache/nodeids",
-      "sha256": "0c8c1d9061aad42c5922ceb62d663c58c045f38ad1e298c9527144ed077523dd",
-      "size_bytes": 455
+      "sha256": "a25ae2e0927f9fd00937982999aae880115a119473dbcf1877abcea5c2a4333a",
+      "size_bytes": 179
     },
     {
       "path": "backend/.quant_cache/prices_10y_100.pkl",
