@@ -13,3 +13,5 @@ build/
 .eggs/
 *.log
 firebase-credentials.json
+.quant_cache/
+quant_report.json

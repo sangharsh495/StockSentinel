@@ -2,10 +2,15 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-09-20T23:28:56.832572+00:00",
-  "master_root_hash": "13c5d46c6093da966b4f736f02b32cfc5d06d51581250efcee10326267f45b8d",
-  "total_sealed_files": 128,
+  "sealed_at_utc": "2026-10-24T12:29:57.936959+00:00",
+  "master_root_hash": "ab89f4c32bfdf1d79929cfc76a7c1abfd350b7db32e7e70505628b6bb3157149",
+  "total_sealed_files": 145,
   "files": [
+    {
+      "path": ".github/workflows/train-quant.yml",
+      "sha256": "05449c4320265abe80798e41b8a87bc9762aa34ba5a4f42d2da0897a77d4634a",
+      "size_bytes": 982
+    },
     {
       "path": ".gitignore",
       "sha256": "1d5b2130c40df778737151871d539b7aaeb597d575948cee06390477af72a6cf",
@@ -13,8 +18,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "70868414859d4bd035146c2ba20e36009018a2460ad931630cc9bd68892e6a0c",
-      "size_bytes": 13239
+      "sha256": "b635d0e49a7bc92205033ee927bb8d60e94c7d71de24060d74e10bb19fd2ac78",
+      "size_bytes": 15609
     },
     {
       "path": "android/.gitignore",
@@ -378,8 +383,33 @@
     },
     {
       "path": "backend/.gitignore",
-      "sha256": "9014c5560ca25f229af97bcd1f71d506c2e735e6cd231284db11fb21445c3b80",
-      "size_bytes": 132
+      "sha256": "e2f0bacfcc4141aad886de6c92be5641a75cc7166d15531fec01219e8ac7d2dc",
+      "size_bytes": 164
+    },
+    {
+      "path": "backend/.pytest_cache/.gitignore",
+      "sha256": "3ed731b65d06150c138e2dadb0be0697550888a6b47eb8c45ecc9adba8b8e9bd",
+      "size_bytes": 37
+    },
+    {
+      "path": "backend/.pytest_cache/CACHEDIR.TAG",
+      "sha256": "37dc88ef9a0abeddbe81053a6dd8fdfb13afb613045ea1eb4a5c815a74a3bde4",
+      "size_bytes": 191
+    },
+    {
+      "path": "backend/.pytest_cache/README.md",
+      "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+      "size_bytes": 302
+    },
+    {
+      "path": "backend/.pytest_cache/v/cache/nodeids",
+      "sha256": "0c8c1d9061aad42c5922ceb62d663c58c045f38ad1e298c9527144ed077523dd",
+      "size_bytes": 455
+    },
+    {
+      "path": "backend/.quant_cache/prices_10y_100.pkl",
+      "sha256": "7fd0ac21e25e4fc3b382578e15d4f827aeea0b1d483a64a2c04910c46e4da486",
+      "size_bytes": 9957989
     },
     {
       "path": "backend/Dockerfile",
@@ -427,6 +457,11 @@
       "size_bytes": 1122
     },
     {
+      "path": "backend/app/api/quant.py",
+      "sha256": "209e13af079d517a2abad965663d00245807d8e24dd46eba4471163e00b24acb",
+      "size_bytes": 7083
+    },
+    {
       "path": "backend/app/api/stocks.py",
       "sha256": "ff2509bb5edfb5841d1bc92f2140944c06533a71fee696859e88f9454e76462b",
       "size_bytes": 8721
@@ -448,8 +483,8 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "9f555d72240b45c305d799a51333348d1e5d8bd6b914d8ac90ca5f9ac7a36bb0",
-      "size_bytes": 8649
+      "sha256": "4e569292cbaca2ba55e21db61a627c8f9000617d3cbfeff1b19ecad663b98de2",
+      "size_bytes": 8720
     },
     {
       "path": "backend/app/ml/__init__.py",
@@ -537,14 +572,54 @@
       "size_bytes": 5702
     },
     {
+      "path": "backend/app/quant/__init__.py",
+      "sha256": "bbb7d4b253a5989ef5530f8fa1ffb06ce934db50c5067ec682d2ae8730d57922",
+      "size_bytes": 403
+    },
+    {
+      "path": "backend/app/quant/data.py",
+      "sha256": "30b8f6c4363cc5b39857fb75904424453d041d4ebc40a2cc2b24e8858b4dbc7d",
+      "size_bytes": 3164
+    },
+    {
+      "path": "backend/app/quant/features.py",
+      "sha256": "f2246348dc94fe0c352c83192ba1c7a1e8cea08e3edf2fc6df1e43bac73ffb50",
+      "size_bytes": 5338
+    },
+    {
+      "path": "backend/app/quant/news_events.py",
+      "sha256": "a1a245eb3675e3792062762d90d207ab6f8a80fbcf762c7a4c4475f6ddb52052",
+      "size_bytes": 11016
+    },
+    {
+      "path": "backend/app/quant/store.py",
+      "sha256": "f3913f4df8211570863a5584a215844f22e2956ae57c516b2c2990438df486c7",
+      "size_bytes": 2559
+    },
+    {
+      "path": "backend/app/quant/trainer.py",
+      "sha256": "54d29d886aa939e1a5667ca5b8187ed92cd0f175c4fa2d9135272e779d5d1291",
+      "size_bytes": 7342
+    },
+    {
+      "path": "backend/app/quant/universe.py",
+      "sha256": "a7c9fea5a8ec2fcef6f032d3c4b2be831c6121a69763b73b88560edd302ca705",
+      "size_bytes": 1555
+    },
+    {
+      "path": "backend/app/quant/validation.py",
+      "sha256": "5bce1671654e9838b18de45342d89a2a75d915f5cf30ceff06fbc373cc4b15e8",
+      "size_bytes": 14700
+    },
+    {
       "path": "backend/app/scheduler/__init__.py",
       "sha256": "f048d776140691217b46d1457029a62cff45b1af6164021fa60202a989d43fa3",
       "size_bytes": 20
     },
     {
       "path": "backend/app/scheduler/jobs.py",
-      "sha256": "92bd3de19300818f89a6085e68874d04d0ed5b8e56ecb25648b4bc920050b75b",
-      "size_bytes": 13343
+      "sha256": "c5238f13183f2c46396b10a2ccb8c7e938e0675df711662984406991b42f765b",
+      "size_bytes": 13879
     },
     {
       "path": "backend/app/scrapers/__init__.py",
@@ -598,8 +673,8 @@
     },
     {
       "path": "backend/requirements.txt",
-      "sha256": "5a45de3e19e88768c33cd2f964e944964b5372a81ba6030431c5742773107f2c",
-      "size_bytes": 591
+      "sha256": "2cf972c3f78a22b4db75848a5e676c1b236131197f70305197ebe860df47f88f",
+      "size_bytes": 658
     },
     {
       "path": "backend/run.py",
@@ -608,13 +683,13 @@
     },
     {
       "path": "backend/schema.sql",
-      "sha256": "af990d9ee0fc4e32e1bf92841a8eb0c6cdd1212565ce42b24fd4040bd2529199",
-      "size_bytes": 8075
+      "sha256": "dc3170df09e972380b8bfcddc143392236a9fd731e2dd6f213288b015659009e",
+      "size_bytes": 9796
     },
     {
       "path": "backend/schema_complete.sql",
-      "sha256": "a6e103436d7eb9f3ffbbabeb1a7eb0911b7e5489c7b94237e133f60c37808b0c",
-      "size_bytes": 7799
+      "sha256": "2428fd0461358333409cc270e72fb076f12052aa2add9b69f0a0a586a858f77e",
+      "size_bytes": 9520
     },
     {
       "path": "backend/schema_phase1.sql",
@@ -625,6 +700,11 @@
       "path": "backend/schema_v2.sql",
       "sha256": "a638bb59b84790cd73f4a8550d18ab47020bf4e6ea4f87eac0c0539a7f373a8c",
       "size_bytes": 2164
+    },
+    {
+      "path": "backend/tests/test_quant.py",
+      "sha256": "7b634b6e7150ea6f53ef40f30d0508c49226858d2773b44c48342e9309aafd45",
+      "size_bytes": 6058
     },
     {
       "path": "scripts/migrate_database.py",
@@ -640,6 +720,11 @@
       "path": "scripts/seed_live_data.py",
       "sha256": "c779b87d42b893155ae04be12c90b6974fbd48e9a59453c77550d1e71e90ac6c",
       "size_bytes": 22760
+    },
+    {
+      "path": "scripts/train_quant.py",
+      "sha256": "9a9bd2e3b37583a1b5b2071414fe3c3b71a130d70103d095af1a9aca56fbc26e",
+      "size_bytes": 2731
     },
     {
       "path": "scripts/verify_integrity.py",

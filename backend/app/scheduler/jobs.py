@@ -272,6 +272,14 @@ def job_backfill_price_history():
     _run_async(_run())
 
 
+def job_news_outcomes():
+    """Measure how stocks actually moved after tagged news (feeds the news model)."""
+    async def _run():
+        from app.quant.news_events import update_news_outcomes
+        await _log_job("news_outcomes", update_news_outcomes)
+    _run_async(_run())
+
+
 # ---------------------------------------------------------------------------
 # Scheduler factory
 # ---------------------------------------------------------------------------
@@ -395,6 +403,14 @@ def create_scheduler() -> BackgroundScheduler:
         CronTrigger(hour="4", minute="30"),
         id="price_history",
         name="Price History Backfill",
+    )
+
+    # --- News outcome measurement: daily at 5:30 PM IST (after market close) ---
+    scheduler.add_job(
+        job_news_outcomes,
+        CronTrigger(hour="17", minute="30"),
+        id="news_outcomes",
+        name="News Outcome Measurement",
     )
 
     logger.info(f"Scheduler configured with {len(scheduler.get_jobs())} jobs")

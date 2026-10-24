@@ -128,6 +128,36 @@ StockSentinel/
 
 ---
 
+## 📐 Quant Engine (Tested Models)
+
+Every probability shown by the app comes from a trained model tested on data it never saw, not from hand-written if/else rules.
+
+**How models are tested** (`backend/app/quant/`)
+- **No look-ahead:** features for day *t* use only prices known at day *t*'s close. Trades are assumed at the **next day's open**.
+- **Walk-forward testing:** train on the past, skip a gap as long as the holding period, then predict the next 6 unseen months. Slide forward and repeat (about 12 test windows over 2020–2026).
+- **Honest probabilities:** scores become probabilities using only *earlier* test results. When the app says 55%, stocks with that score historically won about 55% of the time.
+- **Backtest with costs:** 0.2% per trade side. Compared against the Nifty, an equal-weight basket of the same stocks (removes survivorship bias), and a simple rule-based strategy (RSI / momentum).
+- **`edge_verified`:** true only if ranking skill is statistically significant (t-stat > 2 on non-overlapping periods) and AUC > 0.51. Otherwise the app says "no proven edge" instead of showing a confident number.
+
+| Model | Question it answers |
+|---|---|
+| `stock_trader` | Will this stock beat its peers over the next **5** days? |
+| `stock_swing` | …over the next **20** days? |
+| `stock_investor` | …over the next **60** days? |
+| `market_5d` / `market_20d` | Will the Nifty be higher in 5 / 20 days? (Falls back to the historical base rate when there's no edge.) |
+| `news_5d` | Which news is really followed by out-performance? (Trains after 400+ measured news outcomes.) |
+
+**News outcome tracking:** every news→stock tag gets its actual move vs the market measured after 1, 5 and 20 days (`news_outcomes` table, daily job at 5:30 PM IST). `/api/quant/news-impact` reports hit rates with 95% confidence intervals per news category.
+
+**API:** `/api/quant/picks?strategy=trader|swing|investor`, `/api/quant/stock/{symbol}`, `/api/quant/market-outlook`, `/api/quant/news-impact`, `/api/quant/models` (full validation report).
+
+**Training runs in GitHub Actions** (`.github/workflows/train-quant.yml`, weekdays 6 PM IST), because Render's free CPU is too slow. Add a repo secret `DATABASE_URL` (your Neon connection string) to enable it. Run locally with:
+```
+cd backend && python ../scripts/train_quant.py --no-db --out report.json
+```
+
+---
+
 ## 🔐 Grade-1 Security Standards
 
 StockSentinel complies with modern Grade-1 enterprise application security:
