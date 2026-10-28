@@ -2,10 +2,15 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-28T19:56:24.246372+00:00",
-  "master_root_hash": "3b86ff3985c3b70eb618bb00580e4298a307c5b30c1d3dab445d79da95c80a42",
-  "total_sealed_files": 657,
+  "sealed_at_utc": "2026-10-28T19:57:45.641245+00:00",
+  "master_root_hash": "d77d19979ea14ce30ab7f61272cbfaa338fdf06c79425ba7ffce7496c6987ac3",
+  "total_sealed_files": 658,
   "files": [
+    {
+      "path": ".github/workflows/android-apk.yml",
+      "sha256": "5c533b1557a9be843bd5090302dbc4705b5109ee19c01bd6a7f661d02d7cd01e",
+      "size_bytes": 1291
+    },
     {
       "path": ".github/workflows/train-quant.yml",
       "sha256": "ca38b8787ed0e201e6c750bb7122cd30b19c67b6d9c478d6489745503a13a604",
