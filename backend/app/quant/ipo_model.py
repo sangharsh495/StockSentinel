@@ -17,7 +17,11 @@ from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.ensemble import (
+    HistGradientBoostingClassifier, HistGradientBoostingRegressor,
+    RandomForestClassifier, RandomForestRegressor,
+)
+from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import mean_absolute_error, roc_auc_score
 
 from app.quant.validation import _r
@@ -118,15 +122,46 @@ def _reg():
 
 
 PROB_FEATURES = ["gmp_pct", "log_sub", "gmp_vs_heat", "mkt_ret_20"]
+AVERAGE = "average"
+
+
+class _ZeroCorrection:
+    """'GMP alone' as a candidate: predicts no correction to the GMP-implied gain."""
+
+    def fit(self, X, y):
+        return self
+
+    def predict(self, X):
+        return np.zeros(len(X))
+
+
+def _pipe(model):
+    from sklearn.impute import SimpleImputer
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    return make_pipeline(SimpleImputer(strategy="median"), StandardScaler(), model)
+
+
+# Candidate algorithms: (factory, feature list)
+REG_CANDIDATES = {
+    "gradient_boosting": (_reg, FEATURES),
+    "random_forest": (lambda: _pipe(RandomForestRegressor(
+        n_estimators=300, min_samples_leaf=15, max_features=0.4, random_state=7, n_jobs=-1)), FEATURES),
+    "ridge_linear": (lambda: _pipe(Ridge(alpha=30.0)), FEATURES),
+    "gmp_only": (_ZeroCorrection, FEATURES),
+}
+CLF_CANDIDATES = {
+    "logistic": (lambda: _pipe(LogisticRegression(C=0.5, max_iter=500)), PROB_FEATURES),
+    "gradient_boosting": (lambda: HistGradientBoostingClassifier(
+        max_iter=150, learning_rate=0.04, max_leaf_nodes=6, min_samples_leaf=20,
+        l2_regularization=3.0, random_state=7), FEATURES),
+    "random_forest": (lambda: _pipe(RandomForestClassifier(
+        n_estimators=300, min_samples_leaf=10, max_features=0.4, random_state=7, n_jobs=-1)), FEATURES),
+}
 
 
 def _clf():
-    # Chance of a positive listing: a small, well-calibrated logistic model.
-    from sklearn.impute import SimpleImputer
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.pipeline import make_pipeline
-    from sklearn.preprocessing import StandardScaler
-    return make_pipeline(SimpleImputer(strategy="median"), StandardScaler(), LogisticRegression(C=0.5, max_iter=500))
+    return CLF_CANDIDATES["logistic"][0]()
 
 
 def _usable(train: pd.DataFrame, cols: List[str]) -> List[str]:
@@ -134,17 +169,36 @@ def _usable(train: pd.DataFrame, cols: List[str]) -> List[str]:
     return [c for c in cols if train[c].notna().any()]
 
 
-def _fit_predict(train: pd.DataFrame, test: pd.DataFrame):
-    fc, pc = _usable(train, FEATURES), _usable(train, PROB_FEATURES)
-    reg = _reg().fit(train[fc].values, (train["listing_gain_pct"] - train["gmp_pct"]).values)
-    clf = _clf().fit(train[pc].values, (train["listing_gain_pct"] > 0).astype(int).values)
-    gain = test["gmp_pct"].values + reg.predict(test[fc].values)
-    prob = clf.predict_proba(test[pc].values)[:, 1]
-    return gain, prob, reg, clf
+def _all_predictions(train: pd.DataFrame, test: pd.DataFrame) -> Dict[str, np.ndarray]:
+    """Every candidate's prediction for `test`, trained on `train`, plus the averages."""
+    out = {}
+    target = (train["listing_gain_pct"] - train["gmp_pct"]).values
+    up = (train["listing_gain_pct"] > 0).astype(int).values
+    for n, (f, cols) in REG_CANDIDATES.items():
+        c = _usable(train, cols)
+        out[f"gain_{n}"] = test["gmp_pct"].values + f().fit(train[c].values, target).predict(test[c].values)
+    for n, (f, cols) in CLF_CANDIDATES.items():
+        c = _usable(train, cols)
+        out[f"prob_{n}"] = f().fit(train[c].values, up).predict_proba(test[c].values)[:, 1]
+    out[f"gain_{AVERAGE}"] = np.mean([out[f"gain_{n}"] for n in REG_CANDIDATES], axis=0)
+    out[f"prob_{AVERAGE}"] = np.mean([out[f"prob_{n}"] for n in CLF_CANDIDATES], axis=0)
+    return out
+
+
+def _fit_predict(train: pd.DataFrame, test: pd.DataFrame, reg_name: str = "gradient_boosting",
+                 clf_name: str = "logistic"):
+    preds = _all_predictions(train, test)
+    return preds[f"gain_{reg_name}"], preds[f"prob_{clf_name}"], None, None
 
 
 def walk_forward_ipo(df: pd.DataFrame, min_train: int = 120, step: int = 30) -> pd.DataFrame:
-    """Train on IPOs listed before each block, predict the next block of IPOs."""
+    """
+    Train on IPOs listed before each block, predict the next block — for
+    every candidate. Then, block by block, use the candidate that had the
+    lowest error (gain) / best Brier score (probability) on EARLIER blocks.
+    Columns pred_gain / prob_gain hold that honest selection; the report
+    is in .attrs["multi_model"].
+    """
     d = df.dropna(subset=["listing_gain_pct", "gmp_pct"]).sort_values("listing_date").reset_index(drop=True)
     out = []
     for start in range(min_train, len(d), step):
@@ -153,13 +207,48 @@ def walk_forward_ipo(df: pd.DataFrame, min_train: int = 120, step: int = 30) -> 
         train = d[d["listing_date"] < test["decision_date"].min()]
         if len(train) < min_train:
             continue
-        gain, prob, _, _ = _fit_predict(train, test)
         part = test[["name", "listing_date", "listing_gain_pct", "gmp_pct"]].copy()
-        part["pred_gain"] = gain
-        part["prob_gain"] = prob
+        for k, v in _all_predictions(train, test).items():
+            part[k] = v
         part["fold"] = len(out)
         out.append(part)
-    return pd.concat(out) if out else pd.DataFrame()
+    if not out:
+        return pd.DataFrame()
+    oos = pd.concat(out)
+    y, up = oos["listing_gain_pct"], (oos["listing_gain_pct"] > 0).astype(int)
+    regs = list(REG_CANDIDATES) + [AVERAGE]
+    clfs = list(CLF_CANDIDATES) + [AVERAGE]
+    mae = pd.DataFrame({n: (oos[f"gain_{n}"] - y).abs().groupby(oos["fold"]).mean() for n in regs})
+    brier = pd.DataFrame({n: ((oos[f"prob_{n}"] - up) ** 2).groupby(oos["fold"]).mean() for n in clfs})
+
+    oos["pred_gain"], oos["prob_gain"] = np.nan, np.nan
+    picks = []
+    for k in sorted(oos["fold"].unique()):
+        rn = mae[mae.index < k].mean().idxmin() if k > 0 else AVERAGE
+        cn = brier[brier.index < k].mean().idxmin() if k > 0 else AVERAGE
+        m = oos["fold"] == k
+        oos.loc[m, "pred_gain"] = oos.loc[m, f"gain_{rn}"]
+        oos.loc[m, "prob_gain"] = oos.loc[m, f"prob_{cn}"]
+        picks.append((rn, cn))
+
+    def board(table, lower_better, metric):
+        overall = {n: float(((oos[f"{'gain' if metric == 'mae' else 'prob'}_{n}"] -
+                              (y if metric == 'mae' else up)).abs() if metric == "mae" else
+                             (oos[f"prob_{n}"] - up) ** 2).mean()) for n in table.columns}
+        wins = (table.idxmin(axis=1) if lower_better else table.idxmax(axis=1)).value_counts()
+        rows = [{"model": n, metric: _r(v, 4), "folds_won": int(wins.get(n, 0))} for n, v in overall.items()]
+        return sorted(rows, key=lambda r: r[metric]), min(overall, key=overall.get)
+
+    gain_board, gain_live = board(mae, True, "mae")
+    prob_board, prob_live = board(brier, True, "brier")
+    oos.attrs["multi_model"] = {
+        "gain_leaderboard": gain_board, "probability_leaderboard": prob_board,
+        "gain_chosen_live": gain_live, "probability_chosen_live": prob_live,
+        "selection_rule": "lowest error on earlier IPO blocks only",
+        "times_selected": {"gain": pd.Series([p[0] for p in picks]).value_counts().to_dict(),
+                           "probability": pd.Series([p[1] for p in picks]).value_counts().to_dict()},
+    }
+    return oos
 
 
 def evaluate_ipo(oos: pd.DataFrame) -> Dict:
@@ -212,6 +301,7 @@ def train_ipo_model(history_rows: List[Dict], current_rows: List[Dict],
         return {"model_key": "ipo_listing", "status": "collecting_data", "samples": int(len(hist)),
                 "edge_verified": False}
     oos = walk_forward_ipo(hist)
+    mm = dict(oos.attrs.get("multi_model", {}))
     metrics = evaluate_ipo(oos)
 
     # Residual spread per predicted-gain band -> honest range for new IPOs
@@ -223,7 +313,8 @@ def train_ipo_model(history_rows: List[Dict], current_rows: List[Dict],
         cur = build_frame(current_rows, prices, history=hist)
         cur = cur.dropna(subset=["gmp_pct"])
         if not cur.empty:
-            pg, pp, _, _ = _fit_predict(hist, cur)
+            pg, pp, _, _ = _fit_predict(hist, cur, mm.get("gain_chosen_live", "gradient_boosting"),
+                                        mm.get("probability_chosen_live", "logistic"))
             for (_, r), g, p in zip(cur.iterrows(), pg, pp):
                 use_model = metrics["edge_verified"]
                 exp = float(g) if use_model else float(r["gmp_pct"])
@@ -244,7 +335,14 @@ def train_ipo_model(history_rows: List[Dict], current_rows: List[Dict],
                     "issue_close_date": str(r["decision_date"].date()) if pd.notna(r.get("decision_date")) else None,
                     "listing_date": str(r["listing_date"].date()) if pd.notna(r.get("listing_date")) else None,
                     "verdict": _verdict(p, exp),
+                    "gmp_check": r.get("gmp_check"),
+                    "gmp_sources": r.get("gmp_sources") if isinstance(r.get("gmp_sources"), dict) else None,
+                    "gmp_gap_pct_points": _r(r.get("gmp_gap_pct_points"), 2),
                 })
+                if r.get("gmp_check") == "disagree":
+                    preds[-1]["note"] = r.get("gmp_warning")
+                    if preds[-1]["verdict"].startswith("Strong apply"):
+                        preds[-1]["verdict"] = "Apply (GMP sources disagree)"
     preds.sort(key=lambda x: -(x["expected_gain_pct"] or -999))
     for i, p in enumerate(preds, 1):
         p["rank"] = i
@@ -252,9 +350,10 @@ def train_ipo_model(history_rows: List[Dict], current_rows: List[Dict],
     return {
         "model_key": "ipo_listing", "strategy": "ipo", "horizon_days": 0,
         "description": "Listing-day open vs issue price for mainboard IPOs. Benchmark: GMP-implied gain.",
-        "model_type": "gradient_boosting", "trained_at": datetime.now(timezone.utc).isoformat(),
+        "model_type": f"multi_model:{mm.get('gain_chosen_live')}+{mm.get('probability_chosen_live')}",
+        "trained_at": datetime.now(timezone.utc).isoformat(),
         "data_end": str(pd.Timestamp(hist["listing_date"].max()).date()),
-        "edge_verified": metrics["edge_verified"], "metrics": {**metrics, "top_drivers": imp},
+        "edge_verified": metrics["edge_verified"], "metrics": {**metrics, "top_drivers": imp, "multi_model": mm},
         "backtest": None, "folds": None, "predictions": preds, "samples": int(len(hist)),
     }
 
