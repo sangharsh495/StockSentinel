@@ -2,8 +2,8 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-28T19:55:15.086765+00:00",
-  "master_root_hash": "e2d998e13ed8113f586c8018828c3f35df062add2d98c621bc9a416a3a0736db",
+  "sealed_at_utc": "2026-10-28T19:56:24.246372+00:00",
+  "master_root_hash": "3b86ff3985c3b70eb618bb00580e4298a307c5b30c1d3dab445d79da95c80a42",
   "total_sealed_files": 657,
   "files": [
     {
@@ -103,8 +103,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/settings/SettingsActivity.java",
-      "sha256": "7b1e51376a3af08ae8e5a3e61956d9a6295163c9b2f6ae54782999dcc6ea39c2",
-      "size_bytes": 6597
+      "sha256": "d68277c44a8b68889cfd6a27b333e9693b3ad0ee094f1415d5420b827b02c2c0",
+      "size_bytes": 6907
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/stockdetail/StockDetailActivity.java",
@@ -233,8 +233,8 @@
     },
     {
       "path": "android/app/src/main/res/layout/activity_settings.xml",
-      "sha256": "79e25d3b5ae8bf8cd6305337a9a4eaf60a66efceb8bddcc49666ab79b2b71e82",
-      "size_bytes": 24317
+      "sha256": "8614aea8054abf9a162d89a23eac6c0581d487cc2c57d39273151ed81d81c601",
+      "size_bytes": 24328
     },
     {
       "path": "android/app/src/main/res/layout/activity_splash.xml",

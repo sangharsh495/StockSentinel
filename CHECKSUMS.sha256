@@ -17,7 +17,7 @@ a475cbff50eb3e0ada2e5cffff71a632789b0283dedae9f4572748db1d9c709b  android/app/sr
 80f4216aad77ec29da8bd866b1d17241056bd45c683faffed8a74eff3a64755d  android/app/src/main/java/com/stocksentinel/ui/news/NewsFragment.java
 17d61db3e3be23488bf0761fd6dab6cd9143afd37ed8f9dee8373d2a0843b5f4  android/app/src/main/java/com/stocksentinel/ui/quant/QuantPicksActivity.java
 68778b41eb28ae9fadc36e12d7dacfc100d3b8f2e2575a80b12b3dc361a022c3  android/app/src/main/java/com/stocksentinel/ui/search/SearchActivity.java
-7b1e51376a3af08ae8e5a3e61956d9a6295163c9b2f6ae54782999dcc6ea39c2  android/app/src/main/java/com/stocksentinel/ui/settings/SettingsActivity.java
+d68277c44a8b68889cfd6a27b333e9693b3ad0ee094f1415d5420b827b02c2c0  android/app/src/main/java/com/stocksentinel/ui/settings/SettingsActivity.java
 f042e754473dd0d9559b661b2909b99ebeff8cb99c1010c41a2f34e83c2c15c0  android/app/src/main/java/com/stocksentinel/ui/stockdetail/StockDetailActivity.java
 6f707c7165931b228d4bff88b22581e249c4867098ad052021f1f92ebf9979a4  android/app/src/main/java/com/stocksentinel/ui/stocks/StocksFragment.java
 319cd3bb7740faf777d4865d3fd9a8c50b2c0e8dc1c7f809371a73f37e50277f  android/app/src/main/java/com/stocksentinel/ui/watchlist/WatchlistFragment.java
@@ -43,7 +43,7 @@ fd659e640743f02a061fb5e9ca68408fb68efef08d487b2717d32962a608c4af  android/app/sr
 28e1e6376ba720da7134c8f290f95e1d8a5f8b0700e60fd25e15b232655d4dba  android/app/src/main/res/layout/activity_main.xml
 665dd259b0f4c469fd41166a27acecd3728023864afe880675250989bd3be324  android/app/src/main/res/layout/activity_quant_picks.xml
 0c6dc79d8216654e54bae3c2ce06deda56324c03b7567704e83b4593a66a1a56  android/app/src/main/res/layout/activity_search.xml
-79e25d3b5ae8bf8cd6305337a9a4eaf60a66efceb8bddcc49666ab79b2b71e82  android/app/src/main/res/layout/activity_settings.xml
+8614aea8054abf9a162d89a23eac6c0581d487cc2c57d39273151ed81d81c601  android/app/src/main/res/layout/activity_settings.xml
 b72c97569e4f6fe82befc6e95d0759ed5bece536f5db003be68e6bb70bdce2a7  android/app/src/main/res/layout/activity_splash.xml
 fc65b78edc5fad06c27513beaaba2109d6f094f3dd45580e4b61baee66638594  android/app/src/main/res/layout/activity_stock_detail.xml
 f5c9029f8e340177f8fbc4b025fdbf377a2ebcbeacd0224c6d0cdf6c1bc04554  android/app/src/main/res/layout/fragment_dividends.xml

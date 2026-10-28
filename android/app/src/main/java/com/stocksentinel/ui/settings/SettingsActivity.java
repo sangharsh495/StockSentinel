@@ -12,6 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
+import com.stocksentinel.util.FormatUtils;
 import com.stocksentinel.util.Constants;
 
 import java.util.Locale;
@@ -115,9 +116,14 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    /** A count from the status response, formatted by the shared FormatUtils ("—" if missing or malformed). */
     private static String count(JsonObject db, String key) {
-        return db.has(key) && !db.get(key).isJsonNull()
-                ? String.format(Locale.US, "%d", db.get(key).getAsLong()) : "—";
+        try {
+            return FormatUtils.formatNumber(db.has(key) && !db.get(key).isJsonNull()
+                    ? db.get(key).getAsLong() : null);
+        } catch (RuntimeException e) {  // non-numeric value from the server
+            return FormatUtils.formatNumber(null);
+        }
     }
 
     private void fallbackHealthCheck(long startTime) {
