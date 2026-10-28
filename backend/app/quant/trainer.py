@@ -251,6 +251,9 @@ def run_all(strategies: Optional[List[str]] = None, period: str = "10y",
         results.append(train_stock_strategy(prices, s))
     logger.info("Scoring investor factor blend")
     results.append(train_investor_factor(prices))
+    from app.quant.ranges import train_ranges
+    logger.info("Computing guaranteed-coverage price ranges")
+    results.append(train_ranges(prices))
     # Cross-source check: flag picks whose latest price differs between Yahoo and NSE
     for r in results:
         for p in r.get("predictions") or []:
@@ -260,6 +263,15 @@ def run_all(strategies: Optional[List[str]] = None, period: str = "10y",
     for h in (5, 20):
         logger.info(f"Training market outlook: {h}d")
         results.append(train_market_outlook(prices, h))
+    try:
+        from app.quant.market_data import update_market
+        from app.quant.scanner import run_scanner
+        logger.info("Scanning the whole NSE market")
+        W = update_market(prices["Close"].index)
+        if W:
+            results.append(run_scanner(W))
+    except Exception as e:  # NSE archive down: keep everything else
+        logger.warning(f"Market scanner skipped: {e}")
     ipo_summary = None
     if include_ipo:
         try:

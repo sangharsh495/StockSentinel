@@ -37,6 +37,34 @@ def summary_line(r):
             f"IC_t={m.get('rank_ic_tstat')} backtest_CAGR={bt.get('cagr_pct')}")
 
 
+async def scanner_scorecard(results):
+    """Save tonight's scanner picks, then score every earlier pick whose 5 days have passed."""
+    from datetime import date, datetime, timezone
+    import pandas as pd
+    from app.database import execute_many, fetch
+    from app.quant.market_data import update_market
+    from app.quant.scanner import score_past_picks
+
+    scan = next((r for r in results if r.get("model_key") == "market_scanner"), None)
+    if not scan:
+        return None
+    await execute_many(
+        "INSERT INTO scanner_log (date, symbol, category) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
+        [(date.fromisoformat(p["as_of"]), p["symbol"], p["category"]) for p in scan["predictions"]],
+    )
+    rows = await fetch("SELECT date, symbol, category FROM scanner_log")
+    W = update_market(pd.DatetimeIndex([]))          # cached: no download
+    card = score_past_picks(W, rows)
+    log.info(f"Scanner scorecard: {card.get('scored_picks')} scored, right {card.get('right_pct_all')}%")
+    return {
+        "model_key": "scanner_scorecard", "strategy": "scorecard", "horizon_days": 5,
+        "description": "Live track record of the nightly watchlist: real picks, scored 5 trading days later.",
+        "model_type": "live_scorecard", "trained_at": datetime.now(timezone.utc).isoformat(),
+        "data_end": scan.get("data_end"), "edge_verified": False, "metrics": card,
+        "backtest": None, "folds": None, "predictions": [],
+    }
+
+
 async def main(args):
     results = await asyncio.to_thread(run_all, args.strategies, args.period, not args.no_ipo)
 
@@ -57,6 +85,12 @@ async def main(args):
                     results.append(news)
             except Exception as e:  # news tables may be empty on a fresh DB
                 log.warning(f"News model step skipped: {e}")
+            try:
+                card = await scanner_scorecard(results)
+                if card:
+                    results.append(card)
+            except Exception as e:
+                log.warning(f"Scanner scorecard skipped: {e}")
             await save_results(results)
         finally:
             await close_pool()

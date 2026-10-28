@@ -2,9 +2,9 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-28T19:57:45.641245+00:00",
-  "master_root_hash": "d77d19979ea14ce30ab7f61272cbfaa338fdf06c79425ba7ffce7496c6987ac3",
-  "total_sealed_files": 658,
+  "sealed_at_utc": "2026-10-28T22:08:14.296485+00:00",
+  "master_root_hash": "2015384bc1bf24f19848b2895878d76238be5c6c5a2d39b3879d93e8c53ee7e5",
+  "total_sealed_files": 664,
   "files": [
     {
       "path": ".github/workflows/android-apk.yml",
@@ -403,7 +403,7 @@
     },
     {
       "path": "backend/.quant_cache/delivery.pkl",
-      "sha256": "dcae2b4a5db41ddf5cc50581b22f18042c53366265812b7bcea074e34113cc61",
+      "sha256": "8428f157c4b5a5fc4fb2b9198886fc2fa9a1c8c491abed4ab7997b06cc13149c",
       "size_bytes": 8266362
     },
     {
@@ -2912,6 +2912,11 @@
       "size_bytes": 429753
     },
     {
+      "path": "backend/.quant_cache/market_bhav.pkl",
+      "sha256": "31607ef32b572d7c6634399b47211a2fad86cc7e4664d82d5af376e2858c5d04",
+      "size_bytes": 185213398
+    },
+    {
       "path": "backend/.quant_cache/participants.pkl",
       "sha256": "cb5c05cc1a980ab9cf72d2fc48890da40544f0ed915b3945d90497c3ff4a3bc3",
       "size_bytes": 3553510
@@ -2968,8 +2973,8 @@
     },
     {
       "path": "backend/app/api/quant.py",
-      "sha256": "8a2106949436e138a728d57684c5463ac73740d176a035f488c22939b597b999",
-      "size_bytes": 9187
+      "sha256": "825e6f71c106064f75628e1b8c3fd44d48f238215715e207d670af4b24d224a5",
+      "size_bytes": 12595
     },
     {
       "path": "backend/app/api/stocks.py",
@@ -3118,8 +3123,18 @@
     },
     {
       "path": "backend/app/quant/ipo_model.py",
-      "sha256": "4b76ebc6167a539415700b1fc500e2b08b74d92df6256bea4fb421c853483fba",
-      "size_bytes": 19084
+      "sha256": "8bf608a78d942cb71f891d32d2ed3afea384a3ee4678dfb15ce19ddfc810329f",
+      "size_bytes": 20030
+    },
+    {
+      "path": "backend/app/quant/live_watch.py",
+      "sha256": "351b67df04ce145cdafedcf614f96d7c6b4219861d2d1bbc7a0b7b2ee2ad4147",
+      "size_bytes": 2861
+    },
+    {
+      "path": "backend/app/quant/market_data.py",
+      "sha256": "9340de12b561711472c3a89c16ef7ccf90e964bdd2720a6f08b2530c54da88f0",
+      "size_bytes": 5820
     },
     {
       "path": "backend/app/quant/news_events.py",
@@ -3132,14 +3147,24 @@
       "size_bytes": 4219
     },
     {
+      "path": "backend/app/quant/ranges.py",
+      "sha256": "99534d2fa6e8c6ef3e6e43f3a181c27c188223955f21c4f5fa64bcd012d8cc9f",
+      "size_bytes": 6090
+    },
+    {
+      "path": "backend/app/quant/scanner.py",
+      "sha256": "a0ad3b6c426de78d0a3e09c648202866f26e6976de79841eb79d2ea8584ffa90",
+      "size_bytes": 13205
+    },
+    {
       "path": "backend/app/quant/store.py",
       "sha256": "f3913f4df8211570863a5584a215844f22e2956ae57c516b2c2990438df486c7",
       "size_bytes": 2559
     },
     {
       "path": "backend/app/quant/trainer.py",
-      "sha256": "b0bdfee6aa0948cbc8347897332e029e81866b75b73919fcdc25a774afda6aeb",
-      "size_bytes": 14315
+      "sha256": "9a05e0bc52643d797bb4f463a0e648d55c132d2c7b0de816b7510b6ff57abe5c",
+      "size_bytes": 14862
     },
     {
       "path": "backend/app/quant/universe.py",
@@ -3158,8 +3183,8 @@
     },
     {
       "path": "backend/app/scheduler/jobs.py",
-      "sha256": "c5238f13183f2c46396b10a2ccb8c7e938e0675df711662984406991b42f765b",
-      "size_bytes": 13879
+      "sha256": "d61057357fa8028d8191c224bef1f63cb5ccca16b8971a313e912aa114ffd422",
+      "size_bytes": 14413
     },
     {
       "path": "backend/app/scrapers/__init__.py",
@@ -3228,13 +3253,13 @@
     },
     {
       "path": "backend/schema.sql",
-      "sha256": "dc3170df09e972380b8bfcddc143392236a9fd731e2dd6f213288b015659009e",
-      "size_bytes": 9796
+      "sha256": "1974d3833da3e2a512dc121421587a06e927b523dea271d47577af11edc629a1",
+      "size_bytes": 10433
     },
     {
       "path": "backend/schema_complete.sql",
-      "sha256": "2428fd0461358333409cc270e72fb076f12052aa2add9b69f0a0a586a858f77e",
-      "size_bytes": 9520
+      "sha256": "8c32527aae4a731a496fd24cacf11430dc5c7d61b86c2b1b7566bb169934460a",
+      "size_bytes": 10157
     },
     {
       "path": "backend/schema_phase1.sql",
@@ -3250,6 +3275,11 @@
       "path": "backend/tests/__init__.py",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "size_bytes": 0
+    },
+    {
+      "path": "backend/tests/test_forecast.py",
+      "sha256": "a1f5260a32e6ba0ed38bdcaf61e9cea1de59c3ac23d6aaf88f4e6b4279db6a21",
+      "size_bytes": 4646
     },
     {
       "path": "backend/tests/test_ipo.py",
@@ -3288,8 +3318,8 @@
     },
     {
       "path": "scripts/train_quant.py",
-      "sha256": "cfdf0cad670def16808cb55363efcb528287ca122385ba573d8ae6ce814bc050",
-      "size_bytes": 3342
+      "sha256": "09d7af5fe3cbcbdd1ff08635d5719984aa21f9463f40fe83430478edd640bff7",
+      "size_bytes": 5043
     },
     {
       "path": "scripts/verify_integrity.py",
