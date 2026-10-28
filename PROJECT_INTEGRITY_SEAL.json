@@ -2,8 +2,8 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-24T16:48:35.446831+00:00",
-  "master_root_hash": "dcd2c53ae019158370c98c87dfd9ca1fc978a388464727fd9b3ea7fa8bba49fb",
+  "sealed_at_utc": "2026-10-28T11:45:16.082744+00:00",
+  "master_root_hash": "8007d4b171bdb827e4f8274f46b12e4c8cae4e9d97032f4204f5737c8c3c6d86",
   "total_sealed_files": 650,
   "files": [
     {
@@ -3153,8 +3153,8 @@
     },
     {
       "path": "backend/app/scrapers/ipo_history.py",
-      "sha256": "10e54050cd25e1419eed9b6f313e110461447011e54935d172f763da98d170e5",
-      "size_bytes": 10103
+      "sha256": "45ff289f6a33fba16bf390601555e6d54dc5fefc48e9c853c031327b442b23d9",
+      "size_bytes": 10153
     },
     {
       "path": "backend/app/scrapers/ipo_scraper.py",
@@ -3223,8 +3223,8 @@
     },
     {
       "path": "backend/tests/test_ipo.py",
-      "sha256": "8f8bec52ee8939b2aa54173ff005450734d2295e4206d878030ea86db4ca16dd",
-      "size_bytes": 3650
+      "sha256": "ac2fc4560cde2c6fd497d15e4b013bf8d41f87e857f48b1c126e41889a3d26bc",
+      "size_bytes": 3702
     },
     {
       "path": "backend/tests/test_quant.py",

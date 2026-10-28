@@ -15,8 +15,9 @@ from app.quant.ipo_model import build_frame, evaluate_ipo, walk_forward_ipo  # n
 from app.scrapers.ipo_history import parse_detail, parse_tracker  # noqa: E402
 
 
-def _rsc_page(payload: str) -> str:
-    return f"<html><script>self.__next_f.push([1,{json.dumps(payload)}])</script></html>"
+def _rsc_page(payload: str, body: str = "") -> str:
+    return (f"<html><body><script>self.__next_f.push([1,{json.dumps(payload)}])</script>"
+            f"{body}</body></html>")
 
 
 def test_parse_tracker_reads_embedded_rows():
@@ -38,9 +39,9 @@ def test_parse_detail_reads_issue_object_and_gmp_trend():
     obj = {"shares_offered_qib": "1", "issue_size_fresh_in_amt": "138", "issue_size_ofs_in_amt": "560",
            "issue_size_in_amt": "698", "pe_ratio": "87.7", "issue_end_dt_json": "2025-01-15",
            "company_sector": "Medical"}
-    html = _rsc_page("2:" + json.dumps({"data": obj})) + (
+    html = _rsc_page("2:" + json.dumps({"data": obj}), (
         "<table><tr><th>Metric</th><th>Value</th></tr><tr><td>First GMP</td><td>₹155</td></tr>"
-        "<tr><td>Latest GMP</td><td>₹145</td></tr><tr><td>Trend Slope</td><td>-3.4</td></tr></table>")
+        "<tr><td>Latest GMP</td><td>₹145</td></tr><tr><td>Trend Slope</td><td>-3.4</td></tr></table>"))
     d = parse_detail(html)
     assert d["fresh_issue_amt"] == 138 and d["ofs_amt"] == 560 and d["pe_ratio"] == 87.7
     assert str(d["issue_close_date"]) == "2025-01-15" and d["sector"] == "Medical"
