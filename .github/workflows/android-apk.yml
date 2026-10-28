@@ -1,0 +1,38 @@
+name: Build Android app
+
+# Builds the app with the API key from the STOCKSENTINEL_API_KEY repo secret,
+# so the key never lives in the code. Download the APK from the run's
+# "Artifacts" section.
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: ["android/**", ".github/workflows/android-apk.yml"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+      - name: Build debug APK
+        working-directory: android
+        env:
+          STOCKSENTINEL_API_KEY: ${{ secrets.STOCKSENTINEL_API_KEY }}
+        run: |
+          if [ -z "$STOCKSENTINEL_API_KEY" ]; then
+            echo "::warning::STOCKSENTINEL_API_KEY secret is not set; the app will be built without an API key"
+          fi
+          # gradle.properties points at a Mac Java path; use the runner's JDK instead
+          gradle --no-daemon -Dorg.gradle.java.home="$JAVA_HOME" assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: StockSentinel-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
