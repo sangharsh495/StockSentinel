@@ -6,6 +6,7 @@ Provides:
 3. Input validation & sanitization for financial queries
 """
 
+import hmac
 import time
 import re
 import logging
@@ -55,6 +56,47 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 # ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+def client_ip_of(request: Request) -> str:
+    """
+    Real client IP. Behind Render's proxy request.client.host is the proxy,
+    which would put every user in one rate-limit bucket; the first
+    X-Forwarded-For entry is the caller.
+    """
+    fwd = request.headers.get("x-forwarded-for", "")
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+# ---------------------------------------------------------------------------
+# API key (confidentiality + integrity of writes)
+# ---------------------------------------------------------------------------
+class APIKeyMiddleware(BaseHTTPMiddleware):
+    """
+    Rejects /api/* requests without the shared X-API-Key header. /health and
+    / stay open for uptime pings. Disabled only when no key is configured.
+    """
+    OPEN_PATHS = ("/health", "/")
+
+    def __init__(self, app, api_key: str):
+        super().__init__(app)
+        self.api_key = api_key.encode() if api_key else b""
+
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        if not self.api_key or path in self.OPEN_PATHS or request.method == "OPTIONS":
+            return await call_next(request)
+        sent = request.headers.get("x-api-key", "").encode()
+        if not hmac.compare_digest(sent, self.api_key):
+            logger.warning(f"Rejected request without valid API key: {request.method} {path} "
+                           f"from {client_ip_of(request)}")
+            return JSONResponse(status_code=401, content={"detail": "Missing or invalid API key"})
+        return await call_next(request)
+
+
+# ---------------------------------------------------------------------------
 # 2. Rate Limiting Middleware (Sliding Window)
 # ---------------------------------------------------------------------------
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -75,11 +117,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if path in ("/health", "/", "/docs", "/openapi.json"):
             return await call_next(request)
 
-        client_ip = request.client.host if request.client else "unknown"
+        client_ip = client_ip_of(request)
         now = time.time()
 
-        # Clean old timestamps
+        # Clean old timestamps (and forget idle IPs so memory can't grow forever)
         window_start = now - self.window_seconds
+        if len(self.requests) > 5000:
+            for ip in [k for k, v in self.requests.items() if not v or v[-1] <= window_start]:
+                del self.requests[ip]
         self.requests[client_ip] = [t for t in self.requests[client_ip] if t > window_start]
 
         if len(self.requests[client_ip]) >= self.max_requests:

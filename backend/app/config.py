@@ -30,6 +30,14 @@ class Settings:
     # Render external URL (for self-ping)
     RENDER_EXTERNAL_URL: str = os.getenv("RENDER_EXTERNAL_URL", "")
 
+    # Security
+    # Shared key the Android app sends in the X-API-Key header. When set,
+    # every /api/* call without it is rejected (401). Set it in Render.
+    APP_API_KEY: str = os.getenv("APP_API_KEY", "")
+    # Comma-separated browser origins allowed to call the API. Empty = none
+    # (the Android app doesn't need CORS).
+    CORS_ORIGINS: list = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]
+
     # App settings
     APP_NAME: str = "StockSentinel API"
     APP_VERSION: str = "1.0.0"

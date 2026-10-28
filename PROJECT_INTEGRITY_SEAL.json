@@ -2,9 +2,9 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-28T19:39:44.919491+00:00",
-  "master_root_hash": "7aac7be537a31b9439c95ca7216c8bcb1ab68050ae35c19dbfce001c0904ae4c",
-  "total_sealed_files": 656,
+  "sealed_at_utc": "2026-10-28T19:55:15.086765+00:00",
+  "master_root_hash": "e2d998e13ed8113f586c8018828c3f35df062add2d98c621bc9a416a3a0736db",
+  "total_sealed_files": 657,
   "files": [
     {
       "path": ".github/workflows/train-quant.yml",
@@ -18,8 +18,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "7ac27fdc63a9b658b0d9e64af1ecca579d9aa7c27b8c76bb1d50a478e63324f4",
-      "size_bytes": 17290
+      "sha256": "2685a968fe846a6d4d3e584d0dd5d99fd0c50b1b4359e3df237f179f895b6534",
+      "size_bytes": 18310
     },
     {
       "path": "android/.gitignore",
@@ -28,8 +28,8 @@
     },
     {
       "path": "android/app/build.gradle",
-      "sha256": "2a7dd8a3047d7b0c9eae657598f9c579d9c94aa13b9af4027781e533e5830715",
-      "size_bytes": 2229
+      "sha256": "c5786aa1db836372d60e0f0f3d5ba3d63620436717a285e5837f64f80c9b6ede",
+      "size_bytes": 2810
     },
     {
       "path": "android/app/src/main/AndroidManifest.xml",
@@ -43,13 +43,13 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/data/api/ApiClient.java",
-      "sha256": "6e67258d9dd3b75809a9572be534b2cb929676d62b5e4ff1caa41ba6186fa52d",
-      "size_bytes": 1410
+      "sha256": "4d6b4443b3837cce84fe8d400369401f094809e7c071bc8d9f2e0cb9f204e8b6",
+      "size_bytes": 1962
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/data/api/StockApi.java",
-      "sha256": "76b98ffabac9aad7176f1377054c8c6a70402e7997931260595c0f2d63ca6f0f",
-      "size_bytes": 7685
+      "sha256": "2a3af0d007b4d7d5858dcfa9e7b1596267c8e02974cf51d6481f585c5094e16e",
+      "size_bytes": 7559
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/MainActivity.java",
@@ -103,8 +103,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/settings/SettingsActivity.java",
-      "sha256": "962d25be4a9cc0b4d91d0304288af17a9238d0715b1988140ac6ac28cf0d7262",
-      "size_bytes": 6647
+      "sha256": "7b1e51376a3af08ae8e5a3e61956d9a6295163c9b2f6ae54782999dcc6ea39c2",
+      "size_bytes": 6597
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/stockdetail/StockDetailActivity.java",
@@ -2963,8 +2963,8 @@
     },
     {
       "path": "backend/app/api/quant.py",
-      "sha256": "e9bbf8e194998f7200a21008212985e2c68ca1bc0e31dc2e28a598383a55b2b5",
-      "size_bytes": 9075
+      "sha256": "8a2106949436e138a728d57684c5463ac73740d176a035f488c22939b597b999",
+      "size_bytes": 9187
     },
     {
       "path": "backend/app/api/stocks.py",
@@ -2973,13 +2973,13 @@
     },
     {
       "path": "backend/app/api/watchlist.py",
-      "sha256": "6945512d669a01731bde501a924ba3db6bdf2d9b92f3417b324792a0b036f23c",
-      "size_bytes": 2323
+      "sha256": "e310a7b7a0b7cf089b62698a1c9e7e1bbbd22d002a71fba385ba023dee07f3a5",
+      "size_bytes": 2537
     },
     {
       "path": "backend/app/config.py",
-      "sha256": "9a06521b3adaac4006e889d65b4bc3f6ec9889c878c1078f9d64e3541c72d198",
-      "size_bytes": 1589
+      "sha256": "ed90cc02e550fb37280493a9dd58c3bc8de8ee5dd746440dbc6b08b9e7ef8dd6",
+      "size_bytes": 2022
     },
     {
       "path": "backend/app/database.py",
@@ -2988,8 +2988,8 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "4e569292cbaca2ba55e21db61a627c8f9000617d3cbfeff1b19ecad663b98de2",
-      "size_bytes": 8720
+      "sha256": "806632b9d7d3fb334fbfb18991205e7c24a45b886cea782a1b61cab7713954ad",
+      "size_bytes": 9260
     },
     {
       "path": "backend/app/ml/__init__.py",
@@ -3208,8 +3208,8 @@
     },
     {
       "path": "backend/app/security.py",
-      "sha256": "6d70dc6fe5c88c7e97a12fcc803c7968303ae13fa364113f8c35d495f050a016",
-      "size_bytes": 4628
+      "sha256": "09c0295247d2c419247b4bc9dd3a054a54f15afb142a4183a4b5c0ffc38b69e9",
+      "size_bytes": 6634
     },
     {
       "path": "backend/requirements.txt",
@@ -3260,6 +3260,11 @@
       "path": "backend/tests/test_quant.py",
       "sha256": "fd6e5a681daf95745979e91fd8bd379f504e332c9601cc08a2336c096e7202e1",
       "size_bytes": 6100
+    },
+    {
+      "path": "backend/tests/test_security.py",
+      "sha256": "50ac7496ede61699285bae324fe47a0511dfc1ad2ec9c32aa1638bdcafcd4902",
+      "size_bytes": 2778
     },
     {
       "path": "scripts/migrate_database.py",

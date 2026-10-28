@@ -1,5 +1,6 @@
 package com.stocksentinel.data.api;
 
+import com.stocksentinel.BuildConfig;
 import com.stocksentinel.util.Constants;
 
 import java.util.concurrent.TimeUnit;
@@ -27,12 +28,19 @@ public class ApiClient {
     private static Retrofit getRetrofit() {
         if (retrofit == null) {
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+            // No network logs in release builds; debug logs never print headers (API key).
+            logging.setLevel(BuildConfig.DEBUG
+                    ? HttpLoggingInterceptor.Level.BASIC : HttpLoggingInterceptor.Level.NONE);
+            logging.redactHeader("X-API-Key");
 
             OkHttpClient client = new OkHttpClient.Builder()
                     .connectTimeout(30, TimeUnit.SECONDS)
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(15, TimeUnit.SECONDS)
+                    // Every request carries the app's API key (the backend rejects calls without it)
+                    .addInterceptor(chain -> chain.proceed(chain.request().newBuilder()
+                            .header("X-API-Key", BuildConfig.API_KEY)
+                            .build()))
                     .addInterceptor(logging)
                     .build();
 

@@ -96,15 +96,11 @@ public class SettingsActivity extends AppCompatActivity {
                     // Database stats
                     if (body.has("database") && body.get("database").isJsonObject()) {
                         JsonObject db = body.getAsJsonObject("database");
-                        int stocks = db.has("active_stocks") ? db.get("active_stocks").getAsInt() : 43;
-                        int divs = db.has("dividends_tracked") ? db.get("dividends_tracked").getAsInt() : 39;
-                        int ipos = db.has("ipos_pipeline") ? db.get("ipos_pipeline").getAsInt() : 9;
-                        int news = db.has("news_articles_rated") ? db.get("news_articles_rated").getAsInt() : 208;
-
-                        statDbStocks.setText(String.format(Locale.US, "%d Active (NSE Bluechips + US)", stocks));
-                        statDbDividends.setText(String.format(Locale.US, "%d High-Yield Events", divs));
-                        statDbIpos.setText(String.format(Locale.US, "%d Live / Pipeline", ipos));
-                        statDbNews.setText(String.format(Locale.US, "%d Rated Headlines", news));
+                        // Show "—" when a count is missing; never invent numbers.
+                        statDbStocks.setText(count(db, "active_stocks") + " Active (NSE Bluechips + US)");
+                        statDbDividends.setText(count(db, "dividends_tracked") + " High-Yield Events");
+                        statDbIpos.setText(count(db, "ipos_pipeline") + " Live / Pipeline");
+                        statDbNews.setText(count(db, "news_articles_rated") + " Rated Headlines");
                     }
                 } else {
                     // Fallback to health endpoint if system status is deploying
@@ -119,6 +115,11 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    private static String count(JsonObject db, String key) {
+        return db.has(key) && !db.get(key).isJsonNull()
+                ? String.format(Locale.US, "%d", db.get(key).getAsLong()) : "—";
+    }
+
     private void fallbackHealthCheck(long startTime) {
         ApiClient.getApi().healthCheck().enqueue(new Callback<JsonObject>() {
             @Override
@@ -130,10 +131,11 @@ public class SettingsActivity extends AppCompatActivity {
                     textPingLatency.setText(String.format(Locale.US, "%d ms (Connected)", duration));
                     textPingLatency.setTextColor(Color.parseColor("#FF059669"));
 
-                    statDbStocks.setText("43 Active Listed Stocks");
-                    statDbDividends.setText("39 Corporate Payouts");
-                    statDbIpos.setText("9 IPO Issues");
-                    statDbNews.setText("208 Ranked Articles");
+                    // Only /health answered: counts are unknown, so don't show any.
+                    statDbStocks.setText("— Active (NSE Bluechips + US)");
+                    statDbDividends.setText("— High-Yield Events");
+                    statDbIpos.setText("— Live / Pipeline");
+                    statDbNews.setText("— Rated Headlines");
                 } else {
                     showOfflineState();
                 }
