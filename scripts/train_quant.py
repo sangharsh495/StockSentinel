@@ -41,12 +41,14 @@ async def main(args):
     results = await asyncio.to_thread(run_all, args.strategies, args.period, not args.no_ipo)
 
     if not args.no_db:
-        from app.database import close_pool, create_pool
+        from app.database import close_pool, create_pool, init_schema
         from app.quant.news_events import load_outcomes_frame, train_news_model, update_news_outcomes
         from app.quant.store import save_results
 
         await create_pool()
         try:
+            # Create any missing tables (safe to repeat: every statement is IF NOT EXISTS)
+            await init_schema()
             try:
                 await update_news_outcomes()
                 news = train_news_model(await load_outcomes_frame(365))
