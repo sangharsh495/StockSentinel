@@ -145,7 +145,7 @@ def parse_detail(html: str) -> Dict:
     d["sector"] = o.get("company_sector") or None
 
     # GMP trend summary table (first/latest GMP, sessions up/down, slope)
-    soup = BeautifulSoup(html, "lxml")
+    soup = BeautifulSoup(html, "html.parser")  # stdlib parser: tolerant of stray markup
     for tb in soup.find_all("table"):
         cells = [[c.get_text(" ", strip=True) for c in r.find_all(["td", "th"])] for r in tb.find_all("tr")]
         if cells and cells[0][:2] == ["Metric", "Value"]:
