@@ -155,6 +155,10 @@ Every probability shown by the app comes from a trained model tested on data it 
 - Quarterly EPS surprises (Yahoo; a result counts only from the next trading day)
 - IPO history: GMP and its trend, subscription, fresh issue vs OFS, valuation, financials, listing gain (investorgain.com public pages, fetched politely and cached)
 
+**Multi-model engine (`app/quant/ensemble.py`):** every task trains several algorithms (gradient boosting, random forest, linear/logistic; for IPOs also "GMP alone") plus their average. For each test period, the model used is the one that did best on *earlier* periods only, so choosing the best model can't inflate the reported accuracy. Each model's leaderboard is in `/api/quant/models` → `metrics.multi_model`.
+
+**Cross-source data checks (`app/quant/data_checks.py`, `/api/quant/data-quality`):** Yahoo closing prices vs NSE's official daily file (stocks that disagree get a `data_warning`), and IPO GMP from investorgain vs ipowatch (big disagreements are flagged, and those IPOs can't be labelled "Strong apply").
+
 **Stricter edge rule for stock models:** ranking skill must be significant *and* the top-10 portfolio must beat the equal-weight basket of the same stocks **after trading costs**.
 
 **News outcome tracking:** every news→stock tag gets its actual move vs the market measured after 1, 5 and 20 days (`news_outcomes` table, daily job at 5:30 PM IST). `/api/quant/news-impact` reports hit rates with 95% confidence intervals per news category.

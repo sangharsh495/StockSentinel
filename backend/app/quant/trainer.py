@@ -23,6 +23,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from app.quant.data import load_prices
+from app.quant.ensemble import LiveEnsemble, market_candidates, multi_walk_forward, stock_candidates
 from app.quant.features import HORIZONS, build_dataset, feature_columns, market_features
 from app.quant.validation import (
     backtest, bucket_outcome, evaluate, fit_calibrator, predict_score, walk_forward, _r,
@@ -66,20 +67,21 @@ def train_stock_strategy(prices: Dict[str, pd.DataFrame], strategy: str) -> Dict
     y = (df["fwd_excess"] > med).where(labeled)
     rank_target = df.groupby(level="date")["fwd_excess"].rank(pct=True) - 0.5
 
-    wf = walk_forward(df, fc, y, h, model_factory=stock_model, fit_target=rank_target)
+    cands = stock_candidates()
+    wf, mm = multi_walk_forward(df, fc, y, h, cands, fit_target=rank_target)
     metrics = evaluate(wf.oos, h)
     base_col, asc, rule_desc = RULE_BASELINES[strategy]
     bt = backtest(wf.oos, df, h, baseline_col=base_col, baseline_ascending=asc)
     bt["rule_description"] = rule_desc
 
     # Final model on all labelled history, then score the latest day.
-    final = stock_model()
-    final.fit(df.loc[labeled, fc].values, rank_target[labeled].values)
+    final = LiveEnsemble(cands, mm["chosen_live"]).fit(
+        df.loc[labeled, fc].values, rank_target[labeled].values)
     calibrator = fit_calibrator(wf.oos)
 
     last_date = df.index.get_level_values("date").max()
     today = df.xs(last_date, level="date")
-    raw = pd.Series(predict_score(final, today[fc].values), index=today.index)
+    raw = pd.Series(final.score(today[fc].values), index=today.index)
     score = raw.rank(pct=True)
     preds = []
     for rank, sym in enumerate(raw.sort_values(ascending=False).index, start=1):
@@ -98,10 +100,11 @@ def train_stock_strategy(prices: Dict[str, pd.DataFrame], strategy: str) -> Dict
 
     return {
         "model_key": f"stock_{strategy}", "strategy": strategy, "horizon_days": h,
-        "description": STRATEGY_INFO[strategy], "model_type": "gradient_boosting_rank",
+        "description": STRATEGY_INFO[strategy], "model_type": f"multi_model:{mm['chosen_live']}",
         "trained_at": datetime.now(timezone.utc).isoformat(), "data_end": str(last_date.date()),
         "edge_verified": _useful_edge(metrics, bt),
-        "metrics": {**metrics, "ranking_skill_verified": metrics.get("edge_verified", False)},
+        "metrics": {**metrics, "ranking_skill_verified": metrics.get("edge_verified", False),
+                    "multi_model": mm},
         "backtest": bt, "folds": wf.folds, "predictions": preds,
     }
 
@@ -197,25 +200,27 @@ def train_market_outlook(prices: Dict[str, pd.DataFrame], horizon: int) -> Dict:
     fc = list(m.columns)
     y = (df["fwd_ret"] > 0).where(df["fwd_ret"].notna())
 
-    wf = walk_forward(df, fc, y, horizon, model_factory=market_model, cross_sectional=False)
+    cands = market_candidates()
+    wf, mm = multi_walk_forward(df, fc, y, horizon, cands, cross_sectional=False)
     metrics = evaluate(wf.oos, horizon, cross_sectional=False)
     labeled = y.notna()
     base_rate = float(y[labeled].mean())
     hist = df.loc[labeled, "fwd_ret"]
 
-    final = market_model().fit(df.loc[labeled, fc].values, y[labeled].astype(int).values)
+    final = LiveEnsemble(cands, mm["chosen_live"]).fit(
+        df.loc[labeled, fc].values, y[labeled].astype(int).values)
     last = df.iloc[[-1]]
-    model_prob = float(fit_calibrator(wf.oos).predict(predict_score(final, last[fc].values))[0])
+    model_prob = float(fit_calibrator(wf.oos).predict(final.raw(last[fc].values))[0])
     edge = metrics.get("edge_verified", False)
     current = {k: _r(v, 4) for k, v in last[fc].iloc[0].items()}
 
     return {
         "model_key": f"market_{horizon}d", "strategy": "market", "horizon_days": horizon,
         "description": f"Chance the Nifty 50 is higher {horizon} trading days from now.",
-        "model_type": "logistic_regression",
+        "model_type": f"multi_model:{mm['chosen_live']}",
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "data_end": str(df.index.get_level_values("date")[-1].date()),
-        "edge_verified": edge, "metrics": metrics, "folds": wf.folds, "backtest": None,
+        "edge_verified": edge, "metrics": {**metrics, "multi_model": mm}, "folds": wf.folds, "backtest": None,
         "predictions": [{
             "symbol": "NIFTY", "as_of": str(df.index.get_level_values("date")[-1].date()),
             # Without a proven edge, the honest number is the historical base rate.
@@ -232,31 +237,59 @@ def train_market_outlook(prices: Dict[str, pd.DataFrame], horizon: int) -> Dict:
 
 def run_all(strategies: Optional[List[str]] = None, period: str = "10y",
             include_ipo: bool = True) -> List[Dict]:
+    from app.quant.data_checks import build_report, price_check
+
     prices = load_prices(period=period)
+    try:
+        pcheck = price_check(prices)
+    except Exception as e:  # a failed check must never stop training
+        pcheck = {"status": "error", "detail": str(e)[:200]}
+    flagged = (pcheck.get("disagree") or {}) if isinstance(pcheck, dict) else {}
     results = []
     for s in strategies or list(HORIZONS):
         logger.info(f"Training stock strategy: {s}")
         results.append(train_stock_strategy(prices, s))
     logger.info("Scoring investor factor blend")
     results.append(train_investor_factor(prices))
+    # Cross-source check: flag picks whose latest price differs between Yahoo and NSE
+    for r in results:
+        for p in r.get("predictions") or []:
+            if p["symbol"] in flagged:
+                p["data_warning"] = (f"Yahoo and NSE closing prices differ by {flagged[p['symbol']]:+.2f}%; "
+                                     "this stock's signals may be off.")
     for h in (5, 20):
         logger.info(f"Training market outlook: {h}d")
         results.append(train_market_outlook(prices, h))
+    ipo_summary = None
     if include_ipo:
         try:
-            results.append(train_ipo(prices))
+            ipo_result, ipo_summary = train_ipo(prices)
+            results.append(ipo_result)
         except Exception as e:  # source site down: keep the stock models
             logger.warning(f"IPO model skipped: {e}")
+    report = build_report(None, ipo_summary)
+    report["prices"] = pcheck
+    results.append({
+        "model_key": "data_quality", "strategy": "data", "horizon_days": 0,
+        "description": "Cross-source checks: Yahoo vs NSE official prices, investorgain vs ipowatch GMP.",
+        "model_type": "data_checks", "trained_at": report["checked_at"],
+        "data_end": pcheck.get("date") if isinstance(pcheck, dict) else None,
+        "edge_verified": False, "metrics": report, "backtest": None, "folds": None, "predictions": [],
+    })
+    logger.info(f"Data checks: prices={pcheck.get('status')} gmp={ipo_summary}")
     return results
 
 
-def train_ipo(prices: Dict[str, pd.DataFrame]) -> Dict:
+def train_ipo(prices: Dict[str, pd.DataFrame]):
     from app.quant.ipo_model import train_ipo_model
     from app.scrapers.ipo_history import scrape_current, scrape_history
 
     logger.info("Scraping IPO history (cached) and current IPOs")
     hist = scrape_history(2019)
     cur = scrape_current()
+    from app.quant.data_checks import attach_gmp_checks
+
     listed = {r["ig_id"] for r in hist}
     cur = [c for c in cur if c["ig_id"] not in listed]
-    return train_ipo_model(hist, cur, prices)
+    summary = attach_gmp_checks(cur)
+    return train_ipo_model(hist, cur, prices), summary

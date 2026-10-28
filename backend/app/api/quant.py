@@ -215,3 +215,13 @@ async def ipo_odds():
             "apply_model_p60", "apply_gmp_positive", "apply_all", "top_drivers")},
         "ipos": [_j(r["payload"]) for r in rows],
     }
+
+
+@router.get("/data-quality")
+async def data_quality():
+    """Latest cross-source checks: Yahoo vs NSE prices, investorgain vs ipowatch GMP."""
+    run = await _latest_run("data_quality")
+    if not run:
+        return {"status": "not_checked_yet"}
+    return {"status": "ok", "checked_at": run["trained_at"].isoformat() if run.get("trained_at") else None,
+            **(_j(run.get("metrics")) or {})}
