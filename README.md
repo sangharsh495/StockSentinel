@@ -174,6 +174,15 @@ cd backend && python ../scripts/train_quant.py --no-db --out report.json
 
 ## 🔐 Grade-1 Security Standards
 
+**Access control (current):**
+- `APP_API_KEY` (Render env var): every `/api/*` call must send it in the `X-API-Key` header, or it gets 401. `/health` stays open for uptime pings. The API docs (`/docs`, `/openapi.json`) are switched off while the key is set.
+- The Android app gets the key at build time from `android/local.properties` (`stocksentinel.apiKey=...`, git-ignored) or the `STOCKSENTINEL_API_KEY` env var. The app never logs it. Anyone with the APK file can extract it, so treat it as an app key, not a password; rotate it if the APK leaks.
+- CORS is off unless `CORS_ORIGINS` lists browser origins.
+- The rate limit (120/min) uses the real client IP from `X-Forwarded-For`, so users behind Render's proxy don't share one bucket.
+- Watchlist device IDs are strictly validated; the unused delete-by-row-id endpoint was removed, so one device can't delete another's rows.
+- `/api/system/status` reports only measured values: real counts, the latest data job runs and model training times. Nothing is made up.
+
+
 StockSentinel complies with modern Grade-1 enterprise application security:
 
 1. **Cryptographic Integrity Sealing**: Every source file has a verified SHA-256 fingerprint checked against a Master Root Hash.

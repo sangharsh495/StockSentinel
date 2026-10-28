@@ -6,6 +6,7 @@ accuracy, so the app can show how much to trust each number.
 """
 
 import json
+import re
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
@@ -101,6 +102,8 @@ async def picks(
 async def stock_view(symbol: str):
     """All strategy probabilities for one stock plus its measured news reactions."""
     sym = symbol.upper().strip()
+    if not re.match(r"^[A-Z0-9&_.-]{1,20}$", sym):
+        raise HTTPException(400, "Invalid symbol")
     rows = await fetch(
         """
         SELECT p.model_key, p.payload, r.horizon_days, r.description, r.edge_verified,

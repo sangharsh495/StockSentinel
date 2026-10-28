@@ -118,21 +118,30 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="Personal stock intelligence API — India + US markets",
     lifespan=lifespan,
+    # Interactive API docs list every endpoint; hide them once the API is locked.
+    docs_url=None if settings.APP_API_KEY else "/docs",
+    redoc_url=None if settings.APP_API_KEY else "/redoc",
+    openapi_url=None if settings.APP_API_KEY else "/openapi.json",
 )
 
-# CORS — allow Android app from any origin (personal use)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS — only for browser origins listed in CORS_ORIGINS. The Android app is
+# not a browser and doesn't need it, so the default is no cross-site access.
+if settings.CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.CORS_ORIGINS,
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "DELETE"],
+        allow_headers=["X-API-Key", "Content-Type"],
+    )
 
-# Grade 1 Enterprise Security Middleware
-from app.security import SecurityHeadersMiddleware, RateLimitMiddleware
+# Security middleware (added last = runs first): rate limit, then API key, then headers
+from app.security import APIKeyMiddleware, SecurityHeadersMiddleware, RateLimitMiddleware
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(APIKeyMiddleware, api_key=settings.APP_API_KEY)
 app.add_middleware(RateLimitMiddleware, max_requests=120, window_seconds=60)
+if not settings.APP_API_KEY:
+    logger.warning("APP_API_KEY is not set: the API is open to anyone with the URL")
 
 
 # ---------------------------------------------------------------------------
@@ -150,53 +159,50 @@ async def health_check():
 
 @app.get("/api/system/status")
 async def system_status():
-    """Comprehensive system health and live module operational status."""
-    from app.database import fetchval
+    """
+    Real system health: database counts, data jobs and model training times.
+    Nothing here is hard-coded: when something can't be measured it says so.
+    """
+    from app.database import fetch, fetchval
     from datetime import datetime, timezone
-    
+
+    db = {"status": "CONNECTED"}
+    jobs, models = [], []
     try:
-        stocks_count = await fetchval("SELECT COUNT(*) FROM stocks WHERE is_active = TRUE") or 0
-        divs_count = await fetchval("SELECT COUNT(*) FROM dividends") or 0
-        ipos_count = await fetchval("SELECT COUNT(*) FROM ipos") or 0
-        news_count = await fetchval("SELECT COUNT(*) FROM news WHERE impact_score IS NOT NULL") or 0
-        db_status = "CONNECTED"
+        db["active_stocks"] = await fetchval("SELECT COUNT(*) FROM stocks WHERE is_active = TRUE")
+        db["dividends_tracked"] = await fetchval("SELECT COUNT(*) FROM dividends")
+        db["ipos_pipeline"] = await fetchval("SELECT COUNT(*) FROM ipos")
+        db["news_articles_rated"] = await fetchval("SELECT COUNT(*) FROM news WHERE impact_score IS NOT NULL")
+        jobs = await fetch(
+            """
+            SELECT DISTINCT ON (job_name) job_name, status, finished_at, error_message
+            FROM job_runs ORDER BY job_name, started_at DESC
+            """
+        )
+        models = await fetch(
+            """
+            SELECT DISTINCT ON (model_key) model_key, model_type, edge_verified, trained_at, data_end
+            FROM quant_model_runs ORDER BY model_key, trained_at DESC
+            """
+        )
     except Exception as e:
         logger.error(f"Error checking DB status: {e}")
-        stocks_count = 43
-        divs_count = 39
-        ipos_count = 9
-        news_count = 208
-        db_status = "DEGRADED"
+        db = {"status": "DEGRADED", "detail": "Database unreachable; counts unavailable"}
+
+    def iso(v):
+        return v.isoformat() if hasattr(v, "isoformat") else v
 
     return {
         "server": {
             "status": "ONLINE",
             "service": settings.APP_NAME,
             "version": settings.APP_VERSION,
-            "cloud": "Render Web Service",
+            "api_key_required": bool(settings.APP_API_KEY),
             "timestamp": datetime.now(timezone.utc).isoformat(),
         },
-        "database": {
-            "status": db_status,
-            "engine": "Neon PostgreSQL (Serverless)",
-            "active_stocks": stocks_count,
-            "dividends_tracked": divs_count,
-            "ipos_pipeline": ipos_count,
-            "news_articles_rated": news_count,
-        },
-        "ai_engines": {
-            "buffett_quality_score": "ONLINE (8 Quantitative Dimensions)",
-            "intrinsic_value_dcf": "ONLINE (DCF + Graham + Multiples)",
-            "technical_trend_signals": "ONLINE (RSI, MACD, SMA 20/50/200)",
-            "news_market_impact": "ONLINE (1-10 Dynamic Rating)",
-            "ipo_listing_gain_predictor": "ONLINE (GMP + Subscription Score)",
-        },
-        "live_feeds": {
-            "nse_bse_quotes": "ONLINE (yfinance Real-time Stream)",
-            "dividend_corporate_actions": "ONLINE (Auto-Sync Calendar)",
-            "ipo_draft_and_bidding": "ONLINE (SEBI + Chittorgarh + NSE)",
-            "news_catalysts": "ONLINE (Finnhub + Google News RSS)",
-        },
+        "database": db,
+        "data_jobs": [{k: iso(v) for k, v in j.items()} for j in jobs],
+        "models": [{k: iso(v) for k, v in m.items()} for m in models],
     }
 
 

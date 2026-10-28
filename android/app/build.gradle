@@ -2,6 +2,14 @@ plugins {
     id 'com.android.application'
 }
 
+// API key for the StockSentinel backend (X-API-Key header). Never committed:
+// read from local.properties (stocksentinel.apiKey=...) or the
+// STOCKSENTINEL_API_KEY environment variable at build time.
+def localProps = new Properties()
+def localPropsFile = rootProject.file('local.properties')
+if (localPropsFile.exists()) { localPropsFile.withInputStream { localProps.load(it) } }
+def apiKey = localProps.getProperty('stocksentinel.apiKey') ?: (System.getenv('STOCKSENTINEL_API_KEY') ?: '')
+
 android {
     namespace 'com.stocksentinel'
     compileSdk 34
@@ -14,6 +22,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "API_KEY", "\"${apiKey}\""
     }
 
     buildTypes {
@@ -30,6 +39,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 

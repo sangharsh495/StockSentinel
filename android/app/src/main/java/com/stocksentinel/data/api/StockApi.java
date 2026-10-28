@@ -115,9 +115,6 @@ public interface StockApi {
     @POST("api/watchlist")
     Call<JsonObject> addToWatchlist(@Body JsonObject body);
 
-    @DELETE("api/watchlist/{watchlist_id}")
-    Call<JsonObject> removeFromWatchlist(@Path("watchlist_id") int watchlistId);
-
     @DELETE("api/watchlist/stock/{device_id}/{stock_id}")
     Call<JsonObject> removeStockFromWatchlist(
             @Path("device_id") String deviceId,

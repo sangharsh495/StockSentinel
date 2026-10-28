@@ -187,7 +187,7 @@
                             android:id="@+id/stat_db_stocks"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="43 Stocks (Nifty 50 + US)"
+                            android:text="— Active (NSE Bluechips + US)"
                             android:textColor="@color/green_accent"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -218,7 +218,7 @@
                             android:id="@+id/stat_db_dividends"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="39 Tracked Payouts"
+                            android:text="— High-Yield Events"
                             android:textColor="@color/yellow_accent"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -249,7 +249,7 @@
                             android:id="@+id/stat_db_ipos"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="9 Live / Upcoming"
+                            android:text="— Live / Pipeline"
                             android:textColor="@color/blue_accent"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -280,7 +280,7 @@
                             android:id="@+id/stat_db_news"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="208 Ranked Articles"
+                            android:text="— Rated Headlines"
                             android:textColor="@color/purple_accent"
                             android:textSize="13sp"
                             android:textStyle="bold" />

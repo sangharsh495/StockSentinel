@@ -2,21 +2,33 @@
 Watchlist API — add, remove, list stocks in personal watchlist.
 """
 
-from fastapi import APIRouter, Query
-from pydantic import BaseModel
+import re
+
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 from app.database import fetch, execute, fetchrow
 
 router = APIRouter()
 
+# Android IDs are 16 hex chars; allow other app-generated IDs, but nothing exotic.
+DEVICE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{8,100}$")
+
+
+def _check_device(device_id: str) -> str:
+    if not DEVICE_ID_RE.match(device_id or ""):
+        raise HTTPException(400, "Invalid device id")
+    return device_id
+
 
 class WatchlistAdd(BaseModel):
-    device_id: str
-    stock_id: int
+    device_id: str = Field(..., pattern=r"^[A-Za-z0-9_-]{8,100}$")
+    stock_id: int = Field(..., gt=0)
 
 
 @router.get("/watchlist/{device_id}")
 async def get_watchlist(device_id: str):
     """Get all watchlist stocks for a device with live prices."""
+    _check_device(device_id)
     stocks = await fetch(
         """
         SELECT w.id as watchlist_id, w.added_at,
@@ -59,16 +71,10 @@ async def add_to_watchlist(item: WatchlistAdd):
     return {"status": "added", "device_id": item.device_id, "stock_id": item.stock_id}
 
 
-@router.delete("/watchlist/{watchlist_id}")
-async def remove_from_watchlist(watchlist_id: int):
-    """Remove a stock from the watchlist."""
-    await execute("DELETE FROM watchlist WHERE id = $1", watchlist_id)
-    return {"status": "removed", "watchlist_id": watchlist_id}
-
-
 @router.delete("/watchlist/stock/{device_id}/{stock_id}")
 async def remove_stock_from_watchlist(device_id: str, stock_id: int):
-    """Remove a stock from watchlist by device_id and stock_id."""
+    """Remove a stock from watchlist by device_id and stock_id (only that device's own row)."""
+    _check_device(device_id)
     await execute(
         "DELETE FROM watchlist WHERE device_id = $1 AND stock_id = $2",
         device_id,
