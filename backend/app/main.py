@@ -227,7 +227,7 @@ async def root():
 # ---------------------------------------------------------------------------
 # Register API routers
 # ---------------------------------------------------------------------------
-from app.api import stocks, dividends, ipos, news, watchlist, notifications, analyst, fundamentals
+from app.api import stocks, dividends, ipos, news, watchlist, notifications, analyst, fundamentals, quant
 
 app.include_router(stocks.router, prefix="/api", tags=["Stocks"])
 app.include_router(dividends.router, prefix="/api", tags=["Dividends"])
@@ -237,4 +237,5 @@ app.include_router(watchlist.router, prefix="/api", tags=["Watchlist"])
 app.include_router(notifications.router, prefix="/api", tags=["Notifications"])
 app.include_router(analyst.router, prefix="/api", tags=["Analyst"])
 app.include_router(fundamentals.router, prefix="/api", tags=["Fundamentals"])
+app.include_router(quant.router, prefix="/api", tags=["Quant"])
 

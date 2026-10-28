@@ -54,6 +54,21 @@
             android:layout_marginTop="4dp"
             android:text="12 Jan 2026 – 14 Jan 2026" />
 
+        <!-- Tested listing odds (GMP-corrected model) -->
+        <TextView
+            android:id="@+id/ipo_odds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/badge_bg"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="3dp"
+            android:textColor="@color/bullish"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:text="🎯 Listing +27% · 95% up · Strong apply" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

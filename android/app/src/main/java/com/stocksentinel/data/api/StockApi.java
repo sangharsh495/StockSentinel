@@ -229,6 +229,22 @@ public interface StockApi {
             @Query("symbols") String compareSymbols
     );
 
+    // ---- Quant engine: walk-forward tested models ----
+    @GET("api/quant/picks")
+    Call<JsonObject> getQuantPicks(
+            @Query("strategy") String strategy,
+            @Query("limit") int limit
+    );
+
+    @GET("api/quant/market-outlook")
+    Call<JsonObject> getMarketOutlook();
+
+    @GET("api/quant/ipo-odds")
+    Call<JsonObject> getIpoOdds();
+
+    @GET("api/quant/stock/{symbol}")
+    Call<JsonObject> getQuantStock(@Path("symbol") String symbol);
+
     // ---- Health & System Status ----
     @GET("health")
     Call<JsonObject> healthCheck();

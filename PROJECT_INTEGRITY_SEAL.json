@@ -2,10 +2,15 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-09-20T23:28:56.832572+00:00",
-  "master_root_hash": "13c5d46c6093da966b4f736f02b32cfc5d06d51581250efcee10326267f45b8d",
-  "total_sealed_files": 128,
+  "sealed_at_utc": "2026-10-24T16:48:35.446831+00:00",
+  "master_root_hash": "dcd2c53ae019158370c98c87dfd9ca1fc978a388464727fd9b3ea7fa8bba49fb",
+  "total_sealed_files": 650,
   "files": [
+    {
+      "path": ".github/workflows/train-quant.yml",
+      "sha256": "ca38b8787ed0e201e6c750bb7122cd30b19c67b6d9c478d6489745503a13a604",
+      "size_bytes": 1195
+    },
     {
       "path": ".gitignore",
       "sha256": "1d5b2130c40df778737151871d539b7aaeb597d575948cee06390477af72a6cf",
@@ -13,8 +18,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "70868414859d4bd035146c2ba20e36009018a2460ad931630cc9bd68892e6a0c",
-      "size_bytes": 13239
+      "sha256": "7d29cbab640770245c797f7e9eec47163bff89daf229b2ebf7ad698c50a02c70",
+      "size_bytes": 16566
     },
     {
       "path": "android/.gitignore",
@@ -23,13 +28,13 @@
     },
     {
       "path": "android/app/build.gradle",
-      "sha256": "793d50f01dae24868e0f8788fdc07ff495fb576925228e777b7d4b8faf7258d9",
-      "size_bytes": 2315
+      "sha256": "2a7dd8a3047d7b0c9eae657598f9c579d9c94aa13b9af4027781e533e5830715",
+      "size_bytes": 2229
     },
     {
       "path": "android/app/src/main/AndroidManifest.xml",
-      "sha256": "b858cde04987c9ef63d78301c448c1106edfc793baa0ca6e537231f11db3af2f",
-      "size_bytes": 2646
+      "sha256": "c73d99a6cd0f6ce60797909c56dcd08dfe1e5b607c94fac10de952986d669ec2",
+      "size_bytes": 2870
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/StockSentinelApp.java",
@@ -43,8 +48,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/data/api/StockApi.java",
-      "sha256": "faa02634be970f80f6f7735d3f88ea7beebd1522cd39076c28eb6b74cc0d6ba1",
-      "size_bytes": 7218
+      "sha256": "76b98ffabac9aad7176f1377054c8c6a70402e7997931260595c0f2d63ca6f0f",
+      "size_bytes": 7685
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/MainActivity.java",
@@ -63,8 +68,8 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/home/HomeFragment.java",
-      "sha256": "9de10b35e21e040f526d98165e33406dc86f00a6949ca6d42952b8e770bf1079",
-      "size_bytes": 24038
+      "sha256": "bd1b05808dde583acd99f0429c8035a40bfc78577d93890daa5829f20ab30839",
+      "size_bytes": 28580
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/home/LineChartView.java",
@@ -78,13 +83,18 @@
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/ipos/IposFragment.java",
-      "sha256": "6e56bee0f08b8ce4c9d2bd7cb61aeaf82801e2696e481b55f15f458767827ac5",
-      "size_bytes": 11069
+      "sha256": "60f391af8d951a7dd41202d2e6b594c0d2f3a58dd8cbe5954cf0ddcaca20e5ab",
+      "size_bytes": 16938
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/news/NewsFragment.java",
       "sha256": "80f4216aad77ec29da8bd866b1d17241056bd45c683faffed8a74eff3a64755d",
       "size_bytes": 17571
+    },
+    {
+      "path": "android/app/src/main/java/com/stocksentinel/ui/quant/QuantPicksActivity.java",
+      "sha256": "17d61db3e3be23488bf0761fd6dab6cd9143afd37ed8f9dee8373d2a0843b5f4",
+      "size_bytes": 12530
     },
     {
       "path": "android/app/src/main/java/com/stocksentinel/ui/search/SearchActivity.java",
@@ -212,6 +222,11 @@
       "size_bytes": 2086
     },
     {
+      "path": "android/app/src/main/res/layout/activity_quant_picks.xml",
+      "sha256": "665dd259b0f4c469fd41166a27acecd3728023864afe880675250989bd3be324",
+      "size_bytes": 7452
+    },
+    {
       "path": "android/app/src/main/res/layout/activity_search.xml",
       "sha256": "0c6dc79d8216654e54bae3c2ce06deda56324c03b7567704e83b4593a66a1a56",
       "size_bytes": 2904
@@ -238,13 +253,13 @@
     },
     {
       "path": "android/app/src/main/res/layout/fragment_home.xml",
-      "sha256": "55a516c196b3982a61c14180cb54a3356496aa542ff5dff1f2bf4a91bb841fbd",
-      "size_bytes": 10489
+      "sha256": "8dde602106313374d3f030fa83bbe801e3ab7a1e41280cb0dcbcdf673df68356",
+      "size_bytes": 15933
     },
     {
       "path": "android/app/src/main/res/layout/fragment_ipos.xml",
-      "sha256": "200ef017f3244ab907be3c83f58b73c74f7305b8a7149e26b3e9e03e311a0073",
-      "size_bytes": 4448
+      "sha256": "05f860d4943912628b2d2928a5d14647587e07c3fa5a94a77cdc980b676a84f4",
+      "size_bytes": 5015
     },
     {
       "path": "android/app/src/main/res/layout/fragment_news.xml",
@@ -273,8 +288,8 @@
     },
     {
       "path": "android/app/src/main/res/layout/item_ipo.xml",
-      "sha256": "8b25124873696074f7807b6b4fcea8c4f1eccafdc9b4bdcae1b136afb312f340",
-      "size_bytes": 4375
+      "sha256": "077f4cc9133b727c1958aa90d3fed11e452b0536ae507c079bc698cba9dee646",
+      "size_bytes": 5002
     },
     {
       "path": "android/app/src/main/res/layout/item_news.xml",
@@ -378,8 +393,2518 @@
     },
     {
       "path": "backend/.gitignore",
-      "sha256": "9014c5560ca25f229af97bcd1f71d506c2e735e6cd231284db11fb21445c3b80",
-      "size_bytes": 132
+      "sha256": "a25ae2e0927f9fd00937982999aae880115a119473dbcf1877abcea5c2a4333a",
+      "size_bytes": 179
+    },
+    {
+      "path": "backend/.quant_cache/delivery.pkl",
+      "sha256": "883314311d07b277b89cb073760d2509ff58317e5553d43314ade4a2d709a47f",
+      "size_bytes": 8251592
+    },
+    {
+      "path": "backend/.quant_cache/earnings.pkl",
+      "sha256": "81d289126be63394ebe1fcc952abe5418108098c1dd87786fe39319fe9c046bd",
+      "size_bytes": 198583
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1.html",
+      "sha256": "c95928770eee60421a2df998674947f2297bae671ad591ea00dbe85868d263fd",
+      "size_bytes": 159322
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_10.html",
+      "sha256": "ad74c54a6ccde59f973896d00bec11c71e065c485658fb63514f8ef2711ed45f",
+      "size_bytes": 256844
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1005.html",
+      "sha256": "4e66a4ba551534b35db09f11ad49dd0b3a93b3d8b90538718bd61ab9852c8f79",
+      "size_bytes": 278768
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1009.html",
+      "sha256": "04f36e38f14178dd04d3954b670d5bde5e3157209c687306a44cd28cddb08498",
+      "size_bytes": 243384
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_101.html",
+      "sha256": "43394d0639d0fd34bc6ad456f9020c5f0b4415d1df30b959b8337888853e4ae4",
+      "size_bytes": 242693
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1018.html",
+      "sha256": "f2e0f6b77a6baac3d76f7767c20fd7699ac0061594a9e0a98f731223e39978f6",
+      "size_bytes": 250403
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1024.html",
+      "sha256": "0a7bed528db77827b56858e581e4a8bf60450c490889e3a9952b5a2406ee3924",
+      "size_bytes": 321844
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1026.html",
+      "sha256": "74b0cb096ba4824ffc4d20af8c6582c0c86814a1d54ae37e74ab7c690c8e7469",
+      "size_bytes": 283556
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1028.html",
+      "sha256": "8d692b2919f7c40f508237b9447ba489114009fa457329aa7234be65abcaa814",
+      "size_bytes": 245211
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_103.html",
+      "sha256": "f656e5d0210603f44c6c54487f3ca19e6e2ad6eb46a388157fcce082644ad213",
+      "size_bytes": 224207
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_104.html",
+      "sha256": "a675268f8962766d7d2ad9b7da2e387d2c2595fc0ab7c6b432690faad970ede0",
+      "size_bytes": 266316
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_109.html",
+      "sha256": "e6b1f5b51183742d69ebf7ceb9c8a740efe04aea8165b4973ef624971c7e7a7c",
+      "size_bytes": 255444
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1098.html",
+      "sha256": "a8723534526419b0dab4d70d85e9509b7bc842d015d3983b0d83272f0f1ea5db",
+      "size_bytes": 261749
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_110.html",
+      "sha256": "fce5c29ccd6ff2ca82b6c638ad3d2a004d25165278132241b6255953b8ad3a35",
+      "size_bytes": 258138
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1100.html",
+      "sha256": "73426f768cc3099d8ca501ed672f5e02a3118529aff29d2a5652954de2db1f0d",
+      "size_bytes": 265047
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1107.html",
+      "sha256": "6bdf24ff1daae1f186600c86ce20405022084cf34ba463ca9cef1348487eb882",
+      "size_bytes": 233762
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1108.html",
+      "sha256": "2eb7c6bdd984e2e867eba486433403657d2e550698032721f457fae0d1346d83",
+      "size_bytes": 275670
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1109.html",
+      "sha256": "731c2e31023a76482ad6ff628ee3dd78160fa0ded5ec5d266105f6cdef40faf6",
+      "size_bytes": 248380
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_111.html",
+      "sha256": "2cfbd8bae5245114ed4e7c43e6bfc31d0f329e064bf65014786357d40caf09bb",
+      "size_bytes": 257617
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1110.html",
+      "sha256": "f21e2143a83b452d667bba3b31edbb2bb40568ac57d67b3af5d36e42205545bb",
+      "size_bytes": 240483
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1112.html",
+      "sha256": "02b67b4d0721d7ce0d04054e0cb205bcc448d6db7c3aeef312d1d041d045dba0",
+      "size_bytes": 222656
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1116.html",
+      "sha256": "2d612f41ec7e0423333000974b557919e2dc5303e6dd13b26f19c026c3724744",
+      "size_bytes": 290609
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1118.html",
+      "sha256": "6dd22c11baf71d125494848c9b398b647fb9a322909cca528c06b25bfa209ee8",
+      "size_bytes": 269280
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1125.html",
+      "sha256": "0678ca01f173508b4417edc4e49f427f59806bba28df84090513d63c4486b48f",
+      "size_bytes": 255641
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_113.html",
+      "sha256": "3447ae96a13f9fefb2e900a3653d2d24337b0b9c5661cd2d005cc188256c44c1",
+      "size_bytes": 268429
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1131.html",
+      "sha256": "1dca6ed1bfce3ded4d81076a825b474fb9d1652b0eb007bdb607d282df86d151",
+      "size_bytes": 210321
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1132.html",
+      "sha256": "62e3261fc3374dc146cf0090061ed7e018d24493bccb45634ecba3c50fdf8368",
+      "size_bytes": 154233
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1138.html",
+      "sha256": "9da278cc93d1df5d799ce7a1abfb623d79036d4c238270ab4045b201516b3e13",
+      "size_bytes": 262641
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1139.html",
+      "sha256": "9d6220be27763400cdcc877fbd18efe4e0012c09a23359be12f171c3c84f737d",
+      "size_bytes": 251743
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_114.html",
+      "sha256": "1646a8402a9fd574e085f573b950db82ec81cc9e88ecd66361720d4a360749f0",
+      "size_bytes": 260864
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1140.html",
+      "sha256": "f5a6e683569e4bdf3d791511a010741a9b5bd0c2d50cb0c51549b1ce034d84fb",
+      "size_bytes": 258039
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1142.html",
+      "sha256": "8d8edffeba4e38cb342420aeb082b77756b6ec27a03f7e5962a1846df1c9e0a1",
+      "size_bytes": 262202
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1146.html",
+      "sha256": "d471deaec344fc0e02525087640f7c5997f734146901e50a326f19e45de11ff9",
+      "size_bytes": 263886
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1149.html",
+      "sha256": "68df785f6a65d478231e5ea134bdf5cba03a17ad74f8e912b7bc45820ebc3a8b",
+      "size_bytes": 257005
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1150.html",
+      "sha256": "b3102b3a9e256173844e2f47d8cb0687d7bb521d6747da21a15acfc93d10db91",
+      "size_bytes": 264999
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1152.html",
+      "sha256": "48e43fc7060f0efd0e443781370c8604a42f97215ace97d355f9f7bcfd960696",
+      "size_bytes": 254706
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1153.html",
+      "sha256": "220124ab49e618cb67c678924938bde60172d8548d51a8b04b04a06d5527c2e9",
+      "size_bytes": 268790
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1155.html",
+      "sha256": "479e6de6a8fc21926c56dbbf2d761db12d15c543d53a3747f1410dbcdee9449a",
+      "size_bytes": 247907
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1156.html",
+      "sha256": "bf233bcc6062c1587de68adb511171aa21013b7c7865b009c77bd04b7e1a7ac6",
+      "size_bytes": 245116
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1157.html",
+      "sha256": "986873d2bc3578ea8e50e843252faa754caff7f925917e20fb6cf69360fa2717",
+      "size_bytes": 255801
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1158.html",
+      "sha256": "5601c5453381379a42ae8df4cc6f24af57cf1adbe207c649cb0d6f431e844767",
+      "size_bytes": 261568
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1159.html",
+      "sha256": "8742be81839547f2fe280fb6389a1c074361edb2231e3e2e592ed17746676c58",
+      "size_bytes": 268085
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_116.html",
+      "sha256": "3b81e9a6ff099defd565819e6e54a8110aa78216c3fb1a0655ed48b167e5ce32",
+      "size_bytes": 254858
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1162.html",
+      "sha256": "86e6e0870ca51a3008dea54642edf1886f4d7c053fb218e1c60c4358c38a02c3",
+      "size_bytes": 177959
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1169.html",
+      "sha256": "89cd34393c74703534ec9065715043a9189dd6468366a20a722208bcd2719df6",
+      "size_bytes": 262448
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1172.html",
+      "sha256": "a04e60a94a6fc2075cf70561764850a79769a1a750cca1e622046a5a15536d81",
+      "size_bytes": 250216
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1175.html",
+      "sha256": "b432aaa69362e43e44a2f7f77c5dff324a5eab6dd0ad394cac4b9093950928c0",
+      "size_bytes": 166591
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1179.html",
+      "sha256": "e1adc120dc401507d18afc869eea9807d077405c66c0824b950e638c40eeace8",
+      "size_bytes": 253273
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1185.html",
+      "sha256": "7c1d4c585c770d2b4076f1e722bb60b3b3d9a3e67354f3caa8349872c4edf425",
+      "size_bytes": 239413
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1188.html",
+      "sha256": "37985c291ecf1be6c9494ed773cb64782b4a78b8c627716df43dc31040b6ac2f",
+      "size_bytes": 257578
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1194.html",
+      "sha256": "2af7664f0325364a10c23fc0aeaecb19ccfb0b8c8145811d69d1a15f7c0245d7",
+      "size_bytes": 266170
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_120.html",
+      "sha256": "9d5bcc43c3f421a801251980dd329095337fcf6578a0ab9bcf17d6f47e69749d",
+      "size_bytes": 262843
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1202.html",
+      "sha256": "b7ecf974b92567088973f1f4e55456682427eccabfe7835f02e76ecbd13658cd",
+      "size_bytes": 257670
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1204.html",
+      "sha256": "4059358f536256123b05990195bba884f0c388272b24794d73eac2882cb3dedf",
+      "size_bytes": 266823
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1209.html",
+      "sha256": "8efd1101b6d67f44137c026925e7725061d58e35f69b58d9002b5a7655a14828",
+      "size_bytes": 281310
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_121.html",
+      "sha256": "836a84c5f8feafb008d9229ac7705d1d0abe7934c740c8f563f8b14894471e42",
+      "size_bytes": 257227
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_122.html",
+      "sha256": "7b683f6d63395ff2cadb56de3aa7c8188d2c9e0de8f065d32381ed56750b3b5f",
+      "size_bytes": 250778
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_123.html",
+      "sha256": "a04fb9588ba91792ded6e2527ca67ebfc574250c348bff31907a3e6410c3f39b",
+      "size_bytes": 256803
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1237.html",
+      "sha256": "9b8f383e24c8268d44ee3b18b70a13eb58c8ec45bf613f70238d7817a0d15255",
+      "size_bytes": 270989
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_124.html",
+      "sha256": "26849abafe8be8df815b5b4463f9c8ab6707fc233536c3fd15d511fc16a91a4f",
+      "size_bytes": 269461
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1247.html",
+      "sha256": "d824309d47211209f3e082f2e5f52310eddcca98ef5edfaa4d1a83d3bf0c56af",
+      "size_bytes": 261319
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1249.html",
+      "sha256": "d08e023a46696a6fb6687851e4263e1880e1ac92a40d007615f252e236fd61b4",
+      "size_bytes": 251296
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1253.html",
+      "sha256": "5f52d9394a886f3c99e84a1ea9028afd77c6fcb477628270a6d0c6656ac6f41b",
+      "size_bytes": 261832
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1256.html",
+      "sha256": "751efbcde66c7510a9aa6cd1a70586ba0dbd67034027cc0e6507dd95b162e1f6",
+      "size_bytes": 238523
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1257.html",
+      "sha256": "093e4116899ce6a9b159558234302e3a77e21af8abb0945c45de7a7f694c3b95",
+      "size_bytes": 250157
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_126.html",
+      "sha256": "8802f1d7794b9d44123ac5f9fbd51c1c558e39bf164ea33e65bf79503d7f61b3",
+      "size_bytes": 245547
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1261.html",
+      "sha256": "f8f1885a95f53130ceb0db1b9350fb62e9e11cd135101d0382f96192ea3e3d5f",
+      "size_bytes": 262034
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1268.html",
+      "sha256": "fa180c59d2e79aaea0b89f877da396e2f2e04734940a52c192254e2b7c3344c3",
+      "size_bytes": 254508
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_127.html",
+      "sha256": "619f98c48c705c7314709fc4104f9add5740668c8459d702933a54dab5a9d3cb",
+      "size_bytes": 248390
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1275.html",
+      "sha256": "3f800c89fd5683eb3e43188ece1d86fc6192657685d0a7e141b9022a91b4500c",
+      "size_bytes": 261198
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1276.html",
+      "sha256": "733a49dc00511602d521cbbbc7bef827909b2365d122e20d72a4a47a6c5d0916",
+      "size_bytes": 284013
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1277.html",
+      "sha256": "4589e47fbdd3e9ef0ba37e489c85d432879bdf3c39d4cd2807cc20c10b9b8f9e",
+      "size_bytes": 250767
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1278.html",
+      "sha256": "250eeee289152e0b62395737f00058d64ed6c8edb603f8702720ca6ccf7137af",
+      "size_bytes": 250328
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1279.html",
+      "sha256": "2c90c3a6a99a458f5a2d57ba1a2dfe9927c80eb2a5115d070d6dc0cd5347dee0",
+      "size_bytes": 264317
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_128.html",
+      "sha256": "3588af802a2d3ce620ca89799e2733c39bf79bde642ff2b0702a4b6f5d0928f8",
+      "size_bytes": 260345
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1280.html",
+      "sha256": "c78f812efc1bc10abf8783f89a889cb0fe77a7ac549473d1fbb3a96eb1fa798a",
+      "size_bytes": 269356
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1299.html",
+      "sha256": "d2e5011a184647fb27fa46e1073cac686ccdec28463c869ef0164903d79e57ae",
+      "size_bytes": 251443
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_130.html",
+      "sha256": "626a3616d16e91ec4295871d4f43bcee2fb69b0a2fce9265244328ebf0dc8c5f",
+      "size_bytes": 277322
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1308.html",
+      "sha256": "146f8aea50d990d96722deefd689c5ed686044339de50282b5d84bff29a9a0c3",
+      "size_bytes": 229649
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1310.html",
+      "sha256": "87424f0721cb5b7eeb6be516e82c7a757ebda25eb0a4972afa7a5412a3b56244",
+      "size_bytes": 257101
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1317.html",
+      "sha256": "7cd965e953ee86e329d5addf01a102a3237f8b4cea43f9d4316cdc42c690096c",
+      "size_bytes": 264275
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_132.html",
+      "sha256": "b5db9f7f021592f733563af0758e944d4b3f1e91462691c9f1a9d23c3718b134",
+      "size_bytes": 271981
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1324.html",
+      "sha256": "2701e57d03b3c74ebdcedd197dfa8e599f0f03a5da804ddeca9316f0fa223ff5",
+      "size_bytes": 294844
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1325.html",
+      "sha256": "65ff2d8ac8288be52149f2cc406776bb9cc87c68bd555c11481fd00cac780d2a",
+      "size_bytes": 246628
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1328.html",
+      "sha256": "8ebb91b02976e0d8c54f253985f93e9dee5edaec22b588b9b0e3ce0328054d8d",
+      "size_bytes": 155769
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1333.html",
+      "sha256": "168a06620507048ac939fd0e5bde9750eabcd19fa3a2b345911f7e76973df5d2",
+      "size_bytes": 261359
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1334.html",
+      "sha256": "0a0b63adb44742ad1e51187b1bb95306954afaf9b50697e2f55ab5689e4a697f",
+      "size_bytes": 252294
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1335.html",
+      "sha256": "e9ad0e1440fc82dd5cfd64a79d5322b487ac1376dba754b69111ff989f8820f9",
+      "size_bytes": 255597
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1337.html",
+      "sha256": "6c1e1b212cb71bc546e58038666ed2e67adb9ea5e2f88471d969fe7685e034c4",
+      "size_bytes": 239616
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1341.html",
+      "sha256": "3648120df1a03f312d2984545ac3d8e7654c4d4c952991267df3596239e1b92e",
+      "size_bytes": 269405
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1342.html",
+      "sha256": "29fcaa60a6ec548ba96959832e91af029a2b218ec819b4f59ff0fc3502e73385",
+      "size_bytes": 274070
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1347.html",
+      "sha256": "25fe12d520d25221f047511f96cebfc39cfb8f8ddea9bf8eed7378ea8bb15295",
+      "size_bytes": 254302
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1351.html",
+      "sha256": "51b8033581a7ca0b6c523bd2b912913415b27935fc8b9a84c7ede952230d742e",
+      "size_bytes": 261209
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1353.html",
+      "sha256": "6353d4bc2402eb4801be372ee3d3c8d5f095acdced88d1253ae90b253dc3cfeb",
+      "size_bytes": 286674
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1357.html",
+      "sha256": "7d8635cc4e9e13964aed1447357fca1025bb8569d0b593f551d5bff81710d03a",
+      "size_bytes": 252215
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1363.html",
+      "sha256": "f2e0fcced709660c2421b052efdd107083660acaf81dc8fda140933b3c3e8589",
+      "size_bytes": 250117
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1366.html",
+      "sha256": "fe954b9742298d01c73790025af4eb90fa016faf6f0dd7dd84281c26db3e4afb",
+      "size_bytes": 239116
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1370.html",
+      "sha256": "590d1cac99110c781e91a7c65978cd3d88371555386f1076f91158ea4c8c689e",
+      "size_bytes": 262369
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1374.html",
+      "sha256": "9dc1899eea67a376e31f2c0c54c146be7aae0540093c2a880d5cb298d8a305c2",
+      "size_bytes": 264019
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1375.html",
+      "sha256": "b449d12f5b03920ac675ca76381e0f73150b199cd9456f48ee7bb5944d459921",
+      "size_bytes": 271623
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1376.html",
+      "sha256": "5e6c3a6643f6cce99a3d8eaac97c6b58f69512f842a227abef8e611e1fea5299",
+      "size_bytes": 280975
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1377.html",
+      "sha256": "7f18c1b8a9c22fad43bfabc8b87973aaedfd1e0dd5d84871a4c32d3dfded189b",
+      "size_bytes": 271429
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1379.html",
+      "sha256": "795101c8743972314a551a67a02d0f77ded671b60e067c3df8d277119d6ab576",
+      "size_bytes": 253155
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1381.html",
+      "sha256": "577403d6e681abc565690f980269709cd50154e9de05c274bc23c682145bb6a9",
+      "size_bytes": 243915
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1385.html",
+      "sha256": "8e9ffc64e199ef594e65f4d44e680af8203d70b0e0104cc798cf440a1ace340f",
+      "size_bytes": 277177
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_139.html",
+      "sha256": "92fa14f0503c6f4508197756e24ac2ffdd6ba8c20f40fd2daa2c02c2ac808684",
+      "size_bytes": 257459
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_14.html",
+      "sha256": "363715da01a945a6fc8782d43cad77296f6d9dea7a4966dab7a930a27c94559b",
+      "size_bytes": 185049
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_140.html",
+      "sha256": "69e68114422d881d64e07aec10824d2603e7a346d451e2f4c0a3864431bf6e73",
+      "size_bytes": 264786
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1403.html",
+      "sha256": "bbcd5dcb4fcd548830880e985943db5a8c4dc84345ff1db30af5ddb4231dff22",
+      "size_bytes": 239817
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1407.html",
+      "sha256": "03f17f9b509bcf69d7cf78de0f67d0115eea13a89d82e80f886c381b09dea654",
+      "size_bytes": 276016
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1417.html",
+      "sha256": "9130e1069fbee0e2cbd8b02e3f80eb3a2c9e8c1a6dec2f9d7996f565a0af4502",
+      "size_bytes": 266034
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1418.html",
+      "sha256": "5257829c74de753b7dd3ed6300eebc661bb7f388fbcd65d4fcf94a8320ae1497",
+      "size_bytes": 270964
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_142.html",
+      "sha256": "289ac18d22257a1a4959fa647f61f28fa8443c589de8fecb94225df967abfb3f",
+      "size_bytes": 258855
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1422.html",
+      "sha256": "c3c03915aecc9524bf9414c7bba011f6757034e953d6455c68cacb1058713a4a",
+      "size_bytes": 258500
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1427.html",
+      "sha256": "304786908ebe94cdb74e8b9f1e4107a643d3a07de7a3fc4893fe838c0b1ca3b3",
+      "size_bytes": 231499
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1429.html",
+      "sha256": "73d4923c368876e68ab35074f0e1a4ceccae4950032d957654756eb637cfec84",
+      "size_bytes": 259110
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1432.html",
+      "sha256": "b987e53ed6703d38cdfd08aac0c2ee7f850e177e34025ecc7fe6a60d64297382",
+      "size_bytes": 243452
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1433.html",
+      "sha256": "df60ab97ee7aba25285b3b3194b6a81e463fd164bc12755ff2a4585b7fd25d55",
+      "size_bytes": 241546
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1434.html",
+      "sha256": "b41fd43e5ee6555d5c38250e0c7defb0d0e1bb1b312a20f7ab87c2a469d7023d",
+      "size_bytes": 258223
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1435.html",
+      "sha256": "3a5e396b3ec9e82967d65e2608b781d6851cfe6587085f718b66604ca1ef8bd1",
+      "size_bytes": 254849
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1436.html",
+      "sha256": "138b5db4b99231213f16b2d48a54b3dac81999886eaa47af372b30c067bd94dc",
+      "size_bytes": 261816
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1437.html",
+      "sha256": "bb1bc1cf33ef04153b7582aa558a2702c214c9cd4a693e1aac6a05c3eedb0791",
+      "size_bytes": 266129
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1438.html",
+      "sha256": "cb4b054c86d781d37da66e9dd476ec276fb17427772f66e8678cb485a83dde75",
+      "size_bytes": 260804
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1439.html",
+      "sha256": "e6c6ff7a4607bde5fffeafbf25f1017079733bb0ad2f38bd0011d5a6976cd57d",
+      "size_bytes": 285818
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1441.html",
+      "sha256": "496ef771baa0a301d570d9db1d9e33d6c5351cf36ec846e5c6d2d771f570f448",
+      "size_bytes": 251952
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1446.html",
+      "sha256": "9c16c5f4312ef524a7bb9d0ae1817328d73780b44f1bdf24e783881badb3d770",
+      "size_bytes": 255216
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1453.html",
+      "sha256": "8799bfe45512fddcc1d5c90147eb32de1097da8845e16ccacefa5a9380c7b0bb",
+      "size_bytes": 255096
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1458.html",
+      "sha256": "e116639d7a75863f505bf78dcc72696c7189a29be7f8c4ad7db182ff0163e521",
+      "size_bytes": 260107
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1461.html",
+      "sha256": "d3e6d81be5f7fe73bf98a193a7836113a86f0fc6388ea86e7ffd87c8cb411260",
+      "size_bytes": 221549
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1463.html",
+      "sha256": "66a24223eecd71a4f086a6544313a2e5ddd3f670af5ee418b000c3e23c6e203a",
+      "size_bytes": 251584
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1464.html",
+      "sha256": "d9c81c7d4d3f4fbaa5ef14d54aab53cf1e76cbf84c11bf6fb22c048a12ff95de",
+      "size_bytes": 270488
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1467.html",
+      "sha256": "a2f95d583fda9afe6a9e8668b0119be8581940e2ad72d4f6aa76b1be5e4492ab",
+      "size_bytes": 277536
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1470.html",
+      "sha256": "12ab0500e102d735e7f5ba97f5e65ec698143fa96ae368a220f497eb23ed91ba",
+      "size_bytes": 263372
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1475.html",
+      "sha256": "bafb4e0f03649a34a1885efc214a163529aa8fb805885351c59f750e0dd7e163",
+      "size_bytes": 258073
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1480.html",
+      "sha256": "f882f6d008eecdfb4fdaffe17e399ae13eeebcab8b42632a0651416593c0a050",
+      "size_bytes": 247257
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1491.html",
+      "sha256": "cc0f641edac52de562866a6c8833502415d1fcd4cb1282fd490644c8aaca87a3",
+      "size_bytes": 288337
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1492.html",
+      "sha256": "e103083705c07da64c4f256726925dc5b786a436d00713c3a3e0502b2195f1f0",
+      "size_bytes": 263612
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1493.html",
+      "sha256": "98d94a8c682ff61544159ec705ef29f370e51e9969991ee3e9989d9fd8c05eee",
+      "size_bytes": 244589
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1494.html",
+      "sha256": "506c66b32703bf6431555f24535975a5701b9599f8a1553c5d2b725219989ab8",
+      "size_bytes": 170164
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1496.html",
+      "sha256": "887208df4fb6d81d80207710666f071072b0af10d7fcb6e03781e3e98c2c9824",
+      "size_bytes": 262753
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1497.html",
+      "sha256": "c76255224b7493bab1ab3d131cbdd3653125bbb5de8ada8369a29a8b294b8bb8",
+      "size_bytes": 242304
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1499.html",
+      "sha256": "f52a371aed3585c197b3947f728ec6ace7f8e638f7b7dc0c2baa8e5388d7b366",
+      "size_bytes": 248288
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1501.html",
+      "sha256": "86dcdf229a5354bf8ec16200d20af73ba7a14e77fc3669588367aff0845c77c9",
+      "size_bytes": 248482
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1505.html",
+      "sha256": "058b11fb425effce1fb715d2027f6a32e691263eca66fd811ba011f495e67112",
+      "size_bytes": 259052
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1507.html",
+      "sha256": "1b6a1a57cf94846452a0f27038a502f0ef3024c2a4ef7f1ea115d6fad1835c67",
+      "size_bytes": 267129
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1508.html",
+      "sha256": "57c3e8fcfd44d22b0ffc1c8029ef366a3d9f597fba7f711bfbedc007c2df4c29",
+      "size_bytes": 246147
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1509.html",
+      "sha256": "ee5a88d8ad96ef4849a1eb14b4f1e075172a212497ec6b66b2708ca6bc61cac4",
+      "size_bytes": 272140
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1512.html",
+      "sha256": "50a217b64d3598085cf365f9e8dd8ff8bd8125597c50eb3ef42cfc8268d462c9",
+      "size_bytes": 262797
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1514.html",
+      "sha256": "78782a1ca8b5731d1143a955b156d5fb027d182830f1b48f139916096a41a2b6",
+      "size_bytes": 269904
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1517.html",
+      "sha256": "6111e6981d25270dde90b292743a024f1749a2f0f4f205c6593fd45a12eb43b0",
+      "size_bytes": 265594
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1518.html",
+      "sha256": "48593c55752600502e9e305429360533143e5aa745ba39b9ffd6caeb32c0d57b",
+      "size_bytes": 261153
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1519.html",
+      "sha256": "9539d6de294d135bf185f40aaa4fb1000d64c73ada0c568a727558647c8e67c1",
+      "size_bytes": 213455
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1520.html",
+      "sha256": "b46be88c407f55d9544b6b2822b58a099d4d64533a93ef9e296d5102c2ffc0ab",
+      "size_bytes": 241039
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1521.html",
+      "sha256": "2be09b529c0a20794ce67d26135109f5d56cea5bbaf64c6135fe1dbb1d8ee5bd",
+      "size_bytes": 259665
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1524.html",
+      "sha256": "0c73000698401ef6053956a8bffa2f24e6b2ca609a68b7b2e735df8da46b6401",
+      "size_bytes": 241871
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1538.html",
+      "sha256": "d1b0660cf5ad6947704bc45e8fc729ee3ea4b2569ac24278f0bd7f9ee54b5906",
+      "size_bytes": 266797
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1539.html",
+      "sha256": "c04839b896a7c0e6c583b061719357f3048680c4371d3acd2b6d5ae0017bec6b",
+      "size_bytes": 268048
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1540.html",
+      "sha256": "52456912fe256702da9adac1dce84d88bd5323ed62ed81d017a1b615e86db031",
+      "size_bytes": 261056
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1545.html",
+      "sha256": "091a06227a33c779bf01ad9bb3f15bb69c796213ca6aedf7ed8f537d7782a30a",
+      "size_bytes": 266103
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1549.html",
+      "sha256": "ba064ebb09b76b222c7f8c8aa565ba83d8de5d37be58877c230f38da915d9cbb",
+      "size_bytes": 259145
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1550.html",
+      "sha256": "e6d8c7ad1f52402e531a3b643c663b0bca6bdaf29b2f6e197a2dd645e16f355f",
+      "size_bytes": 235718
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1552.html",
+      "sha256": "e14a269ccd33acbc65f3e4179e7427d76f4ae6aab73f1ed6b1135c5b2d5ba831",
+      "size_bytes": 263176
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1556.html",
+      "sha256": "4fc2f445273a4eb0e337945328d048075acd27929abdf43a6e2798051f55094c",
+      "size_bytes": 267798
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1562.html",
+      "sha256": "38a1543b61e875e9d0b3874a4704885a831d5f32d2eee07e8fc9448e36ac0fb9",
+      "size_bytes": 234899
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1565.html",
+      "sha256": "180b50cbbaa514092a487cff5a5a421765cbe00253d73c248425fe730e711f82",
+      "size_bytes": 261554
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1580.html",
+      "sha256": "dd85ed463f5d08d149e6b0ea11906b932041518c3451b433508d211d769624ff",
+      "size_bytes": 281734
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1586.html",
+      "sha256": "6b31569faf1d2c7d8891bea25cf7a0f17facd919cbdca2d67c6dcc2dc5eaa792",
+      "size_bytes": 261666
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1591.html",
+      "sha256": "adcfb78afe9c0890176bca62707bae4e4ad03a8eafef00cda9dc679c9e0aeac6",
+      "size_bytes": 299716
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1593.html",
+      "sha256": "3170bba620fff271b162e55ea7146a2753328184ebb00eb6e81dd22db5216c69",
+      "size_bytes": 264007
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1594.html",
+      "sha256": "26c7b6da30833c29600d4bc34f3db2cc25d1e87a99f8c39cbadf13101ad7dc95",
+      "size_bytes": 321456
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1595.html",
+      "sha256": "4a2654a24111c8a22e6e6874140a260d9d31e1188963ed0e1485f3018d7e4ac5",
+      "size_bytes": 307635
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1599.html",
+      "sha256": "7ed675eced7c073bbb95235a011b2bad3e3f5bcd1ed6e683224d13e73347f6df",
+      "size_bytes": 272786
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1601.html",
+      "sha256": "906dca8c196774b9dd2ce25df249658137b68a6a3ea700e139a10e8cecf06986",
+      "size_bytes": 305364
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1602.html",
+      "sha256": "5d67a1ac49db39d4774219f1549259b78e2c35915c9b3907c004a6bb95c7ab7e",
+      "size_bytes": 238992
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1607.html",
+      "sha256": "33e4c97ce0da0a8b423f3c53697dc88302fedaaeafeca0c51b48eaaa5e763fcd",
+      "size_bytes": 308785
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1610.html",
+      "sha256": "81746910fb1768a3568c425991d3dea93ecf1320a33be3a23637349ed377d38a",
+      "size_bytes": 285048
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1611.html",
+      "sha256": "29a94144716ff9a6a3207bf61413e17ddb22304064a373fa00398e8fcc19de2e",
+      "size_bytes": 299369
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1612.html",
+      "sha256": "9ae91067e8133bc834233d2d2dc94971b1bb85612f949da6d11c6ae104cb78a9",
+      "size_bytes": 295236
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1619.html",
+      "sha256": "a5df103ed57a93908a01b730ff768768d257ed5dc0fea4b84b886dcb3aab196c",
+      "size_bytes": 302844
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1621.html",
+      "sha256": "5a78fd40985b78857be621f52a03e53be0b9f9ba9c96f793b67f88f392abecb7",
+      "size_bytes": 246530
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1622.html",
+      "sha256": "e057ae01ba6bc8f2c44c21be66a44817e04a9ceaa252cece75ddf5e65baf6b07",
+      "size_bytes": 297736
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1624.html",
+      "sha256": "ea776515952691fb577528ba0be246f1570fd598e5029b778fb083f2bd499955",
+      "size_bytes": 257403
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1625.html",
+      "sha256": "9731c21509fc10199bd2bd47968d59366b5819e5de365e519686dbbe920b80ae",
+      "size_bytes": 219182
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1627.html",
+      "sha256": "b701fa55e6938710067e5a09ec6a0b3cc31e98a5b1d625fa1f5c31212609659f",
+      "size_bytes": 303260
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_164.html",
+      "sha256": "ea8e5d5267eb6e5596278994bdcdccdcd903d243978f7f3f1ab088141408ded3",
+      "size_bytes": 235468
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1640.html",
+      "sha256": "8c2297168d06289ce05be35bd56f26c4de2aa6a941c1872b2fa25a77e13654b5",
+      "size_bytes": 270366
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1648.html",
+      "sha256": "f59a60f8c9c3f22fec102f5566db2577959b65baf16ed0cf942b3a53f397321f",
+      "size_bytes": 296222
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_165.html",
+      "sha256": "521850cd2e17f7f8b76372625579af6761d557a3ce238e4a6adc933299141650",
+      "size_bytes": 169614
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_166.html",
+      "sha256": "be3afd4e9a045a82bc7f6c9e98dc5d5c796d5b97a2f8b3e7667d6b3394f895a3",
+      "size_bytes": 253405
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1662.html",
+      "sha256": "a20393457bf2a2c149a32ed7b0967200d77ab3527f78b9825a79547209037250",
+      "size_bytes": 311217
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1667.html",
+      "sha256": "dfb29302b695043308a63802993b188cfe9b4e4e3769e371e52c4bfdc0245f77",
+      "size_bytes": 248186
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_168.html",
+      "sha256": "3b52e301c29d77bdad831a3e16382fefb928507a8b2f1b1aae5593fb3063faa1",
+      "size_bytes": 265043
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1688.html",
+      "sha256": "9ead37b78348e9d8ea057be7b234e8a5451937bdf91bf997a1b4167b0ce1a246",
+      "size_bytes": 290155
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_169.html",
+      "sha256": "20a52f07792493198f6e90925ed355439e222bab9ad7828290313cfbd5c9fb44",
+      "size_bytes": 401941
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1708.html",
+      "sha256": "5cb45a02e93f8cbc346e4511cac90bba53d6afcbe1988d1e10552b651f4a882a",
+      "size_bytes": 264829
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1711.html",
+      "sha256": "d0a42ed80301abf948781bde552f9af48b325cf32319503cc6166cab574465d1",
+      "size_bytes": 286837
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_172.html",
+      "sha256": "24aa725a14d6875f6c4f83c4cbd2fe092516c63b0ef7d6fa950d61a956048fcb",
+      "size_bytes": 253433
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_174.html",
+      "sha256": "96b5501ba6e72a9e1dc88074292399d71397305efb65f08b4174792602fcb10a",
+      "size_bytes": 241618
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_175.html",
+      "sha256": "00b262e707417fb9f1510feca326963ec4bfbec78e1d8727486ac121e5a1555e",
+      "size_bytes": 264958
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_178.html",
+      "sha256": "857005ab39e3b9c8dbc7401830bebef77cc812d35ca5639facaf7193bf5aaa03",
+      "size_bytes": 243612
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1783.html",
+      "sha256": "c2f72ad9051f82ffef3b9e428bccb491e3b9629eb68102a74f3f4241c9eb8b19",
+      "size_bytes": 268310
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1790.html",
+      "sha256": "4da591e8efa835782d60903355b729a1fc117185f9644359901551775ab6aa5e",
+      "size_bytes": 292969
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1792.html",
+      "sha256": "6d4cf43551fd92b91cdb93b2a8390dc1f46bd20a4790b4eec76ce8301613645b",
+      "size_bytes": 328819
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1793.html",
+      "sha256": "f4d7fa5a68edefd56e517d7a309ccd50b994e6c04a23731635f7095a958edcac",
+      "size_bytes": 320938
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1799.html",
+      "sha256": "68d1786c522f0a3db0eeee2c05849bb4f57fc49e1944e99d77c88336a4f29483",
+      "size_bytes": 319690
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_18.html",
+      "sha256": "5927c0486e892401fef6946a5fe6ca4ad43133d170cab531797260fc17019996",
+      "size_bytes": 158337
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1801.html",
+      "sha256": "f65e3141e544ab4dffb257740dde36a74fe43f7dbdd89baa64a94d1d4068e2b3",
+      "size_bytes": 298828
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1802.html",
+      "sha256": "cb8c5941e18498a834ccc382e13e8c169157482c4430bb4c8d58a034cba4140c",
+      "size_bytes": 317456
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1804.html",
+      "sha256": "7aeb3f8565970fc196903a831fac763762a40444c1d4f80dbefe578e63f52ee0",
+      "size_bytes": 275849
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1806.html",
+      "sha256": "a3c242d104cbfb8bd1546b7db3d346f033843a32f83d94840bb68fdd6ad537d8",
+      "size_bytes": 286910
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1809.html",
+      "sha256": "957863d79ee8cb8bf57246bfbc91fe37ca8ef81a2472f529c81bd6dac9f91811",
+      "size_bytes": 285619
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1812.html",
+      "sha256": "f08c4522cf257e8e4084b8c98524d183213ffc3eaaf2e49ef640c0cb98f750f5",
+      "size_bytes": 280987
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1815.html",
+      "sha256": "cfd2de78664b67a76ab9d21fbdd72076b715df3647da640041aa2e1c13e0a534",
+      "size_bytes": 263668
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1816.html",
+      "sha256": "599df0a413b2b2674c9cbbd37a13ed5ea56e2b2051523b91449b8c5d79641e96",
+      "size_bytes": 314775
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1817.html",
+      "sha256": "2b021a9a858047e77cb65ef246d06f1a9e09470165b20847cfdccbb21d9fd406",
+      "size_bytes": 263139
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_182.html",
+      "sha256": "9e9f3a1adf29dc123ca3b51c3a074e2c34fd5a1497bea38447f6e2afffb4cae2",
+      "size_bytes": 244866
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1820.html",
+      "sha256": "5d3b5d75cd95bdd6ac019c159d1593450428684dcce0d4afcb8d97dad5fddb9a",
+      "size_bytes": 322972
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1823.html",
+      "sha256": "05cecc550a45dcd7feb84d1cfca694e49d14134d6646d51371db6e298068b879",
+      "size_bytes": 262644
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1827.html",
+      "sha256": "5182d44ce6ad2b414de08769b1acac7a5077ed1fd578b402c6ac9de458a300b1",
+      "size_bytes": 289940
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1828.html",
+      "sha256": "f58d75f578c39782f9b77b0699eeb3821093280a66f6f47dddf23b5402916205",
+      "size_bytes": 278229
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1832.html",
+      "sha256": "150b672e4f1b5ae3d68e57a210da7a0beb5b881867cb60bbaac1ba9d3fba01b1",
+      "size_bytes": 301286
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1838.html",
+      "sha256": "55b2efb7a85874b5c4eba1320dd0900ce3668cbf288ef0953869502fbb0534b4",
+      "size_bytes": 305365
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1840.html",
+      "sha256": "a1cff9d49eb4bb3ffc157d230fef705ae098d8ba4030049e22e83d259cd67442",
+      "size_bytes": 263337
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1842.html",
+      "sha256": "5342c24f29cb3893e6d260c10bb6e49081e09d3ab0995e611dde951395df5c62",
+      "size_bytes": 308131
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1848.html",
+      "sha256": "20e3c1ec239e0bf595322fe682896c940c8f8a1904f1589f6c5969cbfe744de7",
+      "size_bytes": 272492
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1852.html",
+      "sha256": "9f86a2d822fa7228891a351301f984a95bff181c7f2494558f498f07c34ddea8",
+      "size_bytes": 262892
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1854.html",
+      "sha256": "f6b9b53c5041c9f30a65dc4b1343e6b0d04bec25fcf008be7fd078fd98e470aa",
+      "size_bytes": 286004
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1857.html",
+      "sha256": "e265783776a7b18f9698739e439ab9b5ed65f3a102992912bd1a14799133d7ca",
+      "size_bytes": 260681
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1858.html",
+      "sha256": "eea2470f10905900a196659cbee8204bd5ec057b8bd27c23ff4e1782139145c9",
+      "size_bytes": 300060
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1861.html",
+      "sha256": "f35a19904bda869825844d60ab40a0ec84d395d7982114d0d3fa46af8bbd7676",
+      "size_bytes": 277281
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1862.html",
+      "sha256": "09a0905836d139ee52afd25e672fb973c71628f78358a9b707cc8676bc1abe74",
+      "size_bytes": 297965
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1865.html",
+      "sha256": "98fcc98c0487818ce70a8e07705a4827d4148952c3f7b0f7566aebaa5604160e",
+      "size_bytes": 293464
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1868.html",
+      "sha256": "62845e2604c5546090901bb3c35d67258073906a68cbb5bcd2d597fd187dc7d9",
+      "size_bytes": 289569
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1871.html",
+      "sha256": "11cbd95b8c2338c1085ec5517a3e88944f47aed3d3f3b8b1125cc1285721d0da",
+      "size_bytes": 323599
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1876.html",
+      "sha256": "88250ed974cb9f695b7d2d0f75c8c965ea92f200ee2dd42657084e17ac967919",
+      "size_bytes": 276670
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1877.html",
+      "sha256": "103de83c75605fe32faa239e24733dcf01e567046d5fabd7cc0976ae86a98606",
+      "size_bytes": 322308
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1879.html",
+      "sha256": "2553532b9e66df6dc453714022291c2b5c261ea12638198e47256e882407307a",
+      "size_bytes": 290323
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1885.html",
+      "sha256": "7159cb04d77693995c42c6c69a9dce91c1fd97624e6a48757780fba42423a0a6",
+      "size_bytes": 288956
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1897.html",
+      "sha256": "e175bc79ed9f4022fe73473f127f8af2e10ce2683bf251b537969aece6ef65c8",
+      "size_bytes": 258464
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_19.html",
+      "sha256": "b50bc96388ebc3d795bfcbfa2e226c8331058edd06e12ab3f29acb9649f9a8f8",
+      "size_bytes": 199702
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1902.html",
+      "sha256": "581289439729731861b8535332b7d1b84abe5bf1a6b19d8dc9c16d29c0995b2f",
+      "size_bytes": 332881
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_191.html",
+      "sha256": "68d09bd97c5415b2de7a1ed802605336f99d0a3eece57b6a423b52c2c031c4e7",
+      "size_bytes": 257096
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1911.html",
+      "sha256": "39f869ad4171190be7323568f46b25bb16858cc26f9e7d6f811055f93ab444ad",
+      "size_bytes": 275214
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1917.html",
+      "sha256": "41ec0bcb53820602fcd93fff427e037feace5e4009c7be3658f877382393d781",
+      "size_bytes": 279234
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_192.html",
+      "sha256": "e3e68087e201bca23a1b56258171b25f56a6b59a0dff9474f14665e2b4f9e095",
+      "size_bytes": 235964
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1923.html",
+      "sha256": "0ac6acab20ce336c90546ccb16fbe67f9bea4d019459fc6d5385a5577d8b14ca",
+      "size_bytes": 296235
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1926.html",
+      "sha256": "52cd6265853591991aac58e1594731d4070cb4dbb285802b4f4d77fd864ce6c0",
+      "size_bytes": 265145
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1927.html",
+      "sha256": "ba17b4814e72e2ccd0a0c5066cf5301c34e1961a6ea8ca7156cdf45e748b2776",
+      "size_bytes": 254119
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1928.html",
+      "sha256": "f6fb47602609bc270460e5ba8628fa10b146177f7f266bf30d78f92e4243b27f",
+      "size_bytes": 286118
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_193.html",
+      "sha256": "6e3e3d8de5915535bb102bd3729892cc7796b05aa8ff9ec6f6c024939317130f",
+      "size_bytes": 229757
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1932.html",
+      "sha256": "333a51f056d23cb0e09d198e4b2bb251daa3779aa94760e60474e068b03772a0",
+      "size_bytes": 288488
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1934.html",
+      "sha256": "429c49bb60c08568a8ad553938db3590eb997356965f17b6bcfb8b3357d1c9ad",
+      "size_bytes": 301836
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1938.html",
+      "sha256": "f82ce8791137e0d7086584e5a49ef76f45d71762c94f679a6629771b14cdff54",
+      "size_bytes": 284688
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1940.html",
+      "sha256": "7fbe842b0ababe17eb73f70a456c3e15000e3dc9d56d8fec8dedb706b916c0f0",
+      "size_bytes": 263273
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1941.html",
+      "sha256": "625b639f185d55047975389998ea65d18764b25bc43d05fb45a4631079aab895",
+      "size_bytes": 273944
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1945.html",
+      "sha256": "27876fc517f881365fe037b572815b2b45795c158cda0acf65f03320d5b98e3c",
+      "size_bytes": 182600
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1949.html",
+      "sha256": "33da22d4301950bb8a6ad4035e1250915829187712976390a3827a4da40cbf68",
+      "size_bytes": 363562
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_195.html",
+      "sha256": "337de243933d9c882517a2697c54b000c6d65468ca1853027e7f759d6fc162a3",
+      "size_bytes": 266541
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_1951.html",
+      "sha256": "0a69b23aaaff48250a039cc5a0849681e9bfeaf13b471b7b15b9de388d8498b1",
+      "size_bytes": 294072
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_197.html",
+      "sha256": "d0c606ae1ba1391021041b96da421bd2cf6f2df255be6a7d2c499af08dbf692b",
+      "size_bytes": 231634
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_198.html",
+      "sha256": "5d1be8cebbdc7cda28daa158962a9bec6fb3b11d1a66aa8a9f5ce8569c1c50ac",
+      "size_bytes": 262560
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_199.html",
+      "sha256": "d0dc8424ba1da2f6602f21bbd712c1b87f3d856622f254d14d80219e14cec866",
+      "size_bytes": 269160
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2.html",
+      "sha256": "a4e68ca0c08b85a6554aa1bd1d2d36a3467c4575343ecc467a0e0870012829a4",
+      "size_bytes": 181909
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_20.html",
+      "sha256": "303467db3e5fd5318e5191eea417b14a00ddb45a04db89146272047f7fc73b5a",
+      "size_bytes": 267791
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_201.html",
+      "sha256": "5bbe3334bb212d791de26556ca3d6954a4e9f23b8c29e13afad197acce92a677",
+      "size_bytes": 251598
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_202.html",
+      "sha256": "9cf868276477e78a0ec6978354d309568da201cf76835d1f90728c84ebcef571",
+      "size_bytes": 258083
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_203.html",
+      "sha256": "1f4ce6d4ff1aa503720c0d46954424c40e813e602ed34ae2884d57cba11c9d6a",
+      "size_bytes": 220061
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2030.html",
+      "sha256": "55a3b5c3eddc32d02b5d1d77fcee0d7ede66f99d3673d37ebc700cb660e8812b",
+      "size_bytes": 281986
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2041.html",
+      "sha256": "c179d079c1bebadee21c1896184febf012d96fdc75e8d1940975b142e4f41343",
+      "size_bytes": 284963
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2048.html",
+      "sha256": "cc91a8f5e53173e2d817a3ea414c0745bf538427c3c17a40217a5834231c44f6",
+      "size_bytes": 328782
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_205.html",
+      "sha256": "5580325dc8d2f53bfa5127ca61c761c66f617824ae4717d25d6c51fd79f643e7",
+      "size_bytes": 262126
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2054.html",
+      "sha256": "9fa94654e9f4671af490a3b69cf603570953adfd74fb92361c38dd4c69697a67",
+      "size_bytes": 280901
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2057.html",
+      "sha256": "3dbc1cd5dee1c28660d9d73dc62a4c7d319c4bc08cc1241b96821141ac34b578",
+      "size_bytes": 281639
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2069.html",
+      "sha256": "c5fc15435cdcd41894e4f29e3d65b3d427ad2a117d33c1d57bc5c44360a575c9",
+      "size_bytes": 303469
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2076.html",
+      "sha256": "53da1a2603ddceb00f000c1a60ea9f4c0bf03d06f63c22a05992b624c2177e90",
+      "size_bytes": 309796
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2080.html",
+      "sha256": "60c4d37536eedf8bf039afb1adab3cfb2e89d685cc944e95d5c2d5bea59f3e92",
+      "size_bytes": 270787
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2081.html",
+      "sha256": "d8353048f73946dc44df9e682fb76d659eda1cd06daf008f83ffa5f1b45b8c89",
+      "size_bytes": 292564
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_211.html",
+      "sha256": "c7260dfc65fc7da4badd501a00bb28aebd316d6f3fe769b95c120ed874c1fdb8",
+      "size_bytes": 249408
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2119.html",
+      "sha256": "f143b8f408eebf219ec6fad156b8531025ad348ac170490d326afb338c291945",
+      "size_bytes": 301160
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2121.html",
+      "sha256": "fa72e5d986c82d2fba808d32825e58fbd253d716d9cf262000c88849c37930c3",
+      "size_bytes": 280737
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2122.html",
+      "sha256": "9f855871028c471c631fa9b07d9841d660ebc51fc9823fef8900cf8fbb0884ed",
+      "size_bytes": 323038
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2123.html",
+      "sha256": "0528612b00583e22906a6ef01728d3ae278e4751f280d29173baf2ff70316acf",
+      "size_bytes": 294563
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2124.html",
+      "sha256": "92fcaca6864c55f387fb7c98fccfa03762767b9911b337dd76c728c6fb315224",
+      "size_bytes": 365063
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2125.html",
+      "sha256": "b3449ba1933f1ae43495e670079092f6822d5f9d58ba152235554cab0af172bc",
+      "size_bytes": 257443
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2126.html",
+      "sha256": "1197bcafa27a53e0c9a5e289a107dc28a31a70eefedd8dc9bdaded3f52dbbd7e",
+      "size_bytes": 235224
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2198.html",
+      "sha256": "64aa23cbb99dd3ab28b139de8ff1313b048e80eecc1ee2fc77f4e58ed62794b8",
+      "size_bytes": 281612
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2210.html",
+      "sha256": "ab816860e580d2f1711d41b9bb5f38e89aa108f20060bd48a7736d90d7aa2282",
+      "size_bytes": 382466
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2217.html",
+      "sha256": "373e181f67c42f43340b03cb2b94adadf6ec026ca3e6b211ae217cf5f78804b9",
+      "size_bytes": 306968
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2226.html",
+      "sha256": "733ffb3b9a0c2abaddd5a2f3b684b1e256b771c8ec656c33f335f9594d1b4bb2",
+      "size_bytes": 155055
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2231.html",
+      "sha256": "63a8733e9cde480e9bfb7910b6640cd74a69a64eaef72a50c32dce9643e4ee8c",
+      "size_bytes": 302601
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2235.html",
+      "sha256": "1aa0528df2e6b9d032728da8a4c935f1f4a7b56ae6d617fc3835c2b4171108e5",
+      "size_bytes": 242225
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2268.html",
+      "sha256": "de33c2b30d1f3ee1105f5a7971459bc2659c982412a66432420ae54d53da65dd",
+      "size_bytes": 268592
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2278.html",
+      "sha256": "964bf25960315497668a3e7fa7a78a353cf3044b735977c221bc8a60a0d8dfaf",
+      "size_bytes": 280914
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2279.html",
+      "sha256": "9750d14edd5ae10f8d9246235b0d37407a25bd96fb5d64a110255b860430deb1",
+      "size_bytes": 394958
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_228.html",
+      "sha256": "7da66f8644d5bf6860ae9655a865b9984435eca946e7706b8a6fe0c5eb98a4ad",
+      "size_bytes": 281075
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_23.html",
+      "sha256": "ceb44c64b4620ca9015a28dca29a0f4b8e7cfa45516ca57caee0db204e05866a",
+      "size_bytes": 266826
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2305.html",
+      "sha256": "b7909d1f2ab28dfa709ed87fa8079d04c01fabe331c55c7b5fe7bc375313e0f2",
+      "size_bytes": 461542
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_232.html",
+      "sha256": "1edbe80f1e28e4351d952b318738f2307204fa7876816823c84f09eb66b33a02",
+      "size_bytes": 287284
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2346.html",
+      "sha256": "da0290dc20dbb115713801b2285310f8bd644531866a946f2dca801ccae4528d",
+      "size_bytes": 291400
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2369.html",
+      "sha256": "312e7635530d785fbc0537a2c731cff756974e36371e3f4d29663a5a64b04e16",
+      "size_bytes": 335091
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_24.html",
+      "sha256": "4e47216df95a8f0a75958720529e497a2531e9590a41e7c6a8f30706b094ade5",
+      "size_bytes": 287641
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_25.html",
+      "sha256": "a76fd15d30a3b3ce74bf87cf46ac4bb070237543976af189df6b6b2a977c20a7",
+      "size_bytes": 190118
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_257.html",
+      "sha256": "310e54d8f45dc3a428a7c84bf2ba49fb5529e46c1e52c895d34488402be8fc93",
+      "size_bytes": 217055
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_258.html",
+      "sha256": "95679df463a1e2b21ae3dc5626a260387d021cdb349713cf64b0c20ab37570e8",
+      "size_bytes": 237683
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_26.html",
+      "sha256": "c6a51af2baedaf1ccb15f274e647445eb3f656769281c2d91e1ced0837c87020",
+      "size_bytes": 238617
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_265.html",
+      "sha256": "e5399be4531e4ade9c83ec311c7518b113e7beb83f2e61b5ba02416074b4f271",
+      "size_bytes": 188718
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_278.html",
+      "sha256": "b89018367bedb42d8b73c7d224174597388acc8443373e239f5e49e639033d68",
+      "size_bytes": 251339
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_279.html",
+      "sha256": "0f2a6dea7b48deb329b22bbdfad27963847e306e861571ac887dde49333e6e29",
+      "size_bytes": 257278
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_28.html",
+      "sha256": "d2ba12910cdf360b1670ac2a5dec97fbf4d63de92d4271bad1b58646cf474e2d",
+      "size_bytes": 269269
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_280.html",
+      "sha256": "f4c1f11e5627ac82952336b5070efd1ec4fbda4eda85e13bdee83ac23b7ba247",
+      "size_bytes": 281372
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_281.html",
+      "sha256": "2cb288f77eb1dbe238a3749883c608591d7cbd414ad97e1b9b32b22d5be94470",
+      "size_bytes": 280642
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_283.html",
+      "sha256": "68c444c8a45d1d0776ea1d8a465282b1c5f9a7dc94f5ddaa9e0dfe4f0905b22e",
+      "size_bytes": 266370
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_284.html",
+      "sha256": "63c658f435559557c033d2a9374ee0d8e253a11e81c07c775741491a9a2ac9de",
+      "size_bytes": 248987
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_286.html",
+      "sha256": "7db48e9e6b85d9d33f093990f8be9e4f0846c476a6aa269c71ba32b85e470547",
+      "size_bytes": 243064
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_291.html",
+      "sha256": "ba0280ac33574b3912f0b0b50835d589654feff5251749676022b53638304088",
+      "size_bytes": 252854
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_30.html",
+      "sha256": "9ad5e76d18b253b6b0ec8e30b36f80fd2855bc20075a6753c4be4191a2250fe9",
+      "size_bytes": 208262
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_32.html",
+      "sha256": "384e74368fc36629d945c8b1cb29b3272273932bdc9cc3408621a16fd2a671af",
+      "size_bytes": 227792
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_325.html",
+      "sha256": "a1bc3472957ee7e06f19d637edac4e1c3bcc67e890e12e8a159321e017bd361a",
+      "size_bytes": 278931
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_334.html",
+      "sha256": "f972b798e1cd00ef870c3e0024e32b20d09644ee6d2d76b031ab1ae0a4f48ae7",
+      "size_bytes": 250221
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_342.html",
+      "sha256": "fc7a0c95c17e4efdb5abcbcadeb2060c9cdfe2bf69ead625082d7ea9e138516f",
+      "size_bytes": 279195
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_347.html",
+      "sha256": "aa4acd4343fe342aae0f10e677dac96250784f358d261ecf4cff50af48c3662b",
+      "size_bytes": 246396
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_36.html",
+      "sha256": "aefde8d4ffd896e7877d8bca6d93cb2c83d2b5ab276d1efcd404c1fd5951fb9b",
+      "size_bytes": 221129
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_381.html",
+      "sha256": "bc3318516154286a333fbe698d7ef7c8d932b3a4755f5b1e80826579af190c4c",
+      "size_bytes": 287692
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_386.html",
+      "sha256": "29b63fa9df00cd85c515bc39217c83be931a4ae5133d4a52ec0ba06767d8ed95",
+      "size_bytes": 239136
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_389.html",
+      "sha256": "62501c2a60fd3882fc1f021ec4e74b46073efc12d20c5d2d9d4872858c2a7b68",
+      "size_bytes": 264717
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_391.html",
+      "sha256": "24892142b52a383d34ea0764f310b50f1c0e9a34ad21fca7554aa86c415547be",
+      "size_bytes": 277469
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_397.html",
+      "sha256": "6d918206f931ca00e269f2d3f671487e41cbce9b794bd8dd2552f8922efc1848",
+      "size_bytes": 293854
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_401.html",
+      "sha256": "d52206bd0392129eaae83161ced5716c24cb0198e548035515f71cd21dfa538d",
+      "size_bytes": 291516
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_402.html",
+      "sha256": "50e07c208be0d8958c9b188d3788125e533a14641f993bf5404d37900563fb0b",
+      "size_bytes": 283649
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_403.html",
+      "sha256": "1915f911cb17f05baa6a54f3a3281090d93415bad54051689e22b3bbb9e9025f",
+      "size_bytes": 291664
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_406.html",
+      "sha256": "e4a1e4a0a41c9e5f0a78aedf8bf240fe7cb0b8a3be5ff5e636f57284eae3ce21",
+      "size_bytes": 295048
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_407.html",
+      "sha256": "baf41bf1ae070616ea8f49951b4019204dd02812c33dccd0948930c232c6041d",
+      "size_bytes": 261223
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_408.html",
+      "sha256": "1f933d2330f575949a7584588429c64d308a3f771cb62b0c58d191238cee9ba3",
+      "size_bytes": 274566
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_410.html",
+      "sha256": "9b1d521d2959834aba46880c349e2394bf77f84b0e54954b8b3f6f94a52de051",
+      "size_bytes": 225214
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_414.html",
+      "sha256": "20542db7a4a7603ebf7cf784b69b9e865f48f24c312ba88cf1d63e8c692e537f",
+      "size_bytes": 267736
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_415.html",
+      "sha256": "d05652b82d4e5c57922b079ce091451bfc03331bda90db98f60eb240d8d757b7",
+      "size_bytes": 269960
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_425.html",
+      "sha256": "9d3c18ccf77f880e6c9124209e0a13367b12ba54dc2350eb0b846bef1e0ded65",
+      "size_bytes": 287770
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_429.html",
+      "sha256": "a8fa88518a2e93aad5f25709254cc5618df0a38daf1547919fecf3070509d7d1",
+      "size_bytes": 265000
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_446.html",
+      "sha256": "cebe00e7692d894599bad487820624fa2477e17872b40613a5aac0f9c3a655b0",
+      "size_bytes": 264679
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_448.html",
+      "sha256": "8f2b361d90b1ca9dad2dcf3365a23042cd714aa37fdfc32719d17f824d5386a6",
+      "size_bytes": 239274
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_449.html",
+      "sha256": "6b47b2048603e12c6725b20f50573c9c325ee0aba7c2093b1f41fd6cb7909ce5",
+      "size_bytes": 269520
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_455.html",
+      "sha256": "cd33cd914f667430181c3662d20da4f56fe7a3fd86780512a4c7aebe5c0b1a89",
+      "size_bytes": 277059
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_46.html",
+      "sha256": "93193434d296747257dbaed8faf4f43ef74e0afbbc2445b8470819290c962cd6",
+      "size_bytes": 308259
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_47.html",
+      "sha256": "3409b756d3b612a11849409e7826acb5ddaff73aef4c7a23c265ffbb477121d3",
+      "size_bytes": 223291
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_49.html",
+      "sha256": "3954e1f00cd35b349182c4258cffa2904262b6a9b91e8b21b069f4e1f2ea3fe1",
+      "size_bytes": 267482
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_493.html",
+      "sha256": "500a3e5e1bf96742e9179e3b4b5e1620bf2f387c14dab4a0197a25244976f1a1",
+      "size_bytes": 258468
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_494.html",
+      "sha256": "17d3bf7fd26242c51edee0e0db16aaf325094a05fe9c18a97e118efd96152294",
+      "size_bytes": 259008
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_5.html",
+      "sha256": "8f18929cc0ad91939d7477037add62f1cd01eaae345586e151a3bb671a0c284b",
+      "size_bytes": 194648
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_502.html",
+      "sha256": "30e2889649d2eabf983175fdb4bbd218da5de12385057ae73dd1a77d58a844f1",
+      "size_bytes": 265652
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_510.html",
+      "sha256": "9a7ad0e3c8cba147ee41c0fd2501dbd07000bff855c5812de61f49ba79fd9b4a",
+      "size_bytes": 302330
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_517.html",
+      "sha256": "f4710370353ec4e4cae54beb2d4a09aee01aef15e1158c5ca83eaa464df82fb8",
+      "size_bytes": 309231
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_52.html",
+      "sha256": "8d9c313ef38b6cb6567b752be1e4d1b7ec1de98cd59f8d55ad1dc2a207cd9c05",
+      "size_bytes": 243778
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_524.html",
+      "sha256": "62a0ff79bb759786bc3c494246737c7aae7b13a84722f9a2266e6fac83157de1",
+      "size_bytes": 324010
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_53.html",
+      "sha256": "4a179843e6b23b876d9787323ba7a6708eb3c4e262d8113fd3ed9e9e5d9ed15a",
+      "size_bytes": 252472
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_530.html",
+      "sha256": "65f53221efef2309f940164f132de7e54adb73f98ec17de0fee2067aa06ea65d",
+      "size_bytes": 429163
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_54.html",
+      "sha256": "bc8e2fb738ad41b0ecf8209251719567a1399499e7c8d059b64f4d01183ed4fb",
+      "size_bytes": 227289
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_542.html",
+      "sha256": "4620ae20ba5aaeba568b0fffb82a0f217e834a249ff7b73cac4135389fd1b542",
+      "size_bytes": 265684
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_547.html",
+      "sha256": "d6d98690b38e89f6ce13f0dad487dfc6de5f1ab1ca1919214475ec5c46c7b5d4",
+      "size_bytes": 282031
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_55.html",
+      "sha256": "518e8b2459ec5468e0c53eb28d20e93ea01594fc2ca7b19a49696464d124e28c",
+      "size_bytes": 246401
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_554.html",
+      "sha256": "9402613872aab4894228a3f78977abf7a8594e0e9335da82c7e309e22a49c836",
+      "size_bytes": 297651
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_558.html",
+      "sha256": "baf55c2318ddca4b64892c8d18454022591deced92e2f32e17ee3386621a80ec",
+      "size_bytes": 288448
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_56.html",
+      "sha256": "21a70e69482d6ac320d8adbc0b1412f91e0a62cd1c98ece7a9298c267fa93f6b",
+      "size_bytes": 240676
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_565.html",
+      "sha256": "2b830016290b36538f5705a05b119263ecd9cc03aca2e928c5ef6a1963aaa65c",
+      "size_bytes": 270874
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_569.html",
+      "sha256": "4269424a66dea0e727a3d540421599c88c599aac4c4a868f35df2dcf523d5c7c",
+      "size_bytes": 263827
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_57.html",
+      "sha256": "ce5493e573137de486dae1a90c9956fe6c3700e42a0598fcd33b3deab22e8958",
+      "size_bytes": 223665
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_573.html",
+      "sha256": "ade80d90bfb134d2e0f0001705e829b2e26413749d5a1d8a2f8dd5dbd86b62a7",
+      "size_bytes": 275769
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_579.html",
+      "sha256": "a99feec995f7aa4ae20350f9031eecd7855cde4593d7ef1038a37bbff31bdbc2",
+      "size_bytes": 287025
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_585.html",
+      "sha256": "edf04cd2044f9e40ffd011aea35b21bca0ce934eb7d645fd5f981cb5315ec289",
+      "size_bytes": 294739
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_587.html",
+      "sha256": "571ffa0ae3a1a28abd4c13ea4b05eedb58e04204a4ad2fb0db50f3e9149a6cf2",
+      "size_bytes": 290521
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_590.html",
+      "sha256": "653715fae3d3d8f7c39e25081dbb45ad5bfaff7142209f2a381f623c36ac42af",
+      "size_bytes": 269629
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_592.html",
+      "sha256": "ecfc82baae37f7d19ceebc651a82eade6c7b5692cadd2194b6819d0331d94135",
+      "size_bytes": 254111
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_594.html",
+      "sha256": "5505a08c9ed3bc6139fd85de2b408da85fba564430afb660910e4e34199ce8d8",
+      "size_bytes": 299645
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_598.html",
+      "sha256": "1304674e85c5245adf94cdeaa388e7fd4956cc225c890a7e20d0e29a93608d88",
+      "size_bytes": 304784
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_60.html",
+      "sha256": "580e9ffd332828ea009db6ab3a2be939fc8c5c3fa73407b006b68e87c53667bd",
+      "size_bytes": 159736
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_601.html",
+      "sha256": "2d124c12bc89f539dd40fe9950d04dc4ad5db12162eb8936069d037ecc073254",
+      "size_bytes": 285444
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_604.html",
+      "sha256": "670ba9870e63c335f1ae1012912fe505cd131872616bb9bc3ee218836e5cbfca",
+      "size_bytes": 284925
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_606.html",
+      "sha256": "370372abb20c10f99bb43ebf6f5aac7f44b75421bf9acb808b662a7485f2aefe",
+      "size_bytes": 259924
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_610.html",
+      "sha256": "c5c1d2d49a7d48aa5b740352b5bef0f77fc36d0ed7384756bcf05e556e6a1548",
+      "size_bytes": 286737
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_612.html",
+      "sha256": "21a856fe1d9523d5a41d0e1278c494570b193c95667aba70f0fa4e8053f13c20",
+      "size_bytes": 294827
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_618.html",
+      "sha256": "cee90aaaa29c58ba4918275615f8fd1b86c6a697df407d742f278fdcac81a632",
+      "size_bytes": 255472
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_619.html",
+      "sha256": "2ac7cae012fdeb6af29317415ca388d3c4e5ca534af1df83b6bd366c76e50834",
+      "size_bytes": 263920
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_62.html",
+      "sha256": "c498a571b901b81aaf3cc24eadd70f9362ecd6360642b894003b54618777a469",
+      "size_bytes": 201835
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_621.html",
+      "sha256": "603685103d3d3bc42e8d78d5c003bf597090260fd6273b6acdec2dd08713381f",
+      "size_bytes": 241674
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_623.html",
+      "sha256": "c8e8710a6381793b435b36ca0bee0c6b151e78eb9c7d35ba9455967c187c3f77",
+      "size_bytes": 172388
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_624.html",
+      "sha256": "5f94f43a74ede954de3791dbcb33d1212a832f7d4cc6f64053eb32f3e44ddace",
+      "size_bytes": 244992
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_627.html",
+      "sha256": "57149956dcd6e5050202f3e7cc046f91eb3c5b8ea84b37e9b68b2d03c081923b",
+      "size_bytes": 245912
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_628.html",
+      "sha256": "7db727a8c2667157220a1e0dc28b814ed5624d0fc4a7126dbd27dd4db1d02408",
+      "size_bytes": 275311
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_63.html",
+      "sha256": "93955d69aac2ddd7ee9589dfff3a894202f4e65cf7b809abd7f76dcd1815dd1a",
+      "size_bytes": 237383
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_642.html",
+      "sha256": "1c4fcc5d051f0b16b9468c0b872c73355dcc246264e7f0ffeb664669c4578052",
+      "size_bytes": 238897
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_644.html",
+      "sha256": "767eabcd48be838b9dda61396698dda7c439411bb674c4159971cbdb80eb20e3",
+      "size_bytes": 173558
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_657.html",
+      "sha256": "f8330db5f91460c88becc6cbfc978df2023eac1f44a017f90d1f5133654f6f62",
+      "size_bytes": 282882
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_66.html",
+      "sha256": "0153a3641c1ab2550a93e21cbc302418f38530c1df9056862ec63a64d7b8b47c",
+      "size_bytes": 245838
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_661.html",
+      "sha256": "e3286811efce7c177d0bcbe6a9efbc461e6af25176d52630159c4de934c078dc",
+      "size_bytes": 276669
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_665.html",
+      "sha256": "da279baa4ab2e01de21e08b3679157f39af83b0635a67b3d6d6969dc97a9fea2",
+      "size_bytes": 253781
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_668.html",
+      "sha256": "480edf3bc8a5feb2e676d7b8c341ab098d9560ce389f5b1dc097f937c2ba98b8",
+      "size_bytes": 258800
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_672.html",
+      "sha256": "533390360df3258d981f3d64510ee01844182a3e8371b3272c486bc412e12098",
+      "size_bytes": 271196
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_673.html",
+      "sha256": "0caddf8f3823d2b1bb9b350ecd7dfa9a372d2dc40f170238eac9df14e48f831b",
+      "size_bytes": 262530
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_674.html",
+      "sha256": "474f189f602df676751b044c1953269c45132fc5fc1ef2ef21144941158749b5",
+      "size_bytes": 248839
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_685.html",
+      "sha256": "ce52bbf87ea01d60e2ce7528eff133b4f30f0484c785062a0602781f89d11c99",
+      "size_bytes": 242825
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_689.html",
+      "sha256": "e22f2e412df54e0bd89f086a8fb70abb5a65560565ddf32bef276a69064bbb6d",
+      "size_bytes": 311856
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_69.html",
+      "sha256": "ee7d92658b8bed1458402d40585980860c0d070359522cfad7da848c7d64f0dc",
+      "size_bytes": 258280
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_690.html",
+      "sha256": "0546142bfe1564f2fcfea6282a0887cf2164bdc1ade5ecae8a3fd71e4dd10c98",
+      "size_bytes": 264437
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_692.html",
+      "sha256": "59283b684c3b7b6a704450b1989570431344c86b6e55eb3a1059169c9cf7f3eb",
+      "size_bytes": 274999
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_694.html",
+      "sha256": "510974c275999c0a4574c05bd131f2d4b5506039c80fe8eab7fecca3544de290",
+      "size_bytes": 268749
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_7.html",
+      "sha256": "586d027495900df47a370e56cafb3d23c34287e5c3dc8e4076ec6fa44268e66b",
+      "size_bytes": 244443
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_703.html",
+      "sha256": "2779b7b52e3054c57ff53149dec15d5db5835eea0b3680164a509ad506ba758a",
+      "size_bytes": 253440
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_704.html",
+      "sha256": "67719a1652968ec0aa25b9b609a77634d2e612004e0f35f94ad642833278e714",
+      "size_bytes": 279153
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_705.html",
+      "sha256": "a56317b2b967dfdf5ba5d11cbf991d42b5b2ab4eab4577e72d4ee33fe93d78e6",
+      "size_bytes": 268168
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_708.html",
+      "sha256": "1a059228bbedefe9c27a0d8efffc7d2b5d0934b6f7f52b787cd42c044d34e0bd",
+      "size_bytes": 265996
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_709.html",
+      "sha256": "7ea25f876804af781e8302ea7affbfad8a1a313a5b18bbfb2a8e499c5811f90f",
+      "size_bytes": 283044
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_710.html",
+      "sha256": "039e0bdf838522b7b50d80478e00c38feb66e8002ff23e604eb764d45c2a7a8a",
+      "size_bytes": 272445
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_711.html",
+      "sha256": "16283a93261b9188343b8590a57f86ca896ed959c74148845e2eefb76c1711a7",
+      "size_bytes": 233650
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_712.html",
+      "sha256": "95c2574777cadaaf7cf52c3aad06071f70c961720c44878da46632bb862e86fe",
+      "size_bytes": 264720
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_716.html",
+      "sha256": "266667c3a45b577145c1208e89d98f996942a9bb0c1f5a7c93bae564b9b80e7f",
+      "size_bytes": 240250
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_718.html",
+      "sha256": "88b5c76b1e2e4cee8d802b180cbf33b3ce451bc3db7a9e01f437bc349d674c17",
+      "size_bytes": 251010
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_720.html",
+      "sha256": "83a6220a5e25a46867c2612c7f995c9eaf333aa865425eaa1c73de3131162ba5",
+      "size_bytes": 262288
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_722.html",
+      "sha256": "ee72873c993c83747491cf8f78ce95f28e04a76e1be816257a00e4934bcd19ce",
+      "size_bytes": 264827
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_73.html",
+      "sha256": "1b79c0b75916bd8fe30c0a58c27c257cbb226d27c1009d3f0fef74f54c88e4a1",
+      "size_bytes": 241828
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_734.html",
+      "sha256": "849c67ba3af3424c9932f9f5a1caa282668b7b5ea42a2f23ec09facd83fa99fd",
+      "size_bytes": 263773
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_735.html",
+      "sha256": "3e6c70e0347b3efd3139aa11062df11a04f8d554cdcfb5045d7784f9e089b46c",
+      "size_bytes": 261387
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_739.html",
+      "sha256": "e948184d9734a974245c1e1dde63a9be3b07ef1932c028c1cdef408580f16f0b",
+      "size_bytes": 259310
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_74.html",
+      "sha256": "87fb46d3a4c96453a82d40daa0bb801050f43b844699ba8d0d075ca638372d72",
+      "size_bytes": 235373
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_742.html",
+      "sha256": "7fe2d048532cc1c7669aaf81aee41d1e89ba284c2373be5e00241a37eadad833",
+      "size_bytes": 263276
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_743.html",
+      "sha256": "c7cb77704d1d96fcef067c0bc634931f8077dff0e45726c028a4bd71c58ece93",
+      "size_bytes": 250450
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_75.html",
+      "sha256": "2267750b0f4c27249f4b1aabd8b4292538d4a01d3f4089a7c4af1887aca373b0",
+      "size_bytes": 265449
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_756.html",
+      "sha256": "8b0bcec820d5f9c3bf16f7bbe240658e15d14d2b056e1004261843a920e5bcf9",
+      "size_bytes": 266079
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_758.html",
+      "sha256": "8d346b1022535e21be4f515331ea0b374bc9d41a10a58ad68135e9ddbef49407",
+      "size_bytes": 262169
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_759.html",
+      "sha256": "8b3505c8c8d3e8cbfea48c9631170f666f3f439936996dcc9291c5bfc2b0ef02",
+      "size_bytes": 258566
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_76.html",
+      "sha256": "ae02c06d7aa6e2573c7fa74154bba9d192acbfd3ffee23687a9f97c17907bef4",
+      "size_bytes": 255411
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_762.html",
+      "sha256": "53542868d91e79839679538b4689f66be624d11cce999efc5a362e22dd351806",
+      "size_bytes": 254955
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_764.html",
+      "sha256": "f3976141e33f94bd4da9c212316a05e014eae6565b6e4e2a2fa3b321146eabcf",
+      "size_bytes": 256037
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_765.html",
+      "sha256": "046db1ed07b9aaaafb95c2452dd922b62f535cd1c5614eea9938d370cd4236af",
+      "size_bytes": 251092
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_766.html",
+      "sha256": "a5aaa057449f2b8ba86da73525a8d4354e89321dae53a9135a84754762dcf665",
+      "size_bytes": 265273
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_767.html",
+      "sha256": "87d2d85597df830e69387886ea7f02516c5e21d190c2440d5d972ae4a2d38fe9",
+      "size_bytes": 243633
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_770.html",
+      "sha256": "de948f34f26f9aac6821ef0dae09e489ae932aeacf7f35cf1a46016a0d22a0fe",
+      "size_bytes": 259955
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_778.html",
+      "sha256": "1fa1f0fd36b1ee1af39c7a5c642921e7821af664335e7e81f170ddc51753c523",
+      "size_bytes": 256680
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_779.html",
+      "sha256": "eb20db76e42965c161c8144a673dd9050b13f869c0a1fc099d128a7bf9240d65",
+      "size_bytes": 232028
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_784.html",
+      "sha256": "5246fa824c3b3e51749d27656d1d0695c69a3ffe2f8a3904a6c6bd413a7abcf3",
+      "size_bytes": 238879
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_787.html",
+      "sha256": "a75b7f4343224de48dee8fc9ba516beaf78902c975b924cfe9343a361e661a5e",
+      "size_bytes": 260851
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_789.html",
+      "sha256": "fd8afb8d5e7bc0fb79428d5e201ba6b0507cfee76f81cb657e602daab0e61e9d",
+      "size_bytes": 249573
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_79.html",
+      "sha256": "2c47ef95078bbcbea89d1de76e6779719b35d4628db072b1a4fe8ad93b03cc9e",
+      "size_bytes": 230215
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_791.html",
+      "sha256": "94b56af0ae5d791aea305a20d0b26aedb3dc7bce3a6b060fe34c6ae79f5d154f",
+      "size_bytes": 262053
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_796.html",
+      "sha256": "c9cf6b7227f7b73b8a5720dda80bb45616c496d9d97905e2c9e13b6368bb05f8",
+      "size_bytes": 258020
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_80.html",
+      "sha256": "8185e8de5528fec407d02187ca76c6b725a90c44a3e48950e48af6cf9308e614",
+      "size_bytes": 231775
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_806.html",
+      "sha256": "b55a15a9d588a7dc01b78f96586db75af98cf5b56fa3fc70f0dc2f69d15c80cf",
+      "size_bytes": 276704
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_81.html",
+      "sha256": "5d6328674589d5a36d5a5cec6316db3077bddacf38c7f54f0fa4521c1e6a71d9",
+      "size_bytes": 167290
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_820.html",
+      "sha256": "abc6f8dd87f7394a09a4066c4ee7af1534c75a14c9a2d92399bb3868e73706d3",
+      "size_bytes": 297768
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_828.html",
+      "sha256": "47f606fcccb043257873654ddac818d0ca61d465b11e931be965e1319aeb8b05",
+      "size_bytes": 263300
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_830.html",
+      "sha256": "312f7a326afc8996c980f46787376e3bf1b51536a40fe89e9ec485d99d40d30c",
+      "size_bytes": 232581
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_839.html",
+      "sha256": "70adae5268e496d6ec7027b027eebb3223d8117b160a6573b12cd1ea729cbf5d",
+      "size_bytes": 271836
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_843.html",
+      "sha256": "72088427e67ff08d71e8a26065821c2f1da8b46f9ec34a2eb538f67f01f0cd8b",
+      "size_bytes": 262663
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_844.html",
+      "sha256": "c7ee83627d0d410700fa7ce29ac42868598cd55e741e7e4266b2ea595bd0b204",
+      "size_bytes": 269038
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_857.html",
+      "sha256": "d6ed06eca1f9d0e116679ecc60b0ad0bd9f88b01aa10ce701b91aef66beabbd1",
+      "size_bytes": 269287
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_860.html",
+      "sha256": "dbef8ba3e9f5c7db7453c45d15c137d63245de975d2b437a0b339dad3e28d7b0",
+      "size_bytes": 264483
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_868.html",
+      "sha256": "e15f344182ebbe6de4f84ef56d822d0f219352c3f39d96aa00e6f9611460e369",
+      "size_bytes": 257057
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_872.html",
+      "sha256": "16d763a32998d04461c76fc3d90d47dc1e0fb13721e9aedd20b5bda3142222f2",
+      "size_bytes": 256326
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_876.html",
+      "sha256": "1ac57be6d26d7c1b06f1f8a0fb86ff3a6e046461b2a76bc6125e32d52958334c",
+      "size_bytes": 272522
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_879.html",
+      "sha256": "67fa580efe146f46b4c132bcfdc47f1100d85bf1d6d9b3f318d561572c54b3d3",
+      "size_bytes": 266556
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_88.html",
+      "sha256": "b432ec0cd0239e545f3cd036375bb05fc84adbce5f5055487a99a5d5fe493898",
+      "size_bytes": 169490
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_881.html",
+      "sha256": "2f2489b0528d83efb3012243fff890e8ab0e21cce7453540c50f644a087d119a",
+      "size_bytes": 257011
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_889.html",
+      "sha256": "7505ff1fdc17a58fc5d6b722357ad461651dfa6e0ab26b8b54e95770b20ca123",
+      "size_bytes": 264808
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_897.html",
+      "sha256": "9d75c2ed9e9ea0eafd487ab2146e3f584fd376710d0ae6d63a798ea5580f43d8",
+      "size_bytes": 265709
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_898.html",
+      "sha256": "8135770766022fa653008fcbe739686624f8829c8315f0bfb669f7e80248aeda",
+      "size_bytes": 258783
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_899.html",
+      "sha256": "a32e5f7b5a0f9165b8eba172e7005794381735b28921f14ce62f3025c3cb1a5d",
+      "size_bytes": 253652
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_9.html",
+      "sha256": "6c0b1006655cbfb611eaf1c9d74e37561af98e79f11c6ecda2080d08b9b4c2df",
+      "size_bytes": 171362
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_913.html",
+      "sha256": "51f81bca19295f4f8ef46a0ce5e80a3d5f23dd5b142dfb48cdef1851513d5688",
+      "size_bytes": 251919
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_92.html",
+      "sha256": "3c6a059a656fd0ae9e4ba61c1f674d0904480d968b5469dccdf146997012590e",
+      "size_bytes": 269674
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_931.html",
+      "sha256": "63c6c75b4c42a21ddc9e1ee29fa687c49073c96b2b20eff189377e5adda38c17",
+      "size_bytes": 259082
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_935.html",
+      "sha256": "f6217d302a24409dfaf243a26400a584a38c3bd9f0074bb1256630d6c3ee201f",
+      "size_bytes": 255588
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_938.html",
+      "sha256": "d27ac242844ca019b173b61b079b931cae58c83a50b9bbfbbcf64147a5d70f6d",
+      "size_bytes": 261237
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_939.html",
+      "sha256": "2215dbd4416193ccb26111593244b9414fb2b1d71df16e7e1a4a5631c1203248",
+      "size_bytes": 252043
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_94.html",
+      "sha256": "f1ec244c491edc5e2e995876afe33c129731834b6d4dc7f40ba33d3998cf8b57",
+      "size_bytes": 158881
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_943.html",
+      "sha256": "2d3fe13c4eceb003fef55dc3b198e8dff5f0484c632b9f9822baefd6d47e7ca6",
+      "size_bytes": 247147
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_947.html",
+      "sha256": "fd43fc7c1a831f9ee923ffad13678cb3526b456cbfdd1e6b311f8c4ea4832ddc",
+      "size_bytes": 252867
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_949.html",
+      "sha256": "5efac3af131bb9a3c149316bd4a9d6e7a52e997cc64133509c1918263c0fd4ef",
+      "size_bytes": 265230
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_95.html",
+      "sha256": "368e1bb19f410904163585aa98c64807360508c0dae7608e3e9bc88a15b253ae",
+      "size_bytes": 265046
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_957.html",
+      "sha256": "8670d29556a7b48b7469d0d01e44569105fe5a93f95722187983a391abba74a5",
+      "size_bytes": 264485
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_959.html",
+      "sha256": "993574368991e44cb61679ed909f6c5c64167026eea071b59c0ebab2a533a34e",
+      "size_bytes": 250494
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_961.html",
+      "sha256": "a62f1376576cc785727763228bf1fab86f1db069f24ec377b79bb2592a0f8c19",
+      "size_bytes": 327634
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_964.html",
+      "sha256": "926fec51a2e8da077952a9f244bef0b522adb049a6ac6f4e28cd62d2330f8e69",
+      "size_bytes": 261528
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_969.html",
+      "sha256": "2c8b5df58e76ba75adc1cfb24504c664d1f23681d42970d16702f1377d6dc811",
+      "size_bytes": 252937
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_97.html",
+      "sha256": "cdda1891229262344a9dbaf725837e556b2fa3313ca0ff0826fe7b1a26c4c4e7",
+      "size_bytes": 240070
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_975.html",
+      "sha256": "d67d50414db02103224a69b9dce30028653ee09abc397c0489214e6f7074f3a2",
+      "size_bytes": 247672
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_977.html",
+      "sha256": "e5a08e361a3b5ff8a8d2e0fe2882d6d3011e40d0970752129b3bb48038757642",
+      "size_bytes": 264777
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_980.html",
+      "sha256": "6aececa0167c53663a54dc44a8c6b88b2d917dabbf99e9a2224c557097bc57de",
+      "size_bytes": 234346
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_982.html",
+      "sha256": "1aff1e28dfc91ff1cbf26e9e78b8365be3a43c30837a64119c78db85ba76b6a8",
+      "size_bytes": 258187
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_985.html",
+      "sha256": "dbc6a293b94db2c7768631e5541a4b4166f0aaf0f915a4ca6adc3593733c05ff",
+      "size_bytes": 256997
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_99.html",
+      "sha256": "b699e277a9a841820db84cfde85af4afa68795b73a60230b4d6f1c9029e1942c",
+      "size_bytes": 250678
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_990.html",
+      "sha256": "b6f777bc1ac4c88c417629597d55ba4407ea792808642b6199b3eaea77b36c02",
+      "size_bytes": 267024
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_997.html",
+      "sha256": "723705cd75f170aca0f8ad688573d7b077ce1315fea3ca8ccda9c6cafcfffe39",
+      "size_bytes": 250650
+    },
+    {
+      "path": "backend/.quant_cache/ipo/tracker_2019.html",
+      "sha256": "929187bbbea4934fd3c1b93d777abd51ea0f5f0d8dd3954327df632bf51f4e55",
+      "size_bytes": 139947
+    },
+    {
+      "path": "backend/.quant_cache/ipo/tracker_2020.html",
+      "sha256": "bbeb5e4afe585ef78eb6b6e8a1cc47ad30843d9150fa4423b861c040f59af633",
+      "size_bytes": 174433
+    },
+    {
+      "path": "backend/.quant_cache/ipo/tracker_2021.html",
+      "sha256": "229d2b8b1074f5da2c604383202f7cbb283ce66662dd0c29303b16b4bda7b380",
+      "size_bytes": 319267
+    },
+    {
+      "path": "backend/.quant_cache/ipo/tracker_2022.html",
+      "sha256": "26d9cc9b533662f4f2823558c2b8438ceae6dcfe53f17397bfbf8173b18f1619",
+      "size_bytes": 239566
+    },
+    {
+      "path": "backend/.quant_cache/ipo/tracker_2023.html",
+      "sha256": "37b7e056bc7054c966ce141e9b48599d920d63c535c36da186164f841bd09fc2",
+      "size_bytes": 303175
+    },
+    {
+      "path": "backend/.quant_cache/ipo/tracker_2024.html",
+      "sha256": "424ec958a7b2a9f12b0386748d26f1cbeb92c3313f7cc80a6bb672f20e74c1a7",
+      "size_bytes": 399966
+    },
+    {
+      "path": "backend/.quant_cache/ipo/tracker_2025.html",
+      "sha256": "7ad43badccdff93fc6dc7ac779ae007ba272a33ff0990eb54db3ea0c6cb3ac24",
+      "size_bytes": 428871
+    },
+    {
+      "path": "backend/.quant_cache/ipo/tracker_2026.html",
+      "sha256": "95572aa7b49b727b2fa2bb47eda6b30dee44757e474925d7273d14da08fbb614",
+      "size_bytes": 428116
+    },
+    {
+      "path": "backend/.quant_cache/participants.pkl",
+      "sha256": "aae9fbb23dcc7239aea62a4fc392344362f9cd5e8961298c430caee118b53b37",
+      "size_bytes": 3549280
+    },
+    {
+      "path": "backend/.quant_cache/prices_10y_100.pkl",
+      "sha256": "7fd0ac21e25e4fc3b382578e15d4f827aeea0b1d483a64a2c04910c46e4da486",
+      "size_bytes": 9957989
     },
     {
       "path": "backend/Dockerfile",
@@ -427,6 +2952,11 @@
       "size_bytes": 1122
     },
     {
+      "path": "backend/app/api/quant.py",
+      "sha256": "59f4ffd11afdb548f3989160fd76a1a6f86661d56327724e84a8c5da0bb9d257",
+      "size_bytes": 8670
+    },
+    {
       "path": "backend/app/api/stocks.py",
       "sha256": "ff2509bb5edfb5841d1bc92f2140944c06533a71fee696859e88f9454e76462b",
       "size_bytes": 8721
@@ -448,8 +2978,8 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "9f555d72240b45c305d799a51333348d1e5d8bd6b914d8ac90ca5f9ac7a36bb0",
-      "size_bytes": 8649
+      "sha256": "4e569292cbaca2ba55e21db61a627c8f9000617d3cbfeff1b19ecad663b98de2",
+      "size_bytes": 8720
     },
     {
       "path": "backend/app/ml/__init__.py",
@@ -537,14 +3067,74 @@
       "size_bytes": 5702
     },
     {
+      "path": "backend/app/quant/__init__.py",
+      "sha256": "bbb7d4b253a5989ef5530f8fa1ffb06ce934db50c5067ec682d2ae8730d57922",
+      "size_bytes": 403
+    },
+    {
+      "path": "backend/app/quant/data.py",
+      "sha256": "30b8f6c4363cc5b39857fb75904424453d041d4ebc40a2cc2b24e8858b4dbc7d",
+      "size_bytes": 3164
+    },
+    {
+      "path": "backend/app/quant/delivery.py",
+      "sha256": "20e810397b41969ec2191b60b222b36e34b8f56764045e8593168a84b9524ba7",
+      "size_bytes": 5190
+    },
+    {
+      "path": "backend/app/quant/earnings.py",
+      "sha256": "659770adb019c3058df730235279741c0d619b7fcd10f5134d0ce2a0fa236c6c",
+      "size_bytes": 4016
+    },
+    {
+      "path": "backend/app/quant/features.py",
+      "sha256": "c1f9955cd98e615139793e01449a11bf89d5481bddc4f64b5b98405be03f2937",
+      "size_bytes": 5997
+    },
+    {
+      "path": "backend/app/quant/ipo_model.py",
+      "sha256": "5b17504675a35759d031e0189132c52af16f9afc8d92e9c4ee4dbdf119888ab0",
+      "size_bytes": 14243
+    },
+    {
+      "path": "backend/app/quant/news_events.py",
+      "sha256": "a1a245eb3675e3792062762d90d207ab6f8a80fbcf762c7a4c4475f6ddb52052",
+      "size_bytes": 11016
+    },
+    {
+      "path": "backend/app/quant/participants.py",
+      "sha256": "e2feb6f390a9bd2076efb3a71cffa1cd05dc4c822f72ea691700ec22cd7db9fe",
+      "size_bytes": 4219
+    },
+    {
+      "path": "backend/app/quant/store.py",
+      "sha256": "f3913f4df8211570863a5584a215844f22e2956ae57c516b2c2990438df486c7",
+      "size_bytes": 2559
+    },
+    {
+      "path": "backend/app/quant/trainer.py",
+      "sha256": "b7c850812a08632c5f7345f54f489adf1b789cce395e87d2d9c8bf5b5190d45b",
+      "size_bytes": 12564
+    },
+    {
+      "path": "backend/app/quant/universe.py",
+      "sha256": "a7c9fea5a8ec2fcef6f032d3c4b2be831c6121a69763b73b88560edd302ca705",
+      "size_bytes": 1555
+    },
+    {
+      "path": "backend/app/quant/validation.py",
+      "sha256": "26979d412d46527211ad1ae083371856ec8ac53f2a29f8a09393f3ba8433e901",
+      "size_bytes": 14751
+    },
+    {
       "path": "backend/app/scheduler/__init__.py",
       "sha256": "f048d776140691217b46d1457029a62cff45b1af6164021fa60202a989d43fa3",
       "size_bytes": 20
     },
     {
       "path": "backend/app/scheduler/jobs.py",
-      "sha256": "92bd3de19300818f89a6085e68874d04d0ed5b8e56ecb25648b4bc920050b75b",
-      "size_bytes": 13343
+      "sha256": "c5238f13183f2c46396b10a2ccb8c7e938e0675df711662984406991b42f765b",
+      "size_bytes": 13879
     },
     {
       "path": "backend/app/scrapers/__init__.py",
@@ -560,6 +3150,11 @@
       "path": "backend/app/scrapers/fundamentals_scraper.py",
       "sha256": "aa61cda04ab6fbbafabb5330a0a21c0998277a7dbb26045cff774049bcb3e13b",
       "size_bytes": 18584
+    },
+    {
+      "path": "backend/app/scrapers/ipo_history.py",
+      "sha256": "10e54050cd25e1419eed9b6f313e110461447011e54935d172f763da98d170e5",
+      "size_bytes": 10103
     },
     {
       "path": "backend/app/scrapers/ipo_scraper.py",
@@ -598,8 +3193,8 @@
     },
     {
       "path": "backend/requirements.txt",
-      "sha256": "5a45de3e19e88768c33cd2f964e944964b5372a81ba6030431c5742773107f2c",
-      "size_bytes": 591
+      "sha256": "2cf972c3f78a22b4db75848a5e676c1b236131197f70305197ebe860df47f88f",
+      "size_bytes": 658
     },
     {
       "path": "backend/run.py",
@@ -608,13 +3203,13 @@
     },
     {
       "path": "backend/schema.sql",
-      "sha256": "af990d9ee0fc4e32e1bf92841a8eb0c6cdd1212565ce42b24fd4040bd2529199",
-      "size_bytes": 8075
+      "sha256": "dc3170df09e972380b8bfcddc143392236a9fd731e2dd6f213288b015659009e",
+      "size_bytes": 9796
     },
     {
       "path": "backend/schema_complete.sql",
-      "sha256": "a6e103436d7eb9f3ffbbabeb1a7eb0911b7e5489c7b94237e133f60c37808b0c",
-      "size_bytes": 7799
+      "sha256": "2428fd0461358333409cc270e72fb076f12052aa2add9b69f0a0a586a858f77e",
+      "size_bytes": 9520
     },
     {
       "path": "backend/schema_phase1.sql",
@@ -625,6 +3220,16 @@
       "path": "backend/schema_v2.sql",
       "sha256": "a638bb59b84790cd73f4a8550d18ab47020bf4e6ea4f87eac0c0539a7f373a8c",
       "size_bytes": 2164
+    },
+    {
+      "path": "backend/tests/test_ipo.py",
+      "sha256": "8f8bec52ee8939b2aa54173ff005450734d2295e4206d878030ea86db4ca16dd",
+      "size_bytes": 3650
+    },
+    {
+      "path": "backend/tests/test_quant.py",
+      "sha256": "fd6e5a681daf95745979e91fd8bd379f504e332c9601cc08a2336c096e7202e1",
+      "size_bytes": 6100
     },
     {
       "path": "scripts/migrate_database.py",
@@ -640,6 +3245,11 @@
       "path": "scripts/seed_live_data.py",
       "sha256": "c779b87d42b893155ae04be12c90b6974fbd48e9a59453c77550d1e71e90ac6c",
       "size_bytes": 22760
+    },
+    {
+      "path": "scripts/train_quant.py",
+      "sha256": "b5afc5cbab1c1ef9845a283752b9e9bc592e52d02b46dcd121e93a3af0a1cce5",
+      "size_bytes": 3206
     },
     {
       "path": "scripts/verify_integrity.py",

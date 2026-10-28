@@ -212,3 +212,56 @@ CREATE TABLE IF NOT EXISTS stock_screener_cache (
 
 CREATE INDEX IF NOT EXISTS idx_ssc_score ON stock_screener_cache(composite_score DESC);
 CREATE INDEX IF NOT EXISTS idx_ssc_grade ON stock_screener_cache(research_grade);
+
+
+-- 12. Quant engine: tested model runs (metrics + backtest per model)
+CREATE TABLE IF NOT EXISTS quant_model_runs (
+    id SERIAL PRIMARY KEY,
+    model_key VARCHAR(40) NOT NULL,
+    strategy VARCHAR(20),
+    horizon_days INTEGER,
+    description TEXT,
+    model_type VARCHAR(40),
+    data_end DATE,
+    edge_verified BOOLEAN DEFAULT FALSE,
+    metrics JSONB,
+    backtest JSONB,
+    folds JSONB,
+    trained_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_qmr_key_time ON quant_model_runs(model_key, trained_at DESC);
+
+-- 13. Quant engine: latest prediction per model and symbol
+CREATE TABLE IF NOT EXISTS quant_predictions (
+    model_key VARCHAR(40) NOT NULL,
+    symbol VARCHAR(20) NOT NULL,
+    run_id INTEGER REFERENCES quant_model_runs(id) ON DELETE CASCADE,
+    as_of DATE,
+    rank INTEGER,
+    probability DECIMAL(6,4),
+    payload JSONB,
+    PRIMARY KEY (model_key, symbol)
+);
+
+CREATE INDEX IF NOT EXISTS idx_qp_rank ON quant_predictions(model_key, rank);
+
+-- 14. News event study: measured move after each news-stock tag
+CREATE TABLE IF NOT EXISTS news_outcomes (
+    news_id INTEGER REFERENCES news(id) ON DELETE CASCADE,
+    symbol VARCHAR(20) NOT NULL,
+    event_date DATE,
+    base_close DECIMAL(14,4),
+    ret_1d DOUBLE PRECISION,
+    ret_5d DOUBLE PRECISION,
+    ret_20d DOUBLE PRECISION,
+    abn_1d DOUBLE PRECISION,
+    abn_5d DOUBLE PRECISION,
+    abn_20d DOUBLE PRECISION,
+    tradable_abn_5d DOUBLE PRECISION,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (news_id, symbol)
+);
+
+CREATE INDEX IF NOT EXISTS idx_no_symbol ON news_outcomes(symbol, event_date DESC);
+CREATE INDEX IF NOT EXISTS idx_no_event_date ON news_outcomes(event_date DESC);
