@@ -2,9 +2,9 @@
   "project": "StockSentinel",
   "description": "Cryptographically Sealed Project Manifest & Source Integrity Record",
   "security_grade": "Grade-1 (Cryptographic SHA-256 Sealed)",
-  "sealed_at_utc": "2026-10-28T11:45:16.082744+00:00",
-  "master_root_hash": "8007d4b171bdb827e4f8274f46b12e4c8cae4e9d97032f4204f5737c8c3c6d86",
-  "total_sealed_files": 650,
+  "sealed_at_utc": "2026-10-28T12:47:58.817992+00:00",
+  "master_root_hash": "f3dfa3050243c01637442f7768e8fb435cdd4254b2173798daf529f91fb5a460",
+  "total_sealed_files": 652,
   "files": [
     {
       "path": ".github/workflows/train-quant.yml",
@@ -398,13 +398,13 @@
     },
     {
       "path": "backend/.quant_cache/delivery.pkl",
-      "sha256": "883314311d07b277b89cb073760d2509ff58317e5553d43314ade4a2d709a47f",
-      "size_bytes": 8251592
+      "sha256": "fc0d2c0693c8f4bba7f25c3e303e14c93b612c7de0e97807b2a6a19077ba28e4",
+      "size_bytes": 8266362
     },
     {
       "path": "backend/.quant_cache/earnings.pkl",
-      "sha256": "81d289126be63394ebe1fcc952abe5418108098c1dd87786fe39319fe9c046bd",
-      "size_bytes": 198583
+      "sha256": "db423cbaa598b6cac9d20d5fa4f6d4ee78191b268a6f18a7cd3cf0c3481a1796",
+      "size_bytes": 198625
     },
     {
       "path": "backend/.quant_cache/ipo/ipo_1.html",
@@ -1392,6 +1392,11 @@
       "size_bytes": 253433
     },
     {
+      "path": "backend/.quant_cache/ipo/ipo_1728.html",
+      "sha256": "a97638af6569a4505a68b648d624be101b8b2a28c651acecef4fdf36c201cff9",
+      "size_bytes": 331095
+    },
+    {
       "path": "backend/.quant_cache/ipo/ipo_174.html",
       "sha256": "96b5501ba6e72a9e1dc88074292399d71397305efb65f08b4174792602fcb10a",
       "size_bytes": 241618
@@ -1890,6 +1895,11 @@
       "path": "backend/.quant_cache/ipo/ipo_2305.html",
       "sha256": "b7909d1f2ab28dfa709ed87fa8079d04c01fabe331c55c7b5fe7bc375313e0f2",
       "size_bytes": 461542
+    },
+    {
+      "path": "backend/.quant_cache/ipo/ipo_2306.html",
+      "sha256": "a1774de0e9864a02de94b121af5d8ea735cbc46b7fc9424c4656149a5e77d4d6",
+      "size_bytes": 672707
     },
     {
       "path": "backend/.quant_cache/ipo/ipo_232.html",
@@ -2893,18 +2903,18 @@
     },
     {
       "path": "backend/.quant_cache/ipo/tracker_2026.html",
-      "sha256": "95572aa7b49b727b2fa2bb47eda6b30dee44757e474925d7273d14da08fbb614",
-      "size_bytes": 428116
+      "sha256": "c8cdaf9e58e8f678c74bbc06d1b4cffc41885444ab5b6a7454b310994b3ab184",
+      "size_bytes": 429753
     },
     {
       "path": "backend/.quant_cache/participants.pkl",
-      "sha256": "aae9fbb23dcc7239aea62a4fc392344362f9cd5e8961298c430caee118b53b37",
-      "size_bytes": 3549280
+      "sha256": "cb5c05cc1a980ab9cf72d2fc48890da40544f0ed915b3945d90497c3ff4a3bc3",
+      "size_bytes": 3553510
     },
     {
       "path": "backend/.quant_cache/prices_10y_100.pkl",
-      "sha256": "7fd0ac21e25e4fc3b382578e15d4f827aeea0b1d483a64a2c04910c46e4da486",
-      "size_bytes": 9957989
+      "sha256": "29430452d9bb426e5a6bde21d004abd02c8b2d4b194ec33135fb3dcb37bb62bf",
+      "size_bytes": 9953962
     },
     {
       "path": "backend/Dockerfile",
@@ -3248,8 +3258,8 @@
     },
     {
       "path": "scripts/train_quant.py",
-      "sha256": "b5afc5cbab1c1ef9845a283752b9e9bc592e52d02b46dcd121e93a3af0a1cce5",
-      "size_bytes": 3206
+      "sha256": "cfdf0cad670def16808cb55363efcb528287ca122385ba573d8ae6ce814bc050",
+      "size_bytes": 3342
     },
     {
       "path": "scripts/verify_integrity.py",
