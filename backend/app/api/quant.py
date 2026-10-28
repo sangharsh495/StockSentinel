@@ -46,6 +46,12 @@ def _trust(run: dict) -> dict:
 
 
 def _verdict(edge: bool, m: dict, bt: dict) -> str:
+    track = m.get("coverage_track_record")
+    if track:
+        c5 = (track.get("5d") or {}).get("p80", {}).get("coverage")
+        return (f"Coverage promise held: the 80% ranges contained the real closing price "
+                f"{c5 * 100:.1f}% of the time on years of unseen days (5-day horizon)."
+                if edge and c5 else "Coverage promise not met on recent history; ranges shown for context.")
     if edge:
         return "Tested edge: beat chance and the hold-everything basket after costs on years of unseen data."
     if m.get("ranking_skill_verified"):
@@ -120,6 +126,13 @@ async def stock_view(symbol: str):
         }
         for r in rows
     }
+    ranges = await fetchrow(
+        """
+        SELECT p.payload, r.metrics FROM quant_predictions p JOIN quant_model_runs r ON r.id = p.run_id
+        WHERE p.model_key = 'price_ranges' AND p.symbol = $1
+        """,
+        sym,
+    )
     news = await fetch(
         """
         SELECT n.title, n.source, n.published_at, nsi.impact_direction, nsi.impact_score,
@@ -137,7 +150,14 @@ async def stock_view(symbol: str):
             v = n.pop(k, None)
             n[k + "_pct"] = round(v * 100, 2) if v is not None else None
         n["impact_score"] = float(n["impact_score"]) if n.get("impact_score") is not None else None
-    return {"symbol": sym, "strategies": strategies, "news_reactions": news}
+    price_ranges = None
+    if ranges:
+        track = (_j(ranges["metrics"]) or {}).get("coverage_track_record", {})
+        price_ranges = {**_j(ranges["payload"]),
+                        "track_record": {h: {lv: {"promised": int(lv[1:]) / 100, "achieved": v.get("coverage"),
+                                                  "worst_quarter": v.get("worst_quarter_coverage")}
+                                             for lv, v in d.items()} for h, d in track.items()}}
+    return {"symbol": sym, "strategies": strategies, "price_ranges": price_ranges, "news_reactions": news}
 
 
 @router.get("/market-outlook")
@@ -215,7 +235,7 @@ async def ipo_odds():
             "oos_ipos", "oos_start", "oos_end", "model_mae_pct", "gmp_rule_mae_pct",
             "model_auc_positive_listing", "gmp_rule_auc_positive_listing",
             "model_direction_accuracy", "gmp_rule_direction_accuracy",
-            "apply_model_p60", "apply_gmp_positive", "apply_all", "top_drivers")},
+            "apply_model_p60", "apply_gmp_positive", "apply_all", "top_drivers", "confidence_tiers")},
         "ipos": [_j(r["payload"]) for r in rows],
     }
 
@@ -228,3 +248,54 @@ async def data_quality():
         return {"status": "not_checked_yet"}
     return {"status": "ok", "checked_at": run["trained_at"].isoformat() if run.get("trained_at") else None,
             **(_j(run.get("metrics")) or {})}
+
+
+@router.get("/ranges")
+async def ranges_all(limit: int = Query(200, ge=1, le=2000)):
+    """Guaranteed-coverage price ranges (80% / 95%) for every tracked stock, plus the method's track record."""
+    run = await _latest_run("price_ranges")
+    if not run:
+        return {"status": "not_trained", "stocks": []}
+    rows = await fetch(
+        "SELECT payload FROM quant_predictions WHERE model_key = 'price_ranges' ORDER BY symbol LIMIT $1", limit)
+    return {"status": "ok", "trust": _trust(run),
+            "track_record": (_j(run.get("metrics")) or {}).get("coverage_track_record"),
+            "stocks": [_j(r["payload"]) for r in rows]}
+
+
+@router.get("/scanner")
+async def scanner():
+    """
+    Tonight's 20-stock watchlist from the whole-market scan, by setup, each
+    with its historical track record, guaranteed-coverage ranges, live
+    market-hours status, and the live scorecard of earlier picks.
+    """
+    run = await _latest_run("market_scanner")
+    if not run:
+        return {"status": "not_scanned_yet", "picks": []}
+    rows = await fetch(
+        """
+        SELECT p.payload, l.price, l.change_pct, l.status AS live_status, l.updated_at
+        FROM quant_predictions p LEFT JOIN live_watch l ON l.symbol = p.symbol
+        WHERE p.model_key = 'market_scanner' ORDER BY p.rank
+        """
+    )
+    picks = []
+    for r in rows:
+        p = _j(r["payload"])
+        if r.get("price") is not None:
+            p["live"] = {"price": float(r["price"]), "change_pct": r["change_pct"],
+                         "status": r["live_status"],
+                         "updated_at": r["updated_at"].isoformat() if r.get("updated_at") else None}
+        picks.append(p)
+    card_run = await _latest_run("scanner_scorecard")
+    m = _j(run.get("metrics")) or {}
+    return {
+        "status": "ok", "as_of": str(run["data_end"]) if run.get("data_end") else None,
+        "description": run.get("description"),
+        "category_track_record": m.get("category_track_record"),
+        "watchlist_categories": m.get("watchlist_categories"),
+        "today_counts": m.get("today_counts"),
+        "live_scorecard": (_j(card_run.get("metrics")) if card_run else {"status": "collecting"}),
+        "picks": picks,
+    }

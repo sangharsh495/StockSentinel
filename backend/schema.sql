@@ -270,3 +270,24 @@ CREATE TABLE IF NOT EXISTS news_outcomes (
 
 CREATE INDEX IF NOT EXISTS idx_no_symbol ON news_outcomes(symbol, event_date DESC);
 CREATE INDEX IF NOT EXISTS idx_no_event_date ON news_outcomes(event_date DESC);
+
+
+-- 15. Scanner live scorecard: every watchlist pick, scored after 5 trading days
+CREATE TABLE IF NOT EXISTS scanner_log (
+    date DATE NOT NULL,
+    symbol VARCHAR(30) NOT NULL,
+    category VARCHAR(40) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (date, symbol)
+);
+
+-- 16. Market-hours live tracking of tonight's watchlist
+CREATE TABLE IF NOT EXISTS live_watch (
+    symbol VARCHAR(30) PRIMARY KEY,
+    price DECIMAL(14,4),
+    change_pct DOUBLE PRECISION,
+    range_low DECIMAL(14,4),
+    range_high DECIMAL(14,4),
+    status VARCHAR(20),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

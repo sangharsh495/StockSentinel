@@ -280,6 +280,14 @@ def job_news_outcomes():
     _run_async(_run())
 
 
+def job_live_watch():
+    """Market hours: live prices for tonight's watchlist vs their 80% ranges."""
+    async def _run():
+        from app.quant.live_watch import refresh_live_watch
+        await _log_job("live_watch", refresh_live_watch)
+    _run_async(_run())
+
+
 # ---------------------------------------------------------------------------
 # Scheduler factory
 # ---------------------------------------------------------------------------
@@ -411,6 +419,14 @@ def create_scheduler() -> BackgroundScheduler:
         CronTrigger(hour="17", minute="30"),
         id="news_outcomes",
         name="News Outcome Measurement",
+    )
+
+    # --- Live watchlist tracking: every 15 min, Mon-Fri 9:15-15:30 IST ---
+    scheduler.add_job(
+        job_live_watch,
+        CronTrigger(day_of_week="mon-fri", hour="9-15", minute="*/15"),
+        id="live_watch",
+        name="Live Watchlist Tracking",
     )
 
     logger.info(f"Scheduler configured with {len(scheduler.get_jobs())} jobs")

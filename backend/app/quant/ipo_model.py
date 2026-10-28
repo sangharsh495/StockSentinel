@@ -304,6 +304,16 @@ def train_ipo_model(history_rows: List[Dict], current_rows: List[Dict],
     mm = dict(oos.attrs.get("multi_model", {}))
     metrics = evaluate_ipo(oos)
 
+    # Confidence tiers: how past IPOs at each confidence level really listed
+    tiers = []
+    for lo_p, hi_p, label in ((0.95, 1.01, "95%+"), (0.9, 0.95, "90-95%"), (0.8, 0.9, "80-90%"),
+                              (0.6, 0.8, "60-80%"), (0.3, 0.6, "30-60%"), (0.0, 0.3, "under 30%")):
+        t = oos[(oos["prob_gain"] >= lo_p) & (oos["prob_gain"] < hi_p)]
+        tiers.append({"tier": label, "lo": lo_p, "hi": hi_p, "ipos": int(len(t)),
+                      "listed_positive_pct": _r((t["listing_gain_pct"] > 0).mean() * 100, 1) if len(t) else None,
+                      "avg_listing_gain_pct": _r(t["listing_gain_pct"].mean(), 1) if len(t) else None})
+    metrics["confidence_tiers"] = tiers
+
     # Residual spread per predicted-gain band -> honest range for new IPOs
     oos = oos.assign(resid=oos["listing_gain_pct"] - oos["pred_gain"])
     lo_q, hi_q = np.percentile(oos["resid"], [10, 90])
@@ -338,6 +348,9 @@ def train_ipo_model(history_rows: List[Dict], current_rows: List[Dict],
                     "gmp_check": r.get("gmp_check"),
                     "gmp_sources": r.get("gmp_sources") if isinstance(r.get("gmp_sources"), dict) else None,
                     "gmp_gap_pct_points": _r(r.get("gmp_gap_pct_points"), 2),
+                    "track_record_at_this_confidence": next(
+                        ({k: t[k] for k in ("tier", "ipos", "listed_positive_pct", "avg_listing_gain_pct")}
+                         for t in tiers if t["lo"] <= p < t["hi"]), None),
                 })
                 if r.get("gmp_check") == "disagree":
                     preds[-1]["note"] = r.get("gmp_warning")
