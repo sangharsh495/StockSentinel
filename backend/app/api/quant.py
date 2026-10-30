@@ -335,6 +335,10 @@ async def multibagger():
                    f"average liquid stock ({stack.get('lift_top_decile')}x). Most picks still won't double.")
     else:
         verdict = "No proven edge yet on unseen data: treat this list as research leads, not buy signals."
+    mom = m.get("momentum_12m_alone") or {}
+    if mom and not m.get("beats_momentum_baseline", True):
+        verdict += (f" Honest note: simple 12-month momentum alone did better in the same test "
+                    f"({mom.get('top_decile_hit_pct')}% doubled), so the zoo does not yet beat the classic factor.")
     return {
         "status": "ok", "as_of": str(run["data_end"]) if run.get("data_end") else None,
         "edge_verified": bool(run.get("edge_verified")), "verdict": verdict,
@@ -343,7 +347,10 @@ async def multibagger():
                                       "families", "targets", "views", "fdr_q")},
         "fdr_survivors": len(m.get("fdr_survivors") or []),
         "honest_test": {k: v for k, v in stack.items() if k != "by_month"},
-        "baselines": {"zoo_average": {k: v for k, v in (m.get("zoo_average") or {}).items() if k != "by_month"},
+        "beats_momentum_baseline": m.get("beats_momentum_baseline"),
+        "baselines": {"momentum_12m_alone": {k: v for k, v in (m.get("momentum_12m_alone") or {}).items()
+                                             if k != "by_month"},
+                      "zoo_average": {k: v for k, v in (m.get("zoo_average") or {}).items() if k != "by_month"},
                       "price_and_flow_only": {k: v for k, v in (m.get("price_and_flow_only") or {}).items()
                                               if k != "by_month"}},
         "lift_by_score_bucket": m.get("lift_by_score_bucket"),
