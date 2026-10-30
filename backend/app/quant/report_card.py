@@ -531,3 +531,46 @@ def nightly_cards_and_income(max_fetch: int = 400) -> List[Dict]:
     cards = run_report_cards(W, fund)
     income = build_income(fund, equities_only(W)["Close"], cards["predictions"])
     return [cards, income]
+
+
+def verdicts_to_log(cards: Dict, per_side: int = 25) -> List[Tuple]:
+    """Tonight's strongest Buy and Sell calls per verified holding period, for the live ledger."""
+    rows = []
+    preds = cards.get("predictions") or []
+    tests = (cards.get("metrics") or {}).get("horizon_tests") or {}
+    for name in HORIZONS:
+        if not (tests.get(name) or {}).get("verified"):
+            continue
+        buys = sorted((p for p in preds if p["verdicts"][name]["verdict"] == "buy"),
+                      key=lambda p: -p["verdicts"][name]["chance_beat_market_pct"])[:per_side]
+        sells = sorted((p for p in preds if p["verdicts"][name]["verdict"] == "sell"),
+                       key=lambda p: p["verdicts"][name]["chance_beat_market_pct"])[:per_side]
+        for p in buys + sells:
+            v = p["verdicts"][name]
+            rows.append((p["as_of"], p["symbol"], name, v["verdict"], v["chance_beat_market_pct"]))
+    return rows
+
+
+def score_verdict_log(W: Dict[str, pd.DataFrame], rows: List[dict]) -> Dict:
+    """Live scorecard: logged Buy / Sell calls whose holding period has passed, vs the median liquid stock."""
+    C = W["Close"].ffill(limit=5)
+    liq = W["TurnoverLacs"].rolling(60, min_periods=40).median() >= MIN_TURNOVER_LACS
+    out: Dict[str, Dict[str, list]] = {}
+    for r in rows:
+        h = HORIZONS.get(r["horizon"])
+        d = pd.Timestamp(r["date"])
+        i = C.index.searchsorted(d, side="right") - 1
+        if h is None or i < 0 or i + h >= len(C) or r["symbol"] not in C.columns:
+            continue
+        ret = C.iloc[i + h] / C.iloc[i] - 1
+        rr = ret.get(r["symbol"])
+        if pd.isna(rr):
+            continue
+        ex = float(rr - ret[liq.iloc[i]].median())
+        out.setdefault(r["horizon"], {}).setdefault(r["verdict"], []).append(ex)
+    card = {"status": "ok" if out else "waiting", "logged_calls": len(rows),
+            "note": "Real calls saved each night, scored once their holding period has passed (price return vs the median liquid stock)."}
+    for name, sides in out.items():
+        card[name] = {side: {"scored": len(xs), "beat_market_pct": round(float(np.mean(np.array(xs) > 0)) * 100, 1),
+                             "avg_excess_pct": round(float(np.mean(xs)) * 100, 2)} for side, xs in sides.items()}
+    return card

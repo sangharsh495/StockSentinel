@@ -2,9 +2,17 @@ name: Train quant models
 
 on:
   schedule:
-    # 12:30 UTC = 6:00 PM IST, Monday to Friday (after NSE close)
+    # 6:00 PM IST, Monday to Friday (after NSE close), plus two backup starts
+    # (9:00 PM and 12:00 AM IST). GitHub sometimes delays or drops scheduled
+    # runs; a backup skips itself when tonight's run already finished.
     - cron: "30 12 * * 1-5"
+    - cron: "30 15 * * 1-5"
+    - cron: "30 18 * * 1-5"
   workflow_dispatch:
+
+concurrency:
+  group: train-quant
+  cancel-in-progress: false
 
 jobs:
   train:
@@ -25,15 +33,26 @@ jobs:
           restore-keys: quant-cache-
       - name: Install dependencies
         run: pip install -r backend/requirements.txt
+      - name: Skip if tonight's run already finished
+        id: guard
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python ../scripts/freshness.py --guard
       - name: Run tests
+        if: steps.guard.outputs.done != 'true'
         working-directory: backend
         run: pip install pytest && python -m pytest -q tests
       - name: Train, test and publish models
+        if: steps.guard.outputs.done != 'true'
         working-directory: backend
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: python ../scripts/train_quant.py --out quant_report.json
       - uses: actions/upload-artifact@v4
+        if: steps.guard.outputs.done != 'true'
         with:
           name: quant-report
           path: backend/quant_report.json

@@ -52,3 +52,15 @@ def test_governance_grade():
     for c in ("no_dilution", "no_circuit_games", "low_debt", "moderate_debt", "cash_backed_profit"):
         row[c] = 1
     assert rc.governance_grade(row)[0] == "A"
+
+
+def test_live_verdict_ledger_scores_after_the_period():
+    W = _market(n_days=400, n=60, seed=9)
+    days = W["Close"].index
+    rows = [{"date": days[300], "symbol": "S001", "horizon": "1w", "verdict": "buy"},
+            {"date": days[300], "symbol": "S002", "horizon": "1w", "verdict": "sell"},
+            {"date": days[-2], "symbol": "S003", "horizon": "1w", "verdict": "buy"},      # too recent
+            {"date": days[300], "symbol": "S004", "horizon": "1y", "verdict": "buy"}]     # too recent for 1 year
+    card = rc.score_verdict_log(W, rows)
+    assert card["status"] == "ok" and card["logged_calls"] == 4
+    assert card["1w"]["buy"]["scored"] == 1 and card["1w"]["sell"]["scored"] == 1 and "1y" not in card

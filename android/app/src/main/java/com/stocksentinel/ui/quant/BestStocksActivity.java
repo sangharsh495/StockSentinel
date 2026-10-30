@@ -174,10 +174,14 @@ public class BestStocksActivity extends AppCompatActivity {
             trustVerdict.setText(verified
                     ? "Buy = likely to beat the median stock over this period. Only stocks with governance A or B and no red flags are listed."
                     : "This holding period did not prove itself on unseen history, so every verdict here is Hold. Listed by score for research only.");
+            JsonObject liveBuy = obj(obj(obj(body, "live_scorecard"), "this_period"), "buy");
+            String live = liveBuy == null ? "Live record: collecting real calls"
+                    : String.format(Locale.US, "Live: Buy calls beat the market %s of %s scored calls",
+                    pct(liveBuy, "beat_market_pct", false), num(liveBuy, "scored").replace(".0", ""));
             trustStats.setText(String.format(Locale.US,
-                    "On unseen months: Buy picks beat the market %s · Sell picks %s · t = %s",
+                    "On unseen months: Buy picks beat the market %s · Sell picks %s · t = %s\n%s",
                     pct(t, "buy_beat_market_pct", false), pct(t, "sell_beat_market_pct", false),
-                    num(t, "buy_minus_sell_t")));
+                    num(t, "buy_minus_sell_t"), live));
         }
     }
 
