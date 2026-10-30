@@ -193,6 +193,34 @@ public class ReportCardActivity extends AppCompatActivity {
                 : String.format(Locale.US, "Yield %.2f%% · ₹%s per share in 12 months · paid in %s of the last 5 years · payout %s",
                 y, num(div, "dps_ttm"), n(dbl(div, "years_paid_of_5")), pct(div, "payout_pct")));
 
+        JsonObject income = obj(card, "income");
+        if (income != null) {
+            StringBuilder ib = new StringBuilder(dividendText.getText());
+            ib.append(String.format(Locale.US, "\nIncome Score %s/100 · %s · pays %s",
+                    n(dbl(income, "income_score")), str(income, "rating_badge"), str(income, "frequency")));
+            JsonArray months = arr(income, "usual_months");
+            if (months != null && months.size() > 0) {
+                ib.append(" in ");
+                String[] names = new java.text.DateFormatSymbols(Locale.US).getShortMonths();
+                for (int i = 0; i < months.size(); i++) {
+                    if (months.get(i).isJsonNull()) continue;
+                    int m = months.get(i).getAsInt();
+                    if (i > 0) ib.append(", ");
+                    if (m >= 1 && m <= 12) ib.append(names[m - 1]);
+                }
+            }
+            ib.append(String.format(Locale.US, "\nPaid %s of the last 10 years · %s cuts in 5 years · ₹%s a year per ₹1 lakh",
+                    n(dbl(income, "years_paid_of_10")), n(dbl(income, "cuts_last_5y")),
+                    n(dbl(income, "income_per_lakh_rs"))));
+            JsonArray next = arr(income, "next_expected");
+            if (next != null && next.size() > 0 && next.get(0).isJsonObject()) {
+                JsonObject nx = next.get(0).getAsJsonObject();
+                ib.append(String.format(Locale.US, "\nNext expected: around %s, about ₹%s per share",
+                        str(nx, "expected_date"), num(nx, "expected_amount")));
+            }
+            dividendText.setText(ib.toString());
+        }
+
         bindChecks(arr(card, "checks"));
     }
 

@@ -406,6 +406,12 @@ async def report_card(symbol: str, horizon: str = Query("1y")):
                        "tested": {k: t.get(k) for k in ("pass_minus_fail_pct", "pass_beat_market_pct", "t", "verified",
                                                          "direction", "months")}})
     card["checks"] = checks
+    inc = await fetchrow("SELECT payload FROM quant_predictions WHERE model_key = 'dividend_income' AND symbol = $1", sym)
+    if inc:
+        p = _j(inc["payload"])
+        card["income"] = {k: p.get(k) for k in ("income_score", "rating_badge", "frequency", "usual_months",
+                                                 "years_paid_of_10", "streak_years", "cuts_last_5y",
+                                                 "dps_5y_growth_pct", "next_expected", "income_per_lakh_rs")}
     return {"status": "ok", "horizon": horizon, **_card_context(run), "card": card}
 
 
@@ -449,3 +455,87 @@ async def best_stocks(kind: str = Query("stocks", description="stocks or dividen
     return {"status": "ok", "kind": kind, "horizon": horizon, **_card_context(run),
             "verified": (m.get("dividend_backtest") or {}).get("verified") if kind == "dividend" else ht.get("verified"),
             "stocks": out}
+
+
+INCOME_SORTS = {"score": "income_score", "yield": "yield_pct", "next": "next"}
+
+
+@router.get("/income/calendar")
+async def income_calendar(
+    month: int = Query(0, ge=0, le=12, description="1-12 for companies that usually pay that month; 0 = all"),
+    min_yield: float = Query(0, ge=0, le=50, description="minimum dividend yield %"),
+    min_score: float = Query(0, ge=0, le=100, description="minimum Income Score"),
+    min_years: int = Query(0, ge=0, le=10, description="paid in at least this many of the last 10 years"),
+    frequency: Optional[str] = Query(None, description="quarterly, half-yearly, yearly or irregular"),
+    governance: Optional[str] = Query(None, description="A or AB"),
+    no_cuts: bool = Query(False, description="no dividend cut in the last 5 years"),
+    income_buy_only: bool = Query(False, description="only STRONG INCOME verdicts"),
+    sort: str = Query("score", description="score, yield or next"),
+    limit: int = Query(100, ge=1, le=500),
+):
+    """Dividend payers by usual pay month, with every filter for building a steady income list."""
+    if sort not in INCOME_SORTS:
+        raise HTTPException(400, f"sort must be one of {list(INCOME_SORTS)}")
+    run = await _latest_run("dividend_income")
+    if not run:
+        return {"status": "not_trained", "stocks": []}
+    rows = await fetch(
+        """
+        SELECT p.payload, s.name FROM quant_predictions p
+        LEFT JOIN stocks s ON UPPER(s.symbol) = p.symbol AND s.exchange = 'NSE'
+        WHERE p.model_key = 'dividend_income'
+        """
+    )
+    out = []
+    for r in rows:
+        p = _j(r["payload"])
+        if month and month not in (p.get("usual_months") or []):
+            continue
+        if (p.get("yield_pct") or 0) < min_yield or (p.get("income_score") or 0) < min_score:
+            continue
+        if (p.get("years_paid_of_10") or 0) < min_years:
+            continue
+        if frequency and p.get("frequency") != frequency:
+            continue
+        if governance and (p.get("governance") or "") not in governance.upper():
+            continue
+        if no_cuts and (p.get("cuts_last_5y") or 0) > 0:
+            continue
+        if income_buy_only and p.get("income_verdict") != "income_buy":
+            continue
+        nxt = p.get("next_expected") or []
+        if month:
+            nxt = [n for n in nxt if n.get("month") == month] or nxt
+        first = nxt[0] if nxt else {}
+        # field names shared with the app's dividend rows
+        p.update({"company_name": r["name"] or p["symbol"], "amount": first.get("expected_amount"),
+                  "ex_date": first.get("expected_date"), "status": "expected", "currency": "INR",
+                  "current_price": p.get("price"), "dividend_yield_pct": p.get("yield_pct")})
+        out.append(p)
+    if sort == "next":
+        out.sort(key=lambda p: p.get("ex_date") or "9999")
+    else:
+        out.sort(key=lambda p: -(p.get(INCOME_SORTS[sort]) or 0))
+    m = _j(run.get("metrics")) or {}
+    yields = [p["yield_pct"] for p in out if p.get("yield_pct") is not None]
+    return {
+        "status": "ok", "as_of": str(run["data_end"]) if run.get("data_end") else None,
+        "month": month, "count": len(out), "month_counts": m.get("month_counts"),
+        "stats": {"total_payouts": len(out), "avg_yield_pct": round(sum(yields) / len(yields), 2) if yields else 0.0,
+                  "high_yield_count": sum(1 for y in yields if y > 3)},
+        "paying_power_backtest": m.get("paying_power_backtest"), "verdict_rules": m.get("verdict_rules"),
+        "dividends": out[:limit],
+    }
+
+
+@router.get("/income/{symbol}")
+async def income_profile(symbol: str):
+    """One company's dividend record: years paid, cuts, usual months, next expected dates and Income Score."""
+    sym = symbol.upper().strip()
+    if not SYMBOL_RE.match(sym):
+        raise HTTPException(400, "invalid symbol")
+    row = await fetchrow("SELECT payload FROM quant_predictions WHERE model_key = 'dividend_income' AND symbol = $1", sym)
+    if not row:
+        return {"status": "not_a_regular_payer", "symbol": sym,
+                "note": "No dividend in the last 3 years, or not a liquid NSE company."}
+    return {"status": "ok", "profile": _j(row["payload"])}

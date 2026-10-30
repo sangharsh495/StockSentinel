@@ -248,6 +248,20 @@ public interface StockApi {
     @GET("api/quant/report-card/{symbol}")
     Call<JsonObject> getReportCard(@Path("symbol") String symbol, @Query("horizon") String horizon);
 
+    @GET("api/quant/income/calendar")
+    Call<JsonObject> getIncomeCalendar(
+            @Query("month") int month,
+            @Query("min_yield") double minYield,
+            @Query("min_score") double minScore,
+            @Query("min_years") int minYears,
+            @Query("frequency") String frequency,
+            @Query("governance") String governance,
+            @Query("no_cuts") boolean noCuts,
+            @Query("income_buy_only") boolean incomeBuyOnly,
+            @Query("sort") String sort,
+            @Query("limit") int limit
+    );
+
     @GET("api/quant/best")
     Call<JsonObject> getBestStocks(
             @Query("kind") String kind,
