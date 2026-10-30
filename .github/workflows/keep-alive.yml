@@ -1,0 +1,34 @@
+name: Keep server awake
+
+# Render's free plan sleeps a server after 15 minutes without visitors, which
+# also stops its background jobs (live prices, news). The server pings itself
+# every 10 minutes; this is an independent outside ping in case it ever
+# restarts asleep. It also fails (and GitHub emails the repo owner) if the
+# server stays down, so an outage never goes unnoticed.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: keep-alive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping /health (allows up to ~2 minutes for a cold start)
+        env:
+          URL: ${{ vars.SERVER_URL || 'https://stocksentinel-kjjj.onrender.com' }}
+        run: |
+          for i in 1 2 3 4; do
+            code=$(curl -s -o /dev/null -m 60 -w "%{http_code}" "$URL/health" || echo 000)
+            echo "attempt $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 10
+          done
+          echo "::error::Server did not answer /health with 200 after 4 tries"
+          exit 1
