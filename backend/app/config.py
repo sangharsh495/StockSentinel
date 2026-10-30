@@ -33,7 +33,7 @@ class Settings:
     # Security
     # Shared key the Android app sends in the X-API-Key header. When set,
     # every /api/* call without it is rejected (401). Set it in Render.
-    APP_API_KEY: str = os.getenv("APP_API_KEY", "")
+    APP_API_KEY: str = os.getenv("APP_API_KEY", "").strip()
     # Comma-separated browser origins allowed to call the API. Empty = none
     # (the Android app doesn't need CORS).
     CORS_ORIGINS: list = [o.strip() for o in os.getenv("CORS_ORIGINS", "").split(",") if o.strip()]

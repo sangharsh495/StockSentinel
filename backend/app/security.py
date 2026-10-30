@@ -82,13 +82,15 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
 
     def __init__(self, app, api_key: str):
         super().__init__(app)
+        # Spaces or line breaks picked up when pasting the key into a dashboard are ignored.
+        api_key = (api_key or "").strip()
         self.api_key = api_key.encode() if api_key else b""
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
         if not self.api_key or path in self.OPEN_PATHS or request.method == "OPTIONS":
             return await call_next(request)
-        sent = request.headers.get("x-api-key", "").encode()
+        sent = request.headers.get("x-api-key", "").strip().encode()
         if not hmac.compare_digest(sent, self.api_key):
             logger.warning(f"Rejected request without valid API key: {request.method} {path} "
                            f"from {client_ip_of(request)}")
