@@ -1,0 +1,40 @@
+name: Train Multibagger Radar
+
+on:
+  schedule:
+    # Saturday 03:17 UTC (8:47 AM IST): weekly, markets closed
+    - cron: "17 3 * * 6"
+  workflow_dispatch:
+    inputs:
+      bags:
+        description: "Bootstrap models per configuration"
+        default: "6"
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Restore downloaded market data
+        uses: actions/cache@v4
+        with:
+          path: backend/.quant_cache
+          key: quant-cache-${{ github.run_id }}
+          restore-keys: quant-cache-
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+      - name: Train, test and publish the radar
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python ../scripts/train_multibagger.py --bags "${{ github.event.inputs.bags || '6' }}" --out multibagger_report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: multibagger-report
+          path: backend/multibagger_report.json

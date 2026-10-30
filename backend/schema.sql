@@ -281,6 +281,16 @@ CREATE TABLE IF NOT EXISTS scanner_log (
     PRIMARY KEY (date, symbol)
 );
 
+-- Multibagger Radar picks, logged weekly and scored 6 and 12 months later
+CREATE TABLE IF NOT EXISTS multibagger_log (
+    date DATE NOT NULL,
+    symbol VARCHAR(30) NOT NULL,
+    stage VARCHAR(20),
+    score_percentile REAL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (date, symbol)
+);
+
 -- 16. Market-hours live tracking of tonight's watchlist
 CREATE TABLE IF NOT EXISTS live_watch (
     symbol VARCHAR(30) PRIMARY KEY,
