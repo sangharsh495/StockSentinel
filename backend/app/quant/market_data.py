@@ -136,3 +136,40 @@ def adjust_for_corporate_actions(wide: Dict[str, pd.DataFrame]) -> Dict[str, pd.
     out["AdjFactor"] = cum
     out["Actions"] = factor
     return out
+
+
+EQUITY_LIST_URL = "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv"
+EQUITY_LIST_FILE = os.path.join(CACHE_DIR, "equity_list.pkl")
+
+
+def equity_symbols(max_age_days: float = 7) -> Optional[set]:
+    """NSE's official list of listed companies (no ETFs, liquid funds or bonds). None if unavailable."""
+    if os.path.exists(EQUITY_LIST_FILE) and time.time() - os.path.getmtime(EQUITY_LIST_FILE) < max_age_days * 86400:
+        return pd.read_pickle(EQUITY_LIST_FILE)
+    try:
+        r = httpx.get(EQUITY_LIST_URL, headers={"User-Agent": UA}, timeout=30)
+        r.raise_for_status()
+        df = pd.read_csv(io.StringIO(r.text))
+        syms = set(df["SYMBOL"].astype(str).str.strip())
+        if len(syms) < 1000:
+            raise ValueError(f"only {len(syms)} symbols")
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        pd.to_pickle(syms, EQUITY_LIST_FILE)
+        return syms
+    except Exception as e:
+        logger.warning(f"Equity list unavailable ({e}); falling back to the cached copy")
+        return pd.read_pickle(EQUITY_LIST_FILE) if os.path.exists(EQUITY_LIST_FILE) else None
+
+
+def equities_only(W: Dict[str, pd.DataFrame], allowed: Optional[set] = None) -> Dict[str, pd.DataFrame]:
+    """Keep only company shares: drops ETFs, liquid funds and other non-company EQ-series symbols."""
+    allowed = allowed if allowed is not None else equity_symbols()
+    if not allowed:
+        return W
+    cols = W["Close"].columns
+    if cols.isin(list(allowed)).mean() < 0.5:      # not NSE symbols at all (e.g. test data): leave as is
+        return W
+    out = {}
+    for k, v in W.items():
+        out[k] = v[[c for c in v.columns if c in allowed]] if isinstance(v, pd.DataFrame) else v
+    return out

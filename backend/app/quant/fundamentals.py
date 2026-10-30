@@ -29,6 +29,7 @@ QUARTER_LAG = pd.Timedelta(days=60)
 INCOME = {"Total Revenue": "revenue", "Operating Income": "op_income", "Net Income": "net_income"}
 BALANCE = {"Total Debt": "debt", "Stockholders Equity": "equity", "Ordinary Shares Number": "shares"}
 CASH = {"Operating Cash Flow": "ocf", "Free Cash Flow": "fcf"}
+CACHE_VERSION = 2          # 2: dividends added
 
 
 def _rows(frame: Optional[pd.DataFrame], names: Dict[str, str]) -> Dict[pd.Timestamp, dict]:
@@ -60,6 +61,13 @@ def fetch_one(symbol: str) -> List[dict]:
         recs.append(r)
     for end, vals in _rows(t.quarterly_income_stmt, INCOME).items():
         recs.append({"symbol": symbol, "kind": "Q", "period_end": end, "available": end + QUARTER_LAG, **vals})
+    # Dividends per share by ex-date (split-adjusted by Yahoo, like our prices).
+    # Known on the ex-date at the latest (they are announced before it).
+    div = t.dividends
+    if div is not None and len(div):
+        for ts, amt in div.items():
+            d = pd.Timestamp(ts).tz_localize(None).normalize() if pd.Timestamp(ts).tzinfo else pd.Timestamp(ts).normalize()
+            recs.append({"symbol": symbol, "kind": "D", "period_end": d, "available": d, "dividend": float(amt)})
     return recs
 
 
@@ -68,7 +76,8 @@ def load_fundamentals(symbols: Iterable[str], max_age_days: float = 7, max_fetch
     """Rows: symbol, kind (A/Q), period_end, available, revenue, op_income, net_income, debt, equity, shares, ocf, fcf."""
     cache = pd.read_pickle(CACHE_FILE) if os.path.exists(CACHE_FILE) else {}
     now = time.time()
-    stale = [s for s in symbols if now - cache.get(s, {}).get("fetched", 0) > max_age_days * 86400]
+    stale = [s for s in symbols if now - cache.get(s, {}).get("fetched", 0) > max_age_days * 86400
+             or cache.get(s, {}).get("v", 1) < CACHE_VERSION]
     stale = stale[:max_fetch]
     if stale:
         logger.info(f"Fetching fundamentals for {len(stale)} stocks")
@@ -85,14 +94,15 @@ def load_fundamentals(symbols: Iterable[str], max_age_days: float = 7, max_fetch
         with ThreadPoolExecutor(workers) as ex:
             for i, (s, recs) in enumerate(ex.map(get, stale)):
                 if recs is not None:
-                    cache[s] = {"fetched": now, "rows": recs}
+                    cache[s] = {"fetched": now, "rows": recs, "v": CACHE_VERSION}
                 if i % 200 == 199:
                     os.makedirs(CACHE_DIR, exist_ok=True)
                     pd.to_pickle(cache, CACHE_FILE)
         os.makedirs(CACHE_DIR, exist_ok=True)
         pd.to_pickle(cache, CACHE_FILE)
     rows = [r for v in cache.values() for r in v.get("rows", [])]
-    cols = ["symbol", "kind", "period_end", "available", *INCOME.values(), *BALANCE.values(), *CASH.values()]
+    cols = ["symbol", "kind", "period_end", "available", *INCOME.values(), *BALANCE.values(), *CASH.values(),
+            "dividend"]
     df = pd.DataFrame(rows)
     for c in cols:
         if c not in df.columns:

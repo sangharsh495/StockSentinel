@@ -360,3 +360,92 @@ async def multibagger():
         "live_scorecard": (_j(card_run.get("metrics")) if card_run else {"status": "collecting"}),
         "picks": picks,
     }
+
+
+CARD_HORIZONS = ("1w", "1m", "3m", "1y")
+SYMBOL_RE = re.compile(r"^[A-Z0-9&\-]{1,30}$")
+
+
+def _card_context(run: dict) -> dict:
+    m = _j(run.get("metrics")) or {}
+    return {
+        "as_of": str(run["data_end"]) if run.get("data_end") else None,
+        "horizon_tests": {h: {k: v for k, v in (t or {}).items() if k != "calibration"}
+                          for h, t in (m.get("horizon_tests") or {}).items()},
+        "dividend_backtest": m.get("dividend_backtest"),
+        "check_count": m.get("check_count"),
+        "how_to_read": ("Buy = likely to beat the median stock over that period, Sell = likely to lag it, "
+                        "Hold = no clear edge. A period marked unverified did not prove itself on unseen "
+                        "history, so every stock is Hold there."),
+    }
+
+
+@router.get("/report-card/{symbol}")
+async def report_card(symbol: str, horizon: str = Query("1y")):
+    """One stock's 57-check report card: verdict per holding period, stage, governance, dividends and every check with its tested track record."""
+    sym = symbol.upper().strip()
+    if not SYMBOL_RE.match(sym):
+        raise HTTPException(400, "invalid symbol")
+    if horizon not in CARD_HORIZONS:
+        raise HTTPException(400, f"horizon must be one of {list(CARD_HORIZONS)}")
+    run = await _latest_run("stock_report_card")
+    if not run:
+        return {"status": "not_trained"}
+    row = await fetchrow(
+        "SELECT payload FROM quant_predictions WHERE model_key = 'stock_report_card' AND symbol = $1", sym)
+    if not row:
+        return {"status": "not_covered", "symbol": sym,
+                "note": "Only liquid NSE companies (median turnover above Rs 50 lakh a day) get a report card."}
+    card = _j(row["payload"])
+    m = _j(run.get("metrics")) or {}
+    checks = []
+    for c in m.get("checks") or []:
+        t = (c.get("tests") or {}).get(horizon) or {}
+        checks.append({"id": c["id"], "category": c["category"], "label": c["label"],
+                       "result": {1: "pass", -1: "fail"}.get((card.get("checks") or {}).get(c["id"]), "no data"),
+                       "tested": {k: t.get(k) for k in ("pass_minus_fail_pct", "pass_beat_market_pct", "t", "verified",
+                                                         "direction", "months")}})
+    card["checks"] = checks
+    return {"status": "ok", "horizon": horizon, **_card_context(run), "card": card}
+
+
+@router.get("/best")
+async def best_stocks(kind: str = Query("stocks", description="stocks or dividend"),
+                      horizon: str = Query("1y"), limit: int = Query(25, ge=1, le=50)):
+    """Best stocks for a holding period (Buy verdicts with clean governance) or best dividend stocks."""
+    if kind not in ("stocks", "dividend"):
+        raise HTTPException(400, "kind must be stocks or dividend")
+    if horizon not in CARD_HORIZONS:
+        raise HTTPException(400, f"horizon must be one of {list(CARD_HORIZONS)}")
+    run = await _latest_run("stock_report_card")
+    if not run:
+        return {"status": "not_trained", "stocks": []}
+    m = _j(run.get("metrics")) or {}
+    symbols = ((m.get("best") or {}).get("dividend" if kind == "dividend" else horizon) or [])[:limit]
+    rows = await fetch(
+        """
+        SELECT p.symbol, p.payload, s.name, s.current_price, s.change_pct
+        FROM quant_predictions p
+        LEFT JOIN stocks s ON UPPER(s.symbol) = p.symbol AND s.exchange = 'NSE'
+        WHERE p.model_key = 'stock_report_card' AND p.symbol = ANY($1::text[])
+        """,
+        symbols,
+    )
+    by_sym = {r["symbol"]: r for r in rows}
+    out = []
+    for sym in symbols:
+        r = by_sym.get(sym)
+        if not r:
+            continue
+        c = _j(r["payload"])
+        out.append({"symbol": sym, "name": r["name"],
+                    "current_price": float(r["current_price"]) if r["current_price"] is not None else None,
+                    "change_pct": float(r["change_pct"]) if r["change_pct"] is not None else None,
+                    "verdict": (c.get("verdicts") or {}).get(horizon), "stage": c.get("stage"),
+                    "governance": (c.get("governance") or {}).get("grade"),
+                    "checks_passed": c.get("checks_passed"), "checks_failed": c.get("checks_failed"),
+                    "dividend": c.get("dividend")})
+    ht = ((m.get("horizon_tests") or {}).get(horizon) or {})
+    return {"status": "ok", "kind": kind, "horizon": horizon, **_card_context(run),
+            "verified": (m.get("dividend_backtest") or {}).get("verified") if kind == "dividend" else ht.get("verified"),
+            "stocks": out}

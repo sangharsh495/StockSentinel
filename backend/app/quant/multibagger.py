@@ -560,6 +560,9 @@ def regime_summary(W, panel: pd.DataFrame) -> Dict:
 def run_multibagger(W: Dict[str, pd.DataFrame], fund: Optional[pd.DataFrame], n_bags: int = 6,
                     refit_months: int = 6, top_n: int = 25, configs: Optional[List[Config]] = None) -> Dict:
     t0 = datetime.now(timezone.utc)
+    from app.quant.market_data import equities_only
+
+    W = equities_only(W)
     configs = configs or all_configs()
     daily = daily_features(W)
     C = W["Close"]

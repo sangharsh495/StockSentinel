@@ -21,6 +21,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
+import com.stocksentinel.ui.quant.BestStocksActivity;
 import com.stocksentinel.ui.quant.MultibaggerActivity;
 import com.stocksentinel.ui.quant.QuantPicksActivity;
 import com.stocksentinel.ui.stockdetail.StockDetailActivity;
@@ -131,6 +132,8 @@ public class HomeFragment extends Fragment {
                 startActivity(new Intent(requireContext(), QuantPicksActivity.class)));
         view.findViewById(R.id.btn_see_all_radar).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), MultibaggerActivity.class)));
+        view.findViewById(R.id.btn_see_all_best).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), BestStocksActivity.class)));
 
         // SwipeRefresh setup
         swipeRefresh.setOnRefreshListener(this::loadAllData);
