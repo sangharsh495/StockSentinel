@@ -113,6 +113,9 @@ public class DividendsFragment extends Fragment {
             startActivity(intent);
         });
 
+        view.findViewById(R.id.btn_income_calendar).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), IncomeCalendarActivity.class)));
+
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 

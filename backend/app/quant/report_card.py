@@ -516,3 +516,18 @@ def nightly_report_cards(max_fetch: int = 400) -> Dict:
     ever = liq.resample("ME").last().ge(MIN_TURNOVER_LACS).any()
     fund = load_fundamentals(list(ever[ever].index), max_fetch=max_fetch)
     return run_report_cards(W, fund)
+
+
+def nightly_cards_and_income(max_fetch: int = 400) -> List[Dict]:
+    """Report cards, then the dividend income calendar (which uses the cards' payout, governance and verdicts)."""
+    from app.quant.fundamentals import load_fundamentals
+    from app.quant.income import build_income
+    from app.quant.market_data import equities_only, update_market
+
+    W = update_market(pd.DatetimeIndex([]))
+    liq = W["TurnoverLacs"].rolling(60, min_periods=40).median()
+    ever = liq.resample("ME").last().ge(MIN_TURNOVER_LACS).any()
+    fund = load_fundamentals(list(ever[ever].index), max_fetch=max_fetch)
+    cards = run_report_cards(W, fund)
+    income = build_income(fund, equities_only(W)["Close"], cards["predictions"])
+    return [cards, income]

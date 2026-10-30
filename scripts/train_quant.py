@@ -69,11 +69,14 @@ async def main(args):
     results = await asyncio.to_thread(run_all, args.strategies, args.period, not args.no_ipo)
     if not args.no_cards:
         try:
-            from app.quant.report_card import nightly_report_cards
-            cards = await asyncio.to_thread(nightly_report_cards)
+            from app.quant.report_card import nightly_cards_and_income
+            cards, income = await asyncio.to_thread(nightly_cards_and_income)
             t = cards["metrics"]["horizon_tests"]
             log.info("Report cards: " + ", ".join(f"{h} verified={v['verified']}" for h, v in t.items()))
-            results.append(cards)
+            bt = income["metrics"]["paying_power_backtest"]
+            log.info(f"Income calendar: {income['metrics']['payers']} payers; top record score paid next year "
+                     f"{bt.get('top_bucket_paid_pct')}%, no cut {bt.get('top_bucket_no_cut_pct')}%")
+            results.extend([cards, income])
         except Exception as e:
             log.warning(f"Report cards skipped: {e}")
 
