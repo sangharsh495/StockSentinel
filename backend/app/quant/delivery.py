@@ -49,7 +49,10 @@ def _fetch_day(client: httpx.Client, day: pd.Timestamp, symbols: set) -> Optiona
                     "qty": pd.to_numeric(df["TTL_TRD_QNTY"], errors="coerce"),
                 })
                 return out
-        except (httpx.HTTPError, ValueError, KeyError) as e:
+        except (ValueError, KeyError) as e:
+            logger.warning(f"{url}: unreadable file, skipped ({e})")
+            return pd.DataFrame()
+        except httpx.HTTPError as e:
             logger.debug(f"{url}: {e}")
         time.sleep(2 ** attempt)
     return None  # failed: retry next run

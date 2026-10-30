@@ -52,7 +52,13 @@ def _fetch(client: httpx.Client, day: pd.Timestamp) -> Optional[pd.DataFrame]:
                     out[dst] = pd.to_numeric(df[src], errors="coerce").astype("float32").values
                 out["date"] = day
                 return out
-        except (httpx.HTTPError, ValueError, KeyError) as e:
+        except (ValueError, KeyError) as e:
+            # The file exists but can't be read (NSE published a malformed
+            # file for a few days): remember it as empty instead of
+            # retrying it every night.
+            logger.warning(f"bhav {day.date()}: unreadable file, skipped ({e})")
+            return pd.DataFrame()
+        except httpx.HTTPError as e:
             logger.debug(f"bhav {day.date()}: {e}")
         time.sleep(2 ** attempt)
     return None                              # failed: retry next run
@@ -62,7 +68,13 @@ def update_market(dates: Iterable[pd.Timestamp], workers: int = 6) -> Dict[str, 
     """Download missing days, return wide frames {field: DataFrame(date x symbol)}."""
     have = pd.read_pickle(CACHE_FILE) if os.path.exists(CACHE_FILE) else {"rows": [], "done": set()}
     done = set(have["done"])
-    todo = [pd.Timestamp(d) for d in dates if pd.Timestamp(d) >= START and pd.Timestamp(d) not in done]
+    # NSE's own files decide which days exist: also try every weekday up to
+    # today, so a lagging Yahoo calendar can't hide the latest session.
+    # (Holidays simply return 404 and are remembered as empty.)
+    today = pd.Timestamp.now(tz="Asia/Kolkata").tz_localize(None).normalize()
+    extra = pd.bdate_range(max(START, today - pd.Timedelta(days=10)), today)
+    wanted = {pd.Timestamp(d) for d in dates} | set(extra)
+    todo = sorted(d for d in wanted if d >= START and d not in done)
     if todo:
         logger.info(f"Downloading NSE daily files for {len(todo)} days")
         new = []

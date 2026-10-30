@@ -13,6 +13,7 @@ Schedule overview:
 
 import logging
 import asyncio
+from typing import Optional
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -21,28 +22,30 @@ from apscheduler.triggers.cron import CronTrigger
 logger = logging.getLogger(__name__)
 
 
-def _run_async(coro):
-    """Helper to run async functions from sync APScheduler jobs.
-    Uses run_coroutine_threadsafe for reliable scheduling on the running loop."""
+# The server's event loop. The database pool belongs to it, so every job's
+# coroutine must run on it. Jobs are started from APScheduler's worker
+# threads, which have no event loop of their own; creating a new loop there
+# (the old behaviour) made every database call fail silently.
+_MAIN_LOOP: Optional[asyncio.AbstractEventLoop] = None
+
+
+def set_main_loop(loop: asyncio.AbstractEventLoop) -> None:
+    global _MAIN_LOOP
+    _MAIN_LOOP = loop
+
+
+def _run_async(coro, timeout: float = 1800):
+    """Run an async job on the server's main event loop and wait for it."""
+    loop = _MAIN_LOOP
+    if loop is None or not loop.is_running():
+        # Not inside the web server (e.g. a script): run on a private loop.
+        asyncio.run(coro)
+        return
+    future = asyncio.run_coroutine_threadsafe(coro, loop)
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # Schedule on the running loop and wait for the result
-            future = asyncio.run_coroutine_threadsafe(coro, loop)
-            try:
-                future.result(timeout=300)  # 5 min timeout per job
-            except Exception as e:
-                logger.error(f"Async job failed: {e}")
-        else:
-            loop.run_until_complete(coro)
-    except RuntimeError:
-        # No running loop — create a new one
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            loop.run_until_complete(coro)
-        finally:
-            loop.close()
+        future.result(timeout=timeout)
+    except Exception:
+        logger.exception("Scheduled job failed")
 
 
 async def _log_job(job_name: str, func):
