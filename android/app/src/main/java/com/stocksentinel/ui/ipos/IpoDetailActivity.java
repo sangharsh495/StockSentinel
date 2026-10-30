@@ -18,6 +18,8 @@ import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
 
+import java.util.Locale;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -132,26 +134,21 @@ public class IpoDetailActivity extends AppCompatActivity {
             verdictRationale.setText(report.get("verdict_rationale").getAsString());
         }
 
-        // Stats
-        if (report.has("ipo_data") && report.get("ipo_data").isJsonObject()) {
-            JsonObject data = report.getAsJsonObject("ipo_data");
-            Double low = data.has("price_band_low") && !data.get("price_band_low").isJsonNull()
-                    ? data.get("price_band_low").getAsDouble() : null;
-            Double high = data.has("price_band_high") && !data.get("price_band_high").isJsonNull()
-                    ? data.get("price_band_high").getAsDouble() : null;
-            String issue = data.has("issue_size") && !data.get("issue_size").isJsonNull()
-                    ? data.get("issue_size").getAsString() : "TBD";
-            Double gmp = data.has("gmp") && !data.get("gmp").isJsonNull()
-                    ? data.get("gmp").getAsDouble() : null;
-
-            if (low != null && high != null) {
-                statPrice.setText(String.format("₹%.0f - ₹%.0f", low, high));
-            }
-            statIssue.setText(issue);
-            if (gmp != null) {
-                statGmp.setText(String.format("+₹%.0f", gmp));
-            }
-        }
+        // Stats: the report carries these at the top level. Missing values show "—",
+        // never the layout's sample numbers.
+        Double low = num(report, "price_band_low");
+        Double high = num(report, "price_band_high");
+        Double gmp = num(report, "gmp");
+        statPrice.setText(low != null && high != null
+                ? String.format(Locale.US, "₹%,.0f - ₹%,.0f", low, high) : "—");
+        statGmp.setText(gmp == null ? "—" : (high != null && high > 0
+                ? String.format(Locale.US, "%+,.0f (%+.0f%%)", gmp, gmp / high * 100)
+                : String.format(Locale.US, "%+,.0f", gmp)));
+        statGmp.setTextColor(getResources().getColor(gmp == null ? R.color.text_secondary
+                : (gmp >= 0 ? R.color.bullish : R.color.bearish), null));
+        String issue = report.has("issue_size") && !report.get("issue_size").isJsonNull()
+                ? report.get("issue_size").getAsString() : "";
+        statIssue.setText(issue.isEmpty() ? "—" : issue);
 
         // Detailed sections
         if (report.has("company_overview")) {
@@ -199,6 +196,16 @@ public class IpoDetailActivity extends AppCompatActivity {
                 sb.append("• ").append(el.getAsString()).append("\n\n");
             }
             reasonsAvoidText.setText(sb.toString().trim());
+        }
+    }
+
+    /** Number field of the report, or null when missing, JSON null or not a number. */
+    private static Double num(JsonObject o, String k) {
+        if (o == null || !o.has(k) || o.get(k).isJsonNull() || !o.get(k).isJsonPrimitive()) return null;
+        try {
+            return o.get(k).getAsDouble();
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 }

@@ -79,3 +79,21 @@ def test_main_app_hides_docs_and_blocks_cors_when_locked(monkeypatch):
     monkeypatch.delenv("APP_API_KEY")
     importlib.reload(app.config)
     importlib.reload(app.main)
+
+
+def test_api_key_ignores_spaces_and_line_breaks_around_it():
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from app.security import APIKeyMiddleware
+
+    app = FastAPI()
+
+    @app.get("/api/x")
+    def x():
+        return {"ok": True}
+
+    app.add_middleware(APIKeyMiddleware, api_key="  abc123XYZ\n")
+    c = TestClient(app)
+    assert c.get("/api/x", headers={"X-API-Key": "abc123XYZ"}).status_code == 200
+    assert c.get("/api/x", headers={"X-API-Key": "abc123XY"}).status_code == 401
+    assert c.get("/api/x").status_code == 401

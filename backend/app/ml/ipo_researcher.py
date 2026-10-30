@@ -107,7 +107,7 @@ class IPOResearcher:
         if not report:
             report = await self._try_groq(prompt)
         if not report:
-            report = self._generate_fallback(ipo_data)
+            report = self._generate_fallback(ipo_data, await self._model_view(company_name))
 
         # Attach IPO metadata
         report["ipo_id"] = ipo_id
@@ -121,6 +121,8 @@ class IPOResearcher:
         report["listing_date"] = str(ipo_data.get("listing_date") or "TBD")
         report["status"] = ipo_data.get("status", "upcoming")
         report["gmp"] = float(ipo_data["gmp"]) if ipo_data.get("gmp") else None
+        report["price_band_low"] = float(ipo_data["price_band_low"]) if ipo_data.get("price_band_low") else None
+        report["price_band_high"] = float(ipo_data["price_band_high"]) if ipo_data.get("price_band_high") else None
         report["subscription_status"] = ipo_data.get("subscription_status")
 
         return report
@@ -177,69 +179,128 @@ class IPOResearcher:
             logger.warning(f"Groq IPO report failed: {e}")
         return None
 
-    def _generate_fallback(self, ipo_data: dict) -> Dict[str, Any]:
-        """Deterministic fallback report when AI is unavailable."""
+    @staticmethod
+    def _norm(name: str) -> str:
+        import re
+        n = re.sub(r"[^a-z0-9 ]", " ", (name or "").lower())
+        drop = {"ltd", "limited", "ipo", "pvt", "private", "the", "india", "co", "company", "sme"}
+        return " ".join(w for w in n.split() if w not in drop)
+
+    async def _model_view(self, company_name: str) -> Optional[Dict[str, Any]]:
+        """The tested IPO listing model's prediction for this company, if it has one."""
+        try:
+            async with (await get_pool()).acquire() as conn:
+                rows = await conn.fetch("SELECT payload FROM quant_predictions WHERE model_key = 'ipo_listing'")
+        except Exception:
+            return None
+        target = self._norm(company_name)
+        if not target:
+            return None
+        for r in rows:
+            p = json.loads(r["payload"]) if isinstance(r["payload"], str) else r["payload"]
+            other = self._norm(p.get("name", ""))
+            if other and (other == target or other in target or target in other):
+                return p
+        return None
+
+    def _generate_fallback(self, ipo_data: dict, model: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Report built from our own data and the tested IPO model, used when no AI key is configured."""
         name = ipo_data.get("company_name", "Unknown Company")
-        market = ipo_data.get("market", "IN")
+        cur = "₹" if ipo_data.get("market", "IN") == "IN" else "$"
         gmp = float(ipo_data.get("gmp") or 0)
-        price_high = float(ipo_data.get("price_band_high") or 0)
+        low = float(ipo_data.get("price_band_low") or 0)
+        high = float(ipo_data.get("price_band_high") or 0)
+        gmp_pct = gmp / high * 100 if gmp and high else None
+        sub = ipo_data.get("subscription_status") or {}
+        if isinstance(sub, str):
+            try:
+                sub = json.loads(sub)
+            except ValueError:
+                sub = {}
+        total_x = None
+        for k in ("total", "overall", "Total"):
+            try:
+                total_x = float(sub.get(k)) if sub.get(k) is not None else None
+            except (TypeError, ValueError):
+                total_x = None
+            if total_x is not None:
+                break
+        if model and model.get("subscription_x") is not None:
+            total_x = model["subscription_x"]
 
-        # Simple heuristic verdict based on GMP
-        if gmp > 0 and price_high > 0:
-            gmp_pct = (gmp / price_high) * 100
-            if gmp_pct > 30:
+        prob = (model or {}).get("probability")
+        exp = (model or {}).get("expected_gain_pct")
+        rng = (model or {}).get("expected_range_pct") or [None, None]
+        track = (model or {}).get("track_record_at_this_confidence") or {}
+
+        if prob is not None and exp is not None:
+            if prob >= 0.75 and exp > 0:
                 verdict = "SUBSCRIBE"
-                confidence = 70
-                rationale = f"Strong grey market premium of {gmp_pct:.0f}% indicates high retail demand."
-            elif gmp_pct > 10:
-                verdict = "RISKY_BET"
-                confidence = 50
-                rationale = f"Moderate GMP of {gmp_pct:.0f}%. Consider fundamentals before applying."
-            else:
+            elif prob < 0.5 or exp < 0:
                 verdict = "AVOID"
-                confidence = 40
-                rationale = f"Weak GMP of {gmp_pct:.0f}%. Market interest is limited."
+            else:
+                verdict = "RISKY_BET"
+            confidence = int(round(prob * 100))
+            rationale = (f"Tested IPO model: expected listing gain {exp:+.1f}%"
+                         + (f" (likely range {rng[0]:+.0f}% to {rng[1]:+.0f}%)" if rng[0] is not None else "")
+                         + f", {prob * 100:.0f}% chance of listing above the issue price.")
+            if track.get("ipos"):
+                rationale += (f" Past IPOs at this confidence: {track['listed_positive_pct']:.0f}% listed positive "
+                              f"({track['ipos']} IPOs).")
+        elif gmp_pct is not None:
+            verdict = "SUBSCRIBE" if gmp_pct > 30 else "RISKY_BET" if gmp_pct > 10 else "AVOID"
+            confidence = 60 if gmp_pct > 30 else 45 if gmp_pct > 10 else 35
+            rationale = (f"Grey market premium is {gmp_pct:.0f}% of the issue price. The tested IPO model has no "
+                         "estimate for this issue yet, so this is the GMP signal alone.")
         else:
-            verdict = "RISKY_BET"
-            confidence = 35
-            rationale = "Insufficient data for a confident recommendation. Research further."
+            verdict, confidence = "RISKY_BET", 30
+            rationale = "No GMP and no model estimate yet: not enough data for a confident call."
 
+        facts = [f"Price band {cur}{low:,.0f} - {cur}{high:,.0f}" if high else "Price band not announced yet"]
+        if ipo_data.get("lot_size"):
+            facts.append(f"lot of {ipo_data['lot_size']} shares")
+        if ipo_data.get("issue_size"):
+            facts.append(f"issue size {ipo_data['issue_size']}")
+        dates = f"bidding {ipo_data.get('open_date') or 'TBD'} to {ipo_data.get('close_date') or 'TBD'}"
+
+        buy, avoid = [], []
+        if gmp_pct is not None:
+            (buy if gmp_pct > 10 else avoid).append(f"Grey market premium {gmp_pct:+.0f}% of the issue price")
+        if total_x is not None:
+            (buy if total_x >= 10 else avoid).append(f"Subscribed {total_x:.1f}x overall")
+        if prob is not None:
+            (buy if prob >= 0.6 else avoid).append(f"Model: {prob * 100:.0f}% chance of a positive listing")
+        if (model or {}).get("gmp_check") == "disagree":
+            avoid.append("GMP sources disagree: treat the premium with caution")
+        if model and not model.get("subscription_known"):
+            avoid.append("Bidding not started: estimate rests on GMP only")
+        if not buy:
+            buy.append("No strong positive signal yet")
+        if not avoid:
+            avoid.append("Listing gains are never guaranteed; markets can turn before listing day")
+
+        no_ai = "Company description needs the AI write-up (not configured) or the offer document (DRHP on sebi.gov.in)."
         return {
-            "company_overview": f"{name} is a company in the {'Indian' if market == 'IN' else 'US'} market filing for an IPO. Detailed business information requires AI analysis.",
-            "business_model": "Business model details unavailable in offline mode. Check the DRHP/prospectus for revenue breakdown.",
-            "industry_position": "Industry analysis requires AI. Check sectoral reports for competitive landscape.",
+            "company_overview": f"{name}: {', '.join(facts)}; {dates}. {no_ai}",
+            "business_model": "Read the 'Our Business' section of the DRHP on sebi.gov.in for how the company earns money.",
+            "industry_position": "See the 'Industry Overview' section of the DRHP for competitors and market size.",
             "financial_snapshot": {
-                "revenue_description": "Financial data not available in offline mode",
-                "profitability": "Check DRHP for PAT and margin data",
-                "debt_status": "Debt metrics unavailable",
-                "key_metrics": "P/E and valuation metrics require AI analysis",
+                "revenue_description": "Revenue and profit history are in the DRHP's 'Financial Information' section",
+                "profitability": f"GMP {cur}{gmp:,.0f}" + (f" ({gmp_pct:+.1f}% of the issue price)" if gmp_pct is not None else ""),
+                "debt_status": f"Subscription {total_x:.1f}x overall" if total_x is not None else "Subscription data not out yet",
+                "key_metrics": (f"Model expected listing gain {exp:+.1f}%, chance positive {prob * 100:.0f}%"
+                                if prob is not None and exp is not None else "No model estimate for this issue yet"),
             },
-            "promoter_management": "Promoter and management details available in the DRHP document.",
-            "valuation_assessment": f"Price band assessment: {'GMP suggests positive listing' if gmp > 0 else 'GMP data unavailable'}.",
-            "strengths": [
-                "IPO provides growth capital for expansion",
-                "Public listing improves brand visibility",
-                "Institutional investors provide credibility",
-            ],
-            "risks": [
-                "IPO pricing may be at premium valuations",
-                "Post-listing volatility is common",
-                "Limited public financial history available",
-                "Lock-in period expiry may create selling pressure",
-            ],
-            "reasons_to_buy": [
-                "Growth potential in expanding market",
-                f"{'Positive GMP indicates listing gains' if gmp > 0 else 'Early entry opportunity'}",
-            ],
-            "reasons_not_to_buy": [
-                "Limited operating history as public company",
-                "Valuation may not justify long-term returns",
-                "Market conditions may impact listing performance",
-            ],
+            "promoter_management": "Promoters and management are listed in the DRHP.",
+            "valuation_assessment": rationale,
+            "strengths": buy,
+            "risks": avoid,
+            "reasons_to_buy": buy,
+            "reasons_not_to_buy": avoid,
             "verdict": verdict,
             "verdict_confidence_pct": confidence,
             "verdict_rationale": rationale,
-            "ai_generated": False,
+            "source": "model_and_data" if model else "data_only",
         }
 
 
