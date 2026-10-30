@@ -200,6 +200,22 @@ def _families(seed: int) -> Dict[str, Callable]:
 
 
 FAMILIES = list(_families(0))
+
+# Classic single-factor rankers with their textbook direction, fixed in
+# advance (no fitting): they compete with the learned models under the same
+# honest selection, so the zoo can only beat them, never hide them.
+FACTORS = {"mom12_1": 1, "mom6": 1, "near_52w_high": 1, "kalman_velocity": 1, "vol60": -1,
+           "rev_growth": 1, "profit_growth": 1, "roe": 1, "earnings_yield": 1, "sales_yield": 1,
+           "deliv_change": 1, "turnover_growth": 1}
+
+
+class FactorRank:
+    def __init__(self, sign: int):
+        self.sign = sign
+
+    def predict_proba(self, X):
+        s = (X[:, 0] - 0.5) * self.sign + 0.5
+        return np.c_[1 - s, s]
 # Missing values are filled with the neutral rank (0.5) for every family, never
 # learned as their own branch: delisted companies have no fundamentals today,
 # so "missing" would secretly mean "this company later died" (look-ahead).
@@ -217,13 +233,18 @@ class Config:
         return f"{self.family}|{self.target}|{self.view}"
 
 
-def all_configs(targets=None, views=None, families=None) -> List[Config]:
-    return [Config(f, t, v) for f in (families or FAMILIES) for t in (targets or TARGETS) for v in (views or VIEWS)]
+def all_configs(targets=None, views=None, families=None, factors: bool = True) -> List[Config]:
+    out = [Config(f, t, v) for f in (families or FAMILIES) for t in (targets or TARGETS) for v in (views or VIEWS)]
+    if factors:
+        out += [Config("factor", PRIMARY, f) for f in FACTORS]
+    return out
 
 
 def fit_config(cfg: Config, R: pd.DataFrame, panel: pd.DataFrame, train_mask: np.ndarray, n_bags: int,
                rng: np.random.Generator):
     """Bagged fit on bootstrap samples of training dates. Returns a list of (model, columns) or None."""
+    if cfg.family == "factor":
+        return [FactorRank(FACTORS[cfg.view])], [cfg.view]
     y = panel[cfg.target].values
     m = train_mask & ~np.isnan(y)
     dates = panel["date"].values[m]
@@ -318,7 +339,8 @@ def walk_forward_zoo(panel: pd.DataFrame, R: pd.DataFrame, configs: List[Config]
             fit = fit_config(cfg, R, panel, train, n_bags, rng)
             if fit is None:
                 continue
-            n_fit += len(fit[0])
+            if cfg.family != "factor":
+                n_fit += len(fit[0])
             scores.loc[panel.index[block], cfg.key] = predict_config(fit, cfg, R, block)
         log(f"Zoo refit {R0.date()}: {n_fit} models fitted so far")
     return scores, n_fit
@@ -567,13 +589,15 @@ def run_multibagger(W: Dict[str, pd.DataFrame], fund: Optional[pd.DataFrame], n_
     zoo_avg = pd.Series(np.nanmean(np.column_stack([
         panel.loc[scores.index].assign(v=scores[k].values).groupby("date")["v"].rank(pct=True).values
         for k in scores.columns if scores[k].notna().any()]), axis=1), index=scores.index)
-    price_only = [c for c in configs if c.view in ("momentum", "kalman_trend", "flow", "risk_size")]
+    price_only = [c for c in configs if c.family != "factor" and c.view in ("momentum", "kalman_trend", "flow", "risk_size")]
     po = pd.Series(np.nanmean(np.column_stack([
         panel.loc[scores.index].assign(v=scores[c.key].values).groupby("date")["v"].rank(pct=True).values
         for c in price_only if scores[c.key].notna().any()]), axis=1), index=scores.index)
     ev_stack = evaluate_stack(panel, stack, "honest_top10_stack")
     ev_avg = evaluate_stack(panel, zoo_avg, "zoo_average")
     ev_price = evaluate_stack(panel, po, "price_and_flow_models_only")
+    mom = pd.Series(panel.loc[scores.index, "mom12_1"].values, index=scores.index)
+    ev_mom = evaluate_stack(panel, mom, "momentum_12m_alone")
     lifts = lift_table(panel, stack)
     stages = stage_track_record(panel, stack)
     flags = red_flag_study(panel)
@@ -593,7 +617,8 @@ def run_multibagger(W: Dict[str, pd.DataFrame], fund: Optional[pd.DataFrame], n_
         fit = fit_config(cfg, R, panel, train, n_bags, rng)
         if fit is None:
             continue
-        n_fit += len(fit[0])
+        if cfg.family != "factor":
+            n_fit += len(fit[0])
         live_ranks.append(_pct_rank(predict_config(fit, cfg, R, live_mask)))
     live = panel.loc[live_mask].copy()
     live["score"] = np.nanmean(np.column_stack(live_ranks), axis=1) if live_ranks else np.nan
@@ -642,16 +667,18 @@ def run_multibagger(W: Dict[str, pd.DataFrame], fund: Optional[pd.DataFrame], n_
     n_cfg_models = len([k for k in scores.columns if scores[k].notna().any()])
     return clean_json({
         "model_key": "multibagger_radar", "strategy": "multibagger", "horizon_days": 250,
-        "description": "Stocks with the best tested odds of doubling within a year, from a 168-configuration model zoo.",
+        "description": "Stocks with the best tested odds of doubling within a year, from a model zoo plus classic factors.",
         "model_type": "model_zoo_stack", "trained_at": t0.isoformat(), "data_end": str(today.date()),
         "edge_verified": bool(edge),
         "metrics": {
             "model_configurations": len(configs), "configurations_with_models": n_cfg_models,
             "fitted_models": int(n_fit), "bags_per_configuration": n_bags,
-            "families": FAMILIES, "targets": list(TARGETS), "views": list(VIEWS),
+            "families": FAMILIES + ["factor"], "classic_factors": list(FACTORS), "targets": list(TARGETS), "views": list(VIEWS),
             "panel_rows": int(len(panel)), "panel_months": int(panel["date"].nunique()),
             "stocks_with_fundamentals_today": int(live["rev_growth"].notna().sum()),
             "honest_stack": ev_stack, "zoo_average": ev_avg, "price_and_flow_only": ev_price,
+            "momentum_12m_alone": ev_mom,
+            "beats_momentum_baseline": bool((ev_stack.get("top_decile_hit_pct") or 0) > (ev_mom.get("top_decile_hit_pct") or 0)),
             "fdr_survivors": survivors, "fdr_q": 0.10, "leaderboard_top": leaderboard[:15],
             "lift_by_score_bucket": lifts, "stage_track_record": stages, "red_flag_study": flags,
             "regime": regime, "live_stack_configs": chosen_keys,
