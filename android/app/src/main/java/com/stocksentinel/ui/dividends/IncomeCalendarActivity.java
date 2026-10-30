@@ -96,7 +96,8 @@ public class IncomeCalendarActivity extends AppCompatActivity {
             Intent intent = new Intent(this, StockDetailActivity.class);
             intent.putExtra(StockDetailActivity.EXTRA_SYMBOL, sym);
             intent.putExtra(StockDetailActivity.EXTRA_EXCHANGE, "NSE");
-            intent.putExtra(StockDetailActivity.EXTRA_NAME, sym);
+            String name = str(div, "plain_name");
+            intent.putExtra(StockDetailActivity.EXTRA_NAME, name.isEmpty() ? sym : name);
             startActivity(intent);
         });
         recycler.setAdapter(adapter);
@@ -197,7 +198,7 @@ public class IncomeCalendarActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
-                if (!isFinishing()) swipeRefresh.setRefreshing(false);
+                if (!isFinishing() && reqMonth == month && reqKey.equals(filterKey())) swipeRefresh.setRefreshing(false);
             }
         });
     }
@@ -233,17 +234,19 @@ public class IncomeCalendarActivity extends AppCompatActivity {
         if (!freq.isEmpty()) sb.append(" · ").append(freq);
         JsonArray months = arr(p, "usual_months");
         if (months != null && months.size() > 0) {
-            sb.append(" · ");
-            for (int i = 0; i < months.size(); i++) {
-                if (months.get(i).isJsonNull()) continue;
-                int m = months.get(i).getAsInt();
-                if (i > 0) sb.append(", ");
-                if (m >= 1 && m <= 12) sb.append(SHORT_MONTHS[m - 1]);
+            List<String> names = new ArrayList<>();
+            for (JsonElement el : months) {
+                if (el.isJsonPrimitive() && el.getAsJsonPrimitive().isNumber()) {
+                    int m = el.getAsInt();
+                    if (m >= 1 && m <= 12) names.add(SHORT_MONTHS[m - 1]);
+                }
             }
+            if (!names.isEmpty()) sb.append(" · ").append(String.join(", ", names));
         }
         Double years = dbl(p, "years_paid_of_10");
         if (years != null) sb.append(String.format(Locale.US, " · %.0f/10 yrs", years));
         JsonObject copy = p.deepCopy();
+        copy.addProperty("plain_name", str(p, "company_name"));
         copy.addProperty("company_name", sb.toString());
         return copy;
     }
