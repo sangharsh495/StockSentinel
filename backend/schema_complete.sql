@@ -286,6 +286,17 @@ CREATE TABLE IF NOT EXISTS multibagger_log (
     PRIMARY KEY (date, symbol)
 );
 
+-- Report card Buy / Sell calls, logged nightly and scored after their holding period
+CREATE TABLE IF NOT EXISTS verdict_log (
+    date DATE NOT NULL,
+    symbol VARCHAR(30) NOT NULL,
+    horizon VARCHAR(4) NOT NULL,
+    verdict VARCHAR(8) NOT NULL,
+    chance REAL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    PRIMARY KEY (date, symbol, horizon)
+);
+
 -- 16. Market-hours live tracking of tonight's watchlist
 CREATE TABLE IF NOT EXISTS live_watch (
     symbol VARCHAR(30) PRIMARY KEY,

@@ -452,8 +452,12 @@ async def best_stocks(kind: str = Query("stocks", description="stocks or dividen
                     "checks_passed": c.get("checks_passed"), "checks_failed": c.get("checks_failed"),
                     "dividend": c.get("dividend")})
     ht = ((m.get("horizon_tests") or {}).get(horizon) or {})
+    live_run = await _latest_run("report_card_scorecard")
+    live = (_j(live_run.get("metrics")) or {}) if live_run else {"status": "collecting"}
     return {"status": "ok", "kind": kind, "horizon": horizon, **_card_context(run),
             "verified": (m.get("dividend_backtest") or {}).get("verified") if kind == "dividend" else ht.get("verified"),
+            "live_scorecard": {"status": live.get("status"), "logged_calls": live.get("logged_calls"),
+                               "this_period": live.get(horizon)},
             "stocks": out}
 
 

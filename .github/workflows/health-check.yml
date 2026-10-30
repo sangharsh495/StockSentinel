@@ -1,0 +1,39 @@
+name: Morning health check
+
+# 8:00 AM IST, Tuesday to Saturday: confirms last night's models and the
+# server's data jobs all ran. If anything is stale the run fails and GitHub
+# emails the repo owner. It also checks the live API answers.
+
+on:
+  schedule:
+    - cron: "30 2 * * 2-6"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+      - name: Models and data jobs are up to date
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python ../scripts/freshness.py --check
+      - name: Live API answers
+        env:
+          URL: ${{ vars.SERVER_URL || 'https://stocksentinel-kjjj.onrender.com' }}
+          KEY: ${{ secrets.STOCKSENTINEL_API_KEY }}
+        run: |
+          for path in /health /api/quant/best?horizon=1y /api/quant/income/calendar /api/quant/scanner; do
+            code=$(curl -s -o body.json -m 90 -w "%{http_code}" -H "X-API-Key: $KEY" "$URL$path" || echo 000)
+            echo "$path -> HTTP $code"
+            [ "$code" = "200" ] || { echo "::error::$path returned $code"; exit 1; }
+          done

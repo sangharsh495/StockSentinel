@@ -1,0 +1,32 @@
+name: Tests and security scan
+
+# Every pull request and push to master: run the backend tests and scan the
+# Python dependencies for known vulnerabilities. Also weekly, because new
+# vulnerabilities get published for libraries that haven't changed.
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt pytest pip-audit
+      - name: Backend tests
+        working-directory: backend
+        run: python -m pytest -q tests
+      - name: Known-vulnerability scan
+        run: pip-audit -r backend/requirements.txt --progress-spinner off

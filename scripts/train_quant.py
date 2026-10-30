@@ -65,6 +65,35 @@ async def scanner_scorecard(results):
     }
 
 
+async def verdict_scorecard(results):
+    """Log tonight's strongest report-card calls, then score every earlier call whose period has passed."""
+    from datetime import date, datetime, timezone
+    import pandas as pd
+    from app.database import execute_many, fetch
+    from app.quant.market_data import equities_only, update_market
+    from app.quant.report_card import score_verdict_log, verdicts_to_log
+
+    cards = next((r for r in results if r.get("model_key") == "stock_report_card"), None)
+    if not cards:
+        return None
+    await execute_many(
+        "INSERT INTO verdict_log (date, symbol, horizon, verdict, chance) VALUES ($1, $2, $3, $4, $5) "
+        "ON CONFLICT DO NOTHING",
+        [(date.fromisoformat(d), s, h, v, c) for d, s, h, v, c in verdicts_to_log(cards)],
+    )
+    rows = [dict(r) for r in await fetch("SELECT date, symbol, horizon, verdict FROM verdict_log")]
+    W = await asyncio.to_thread(lambda: equities_only(update_market(pd.DatetimeIndex([]))))
+    card = await asyncio.to_thread(score_verdict_log, W, rows)
+    log.info(f"Report card live scorecard: {card.get('logged_calls')} calls logged, status {card.get('status')}")
+    return {
+        "model_key": "report_card_scorecard", "strategy": "scorecard", "horizon_days": 5,
+        "description": "Live track record of the report cards' Buy and Sell calls.",
+        "model_type": "live_scorecard", "trained_at": datetime.now(timezone.utc).isoformat(),
+        "data_end": cards.get("data_end"), "edge_verified": False, "metrics": card,
+        "backtest": None, "folds": None, "predictions": [],
+    }
+
+
 async def main(args):
     results = await asyncio.to_thread(run_all, args.strategies, args.period, not args.no_ipo)
     if not args.no_cards:
@@ -97,6 +126,12 @@ async def main(args):
                     results.append(news)
             except Exception as e:  # news tables may be empty on a fresh DB
                 log.warning(f"News model step skipped: {e}")
+            try:
+                card = await verdict_scorecard(results)
+                if card:
+                    results.append(card)
+            except Exception as e:
+                log.warning(f"Report card scorecard skipped: {e}")
             try:
                 card = await scanner_scorecard(results)
                 if card:

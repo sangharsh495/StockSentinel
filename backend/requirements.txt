@@ -1,5 +1,5 @@
 # Web framework
-fastapi==0.115.6
+fastapi==0.162.0
 uvicorn[standard]==0.32.1
 
 # Database
@@ -7,7 +7,7 @@ asyncpg==0.30.0
 psycopg2-binary==2.9.10
 
 # Environment
-python-dotenv==1.0.1
+python-dotenv==1.2.4
 
 # Scheduler
 apscheduler==3.10.4
@@ -17,7 +17,7 @@ httpx==0.28.1
 
 # Web scraping
 beautifulsoup4==4.12.3
-lxml==5.3.0
+lxml==6.1.3
 
 # RSS parsing
 feedparser==6.0.11
@@ -41,7 +41,7 @@ groq==0.18.0
 firebase-admin==6.6.0
 
 # Data validation
-pydantic==2.10.3
+pydantic>=2.10.3
 
 # Timezone handling
 pytz==2024.2

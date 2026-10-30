@@ -1,0 +1,28 @@
+name: Keep schedules active
+
+# GitHub turns off scheduled workflows in public repos after 60 days without
+# repository activity, which would stop the nightly models and keep-alive.
+# A tiny monthly commit counts as activity.
+
+on:
+  schedule:
+    - cron: "41 4 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  touch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record a heartbeat
+        run: |
+          mkdir -p .github
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .github/heartbeat.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/heartbeat.txt
+          git commit -m "Monthly heartbeat (keeps scheduled workflows active)" || exit 0
+          git push

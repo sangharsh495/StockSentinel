@@ -4,6 +4,8 @@ on:
   schedule:
     # Saturday 03:17 UTC (8:47 AM IST): weekly, markets closed
     - cron: "17 3 * * 6"
+    # backup on Sunday in case GitHub dropped Saturday's run (a repeat is harmless)
+    - cron: "17 3 * * 0"
   workflow_dispatch:
     inputs:
       bags:
