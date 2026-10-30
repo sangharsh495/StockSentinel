@@ -61,6 +61,14 @@
             android:name=".ui.quant.MultibaggerActivity"
             android:exported="false"
             android:theme="@style/Theme.StockSentinel" />
+        <activity
+            android:name=".ui.quant.BestStocksActivity"
+            android:exported="false"
+            android:theme="@style/Theme.StockSentinel" />
+        <activity
+            android:name=".ui.quant.ReportCardActivity"
+            android:exported="false"
+            android:theme="@style/Theme.StockSentinel" />
 
         <!-- Settings & System Status Activity -->
         <activity

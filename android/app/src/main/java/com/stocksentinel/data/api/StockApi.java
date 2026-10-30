@@ -245,6 +245,16 @@ public interface StockApi {
     @GET("api/quant/multibagger")
     Call<JsonObject> getMultibaggerRadar();
 
+    @GET("api/quant/report-card/{symbol}")
+    Call<JsonObject> getReportCard(@Path("symbol") String symbol, @Query("horizon") String horizon);
+
+    @GET("api/quant/best")
+    Call<JsonObject> getBestStocks(
+            @Query("kind") String kind,
+            @Query("horizon") String horizon,
+            @Query("limit") int limit
+    );
+
     // ---- Health & System Status ----
     @GET("health")
     Call<JsonObject> healthCheck();

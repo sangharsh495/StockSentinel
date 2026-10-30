@@ -203,6 +203,20 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
+            <!-- 57-check report card link -->
+            <TextView
+                android:id="@+id/btn_report_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/badge_bg"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:textColor="@color/purple_accent"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:text="🧪 57-Check Report Card ➔" />
+
             <!-- ============================================================ -->
             <!-- 1. BUFFETT INTRINSIC VALUATION & MARGIN OF SAFETY -->
             <!-- ============================================================ -->

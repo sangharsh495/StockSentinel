@@ -67,6 +67,15 @@ async def scanner_scorecard(results):
 
 async def main(args):
     results = await asyncio.to_thread(run_all, args.strategies, args.period, not args.no_ipo)
+    if not args.no_cards:
+        try:
+            from app.quant.report_card import nightly_report_cards
+            cards = await asyncio.to_thread(nightly_report_cards)
+            t = cards["metrics"]["horizon_tests"]
+            log.info("Report cards: " + ", ".join(f"{h} verified={v['verified']}" for h, v in t.items()))
+            results.append(cards)
+        except Exception as e:
+            log.warning(f"Report cards skipped: {e}")
 
     if not args.no_db:
         from app.database import close_pool, create_pool, init_schema
@@ -109,5 +118,6 @@ if __name__ == "__main__":
     ap.add_argument("--out", help="write the full JSON report here")
     ap.add_argument("--period", default="10y")
     ap.add_argument("--no-ipo", action="store_true", help="skip the IPO scrape and model")
+    ap.add_argument("--no-cards", action="store_true", help="skip the 57-check stock report cards")
     ap.add_argument("--strategies", nargs="*", choices=["trader", "swing", "investor"])
     asyncio.run(main(ap.parse_args()))
