@@ -21,6 +21,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.stocksentinel.R;
 import com.stocksentinel.data.api.ApiClient;
+import com.stocksentinel.ui.quant.MultibaggerActivity;
 import com.stocksentinel.ui.quant.QuantPicksActivity;
 import com.stocksentinel.ui.stockdetail.StockDetailActivity;
 import com.stocksentinel.util.FormatUtils;
@@ -128,6 +129,8 @@ public class HomeFragment extends Fragment {
         quantPicksRecycler.setAdapter(quantPicksAdapter);
         view.findViewById(R.id.btn_see_all_picks).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), QuantPicksActivity.class)));
+        view.findViewById(R.id.btn_see_all_radar).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), MultibaggerActivity.class)));
 
         // SwipeRefresh setup
         swipeRefresh.setOnRefreshListener(this::loadAllData);

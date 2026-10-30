@@ -242,6 +242,9 @@ public interface StockApi {
     @GET("api/quant/stock/{symbol}")
     Call<JsonObject> getQuantStock(@Path("symbol") String symbol);
 
+    @GET("api/quant/multibagger")
+    Call<JsonObject> getMultibaggerRadar();
+
     // ---- Health & System Status ----
     @GET("health")
     Call<JsonObject> healthCheck();

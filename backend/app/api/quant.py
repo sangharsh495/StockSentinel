@@ -299,3 +299,57 @@ async def scanner():
         "live_scorecard": (_j(card_run.get("metrics")) if card_run else {"status": "collecting"}),
         "picks": picks,
     }
+
+
+@router.get("/multibagger")
+async def multibagger():
+    """
+    Multibagger Radar: stocks with the best tested odds of doubling within a
+    year, each with its stage, evidence ledger and red flags, plus the
+    model zoo's honest test results, market regime and live scorecard.
+    """
+    run = await _latest_run("multibagger_radar")
+    if not run:
+        return {"status": "not_trained", "picks": []}
+    rows = await fetch(
+        """
+        SELECT p.payload, s.name, s.sector, s.current_price, s.change_pct
+        FROM quant_predictions p
+        LEFT JOIN stocks s ON UPPER(s.symbol) = p.symbol AND s.exchange = 'NSE'
+        WHERE p.model_key = 'multibagger_radar' ORDER BY p.rank
+        """
+    )
+    picks = []
+    for r in rows:
+        p = _j(r["payload"])
+        p.update({"name": r["name"], "sector": r["sector"],
+                  "current_price": float(r["current_price"]) if r["current_price"] is not None else None,
+                  "change_pct": float(r["change_pct"]) if r["change_pct"] is not None else None})
+        picks.append(p)
+    m = _j(run.get("metrics")) or {}
+    card_run = await _latest_run("multibagger_scorecard")
+    stack = m.get("honest_stack") or {}
+    if run.get("edge_verified"):
+        verdict = (f"Tested edge: on {stack.get('months')} unseen months the top 10% of this ranking doubled "
+                   f"{stack.get('top_decile_hit_pct')}% of the time vs {stack.get('avg_base_rate_pct')}% for an "
+                   f"average liquid stock ({stack.get('lift_top_decile')}x). Most picks still won't double.")
+    else:
+        verdict = "No proven edge yet on unseen data: treat this list as research leads, not buy signals."
+    return {
+        "status": "ok", "as_of": str(run["data_end"]) if run.get("data_end") else None,
+        "edge_verified": bool(run.get("edge_verified")), "verdict": verdict,
+        "description": run.get("description"),
+        "zoo": {k: m.get(k) for k in ("model_configurations", "fitted_models", "bags_per_configuration",
+                                      "families", "targets", "views", "fdr_q")},
+        "fdr_survivors": len(m.get("fdr_survivors") or []),
+        "honest_test": {k: v for k, v in stack.items() if k != "by_month"},
+        "baselines": {"zoo_average": {k: v for k, v in (m.get("zoo_average") or {}).items() if k != "by_month"},
+                      "price_and_flow_only": {k: v for k, v in (m.get("price_and_flow_only") or {}).items()
+                                              if k != "by_month"}},
+        "lift_by_score_bucket": m.get("lift_by_score_bucket"),
+        "stage_track_record": m.get("stage_track_record"),
+        "red_flag_study": m.get("red_flag_study"),
+        "regime": m.get("regime"),
+        "live_scorecard": (_j(card_run.get("metrics")) if card_run else {"status": "collecting"}),
+        "picks": picks,
+    }
