@@ -9,10 +9,15 @@ def localProps = new Properties()
 def localPropsFile = rootProject.file('local.properties')
 if (localPropsFile.exists()) { localPropsFile.withInputStream { localProps.load(it) } }
 def apiKey = (localProps.getProperty('stocksentinel.apiKey') ?: (System.getenv('STOCKSENTINEL_API_KEY') ?: '')).trim()
-// Only letters, digits and - _ . are allowed, so the key is always a valid HTTP header
-// and a safe Java string. Anything else fails the build with a clear message.
-if (apiKey && !(apiKey ==~ /[A-Za-z0-9._-]+/)) {
-    throw new GradleException("STOCKSENTINEL_API_KEY may only contain letters, numbers, '-', '_' and '.' (found other characters). Create a new key with letters and numbers only.")
+// A key must be printable ASCII without quotes or backslashes (it becomes an HTTP header
+// and a Java string). Otherwise the app is built without a key, with a warning, so a bad
+// secret never blocks the build.
+if (apiKey && !(apiKey ==~ /[\x21\x23-\x5b\x5d-\x7e]+/)) {
+    logger.warn("WARNING: STOCKSENTINEL_API_KEY contains characters that cannot be sent in an HTTP header " +
+            "(spaces, quotes, backslashes or non-English characters). Building WITHOUT a key. " +
+            "Use letters and numbers only.")
+    println("::warning::STOCKSENTINEL_API_KEY has unusable characters; the app was built without a key")
+    apiKey = ''
 }
 
 android {
