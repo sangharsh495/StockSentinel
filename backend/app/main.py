@@ -89,7 +89,11 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
 
-    # 2. Start APScheduler
+    # 2. Start APScheduler (jobs run their async work on this event loop,
+    #    which owns the database pool)
+    import asyncio
+    from app.scheduler.jobs import set_main_loop
+    set_main_loop(asyncio.get_running_loop())
     scheduler = start_scheduler()
 
     # 3. Start self-ping keep-alive thread
