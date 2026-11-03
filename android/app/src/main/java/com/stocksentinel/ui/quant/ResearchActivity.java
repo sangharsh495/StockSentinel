@@ -189,7 +189,8 @@ public class ResearchActivity extends AppCompatActivity {
             highlightChips();
         }
         nameText.setText(str(b, "symbol"));
-        stageBadge.setText(MultibaggerActivity.stageLabel(str(b, "stage")));
+        String stage = str(b, "stage");
+        stageBadge.setText(stage.isEmpty() ? "—" : MultibaggerActivity.stageLabel(stage));
         String note = str(b, "note");
         summaryText.setText(str(b, "name") + (note.isEmpty() ? "" : "\n" + note));
 
@@ -407,7 +408,9 @@ public class ResearchActivity extends AppCompatActivity {
     }
 
     private static String px(JsonArray a, int i) {
-        return a.get(i).isJsonNull() ? "—" : FormatUtils.formatPrice(a.get(i).getAsDouble(), "INR");
+        JsonElement e = a.get(i);
+        if (!e.isJsonPrimitive() || !e.getAsJsonPrimitive().isNumber()) return "—";
+        return FormatUtils.formatPrice(e.getAsDouble(), "INR");
     }
 
     private static String n0(Double v) {
