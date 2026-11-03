@@ -471,9 +471,11 @@ def run_report_cards(W: Dict[str, pd.DataFrame], fund: Optional[pd.DataFrame], t
                          "score": None if np.isnan(dscore[i]) else round(float(dscore[i]), 3)},
             "key_numbers": {k: (None if pd.isna(r[k]) else round(float(r[k]), 4)) for k in
                             ("ret_1y", "mom6", "vol60", "max_dd_1y", "rev_growth", "roe", "debt_to_equity",
-                             "earnings_yield", "deliv_level", "kalman_snr")},
+                             "earnings_yield", "sales_yield", "log_mcap", "deliv_level", "kalman_snr",
+                             "op_margin", "profit_growth", "dilution", "near_52w_high")},
         })
     by_sym = {c["symbol"]: c for c in cards}
+    ranges_cov = add_ranges_and_percentiles(W, cards)
 
     def ok_gov(c):
         return c["governance"]["grade"] in ("A", "B") and not c["red_flags"]
@@ -499,6 +501,7 @@ def run_report_cards(W: Dict[str, pd.DataFrame], fund: Optional[pd.DataFrame], t
             "check_count": len(CHECKS), "checks_verified": survivors,
             "horizon_tests": horizon_tests, "dividend_backtest": div_test,
             "best": best, "stocks_scored": len(cards), "panel_rows": int(len(panel)),
+            "ranges_coverage": ranges_cov,
             "governance_not_covered": GOVERNANCE_NOT_COVERED,
             "minutes": round((datetime.now(timezone.utc) - t0).total_seconds() / 60, 1),
         },
@@ -574,3 +577,46 @@ def score_verdict_log(W: Dict[str, pd.DataFrame], rows: List[dict]) -> Dict:
         card[name] = {side: {"scored": len(xs), "beat_market_pct": round(float(np.mean(np.array(xs) > 0)) * 100, 1),
                              "avg_excess_pct": round(float(np.mean(xs)) * 100, 2)} for side, xs in sides.items()}
     return card
+
+
+PCTL_KEYS = {"pe": "lower is cheaper", "ps": "lower is cheaper", "roe": "higher is better",
+             "rev_growth": "higher is better", "op_margin": "higher is better",
+             "debt_to_equity": "lower is safer", "vol60": "lower is calmer", "ret_1y": "higher is stronger",
+             "div_yield": "higher pays more"}
+
+
+def add_ranges_and_percentiles(W: Dict[str, pd.DataFrame], cards: List[Dict]) -> Dict:
+    """Guaranteed-coverage price ranges for every carded stock, and where its numbers rank in the market."""
+    from app.quant.ranges import backtest_coverage, todays_ranges
+
+    syms = [c["symbol"] for c in cards if c["symbol"] in W["Close"].columns]
+    close = W["Close"][syms]
+    cov = {}
+    try:
+        rng = todays_ranges(close, syms)
+        for c in cards:
+            c["ranges"] = rng.get(c["symbol"]) or None
+            c["last_close"] = float(close[c["symbol"]].dropna().iloc[-1]) if c["symbol"] in close else None
+        for h in (5, 20):
+            r = backtest_coverage(close, h, 0.8)
+            cov[f"{h}d"] = {"promised": 0.8, "achieved": r.get("coverage"), "days": r.get("days")}
+    except Exception as e:   # ranges are an extra: never block the cards
+        logger.warning(f"Ranges for report cards skipped: {e}")
+
+    vals = {}
+    for c in cards:
+        k = c.get("key_numbers") or {}
+        ey, sy = k.get("earnings_yield"), k.get("sales_yield")
+        v = {"pe": 1 / ey if ey and ey > 0 else None, "ps": 1 / sy if sy and sy > 0 else None,
+             "roe": k.get("roe"), "rev_growth": (math.expm1(k["rev_growth"]) if k.get("rev_growth") is not None else None),
+             "op_margin": k.get("op_margin"), "debt_to_equity": k.get("debt_to_equity"), "vol60": k.get("vol60"),
+             "ret_1y": k.get("ret_1y"), "div_yield": ((c.get("dividend") or {}).get("yield_pct") or 0) / 100}
+        vals[c["symbol"]] = v
+    frame = pd.DataFrame(vals).T.astype(float)
+    pct = frame.rank(pct=True)
+    for c in cards:
+        v, p = vals[c["symbol"]], pct.loc[c["symbol"]]
+        c["valuation"] = {key: {"value": None if v[key] is None or not np.isfinite(v[key]) else round(float(v[key]), 4),
+                                "market_percentile": None if pd.isna(p[key]) else int(round(p[key] * 100)),
+                                "reading": PCTL_KEYS[key]} for key in PCTL_KEYS}
+    return cov

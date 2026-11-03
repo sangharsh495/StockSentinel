@@ -262,6 +262,14 @@ public interface StockApi {
             @Query("limit") int limit
     );
 
+    @GET("api/quant/research/{symbol}")
+    Call<JsonObject> getResearch(
+            @Path("symbol") String symbol,
+            @Query("capital") double capital,
+            @Query("risk_pct") double riskPct,
+            @Query("horizon") String horizon
+    );
+
     @GET("api/quant/best")
     Call<JsonObject> getBestStocks(
             @Query("kind") String kind,

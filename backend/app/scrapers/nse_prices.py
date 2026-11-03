@@ -181,13 +181,17 @@ async def fetch_nse_intraday(force: bool = False) -> int:
 
 async def eod_needed() -> bool:
     """True when the newest NSE price in the database is older than the last trading day's close."""
-    pool = await get_pool()
-    async with pool.acquire() as conn:
-        t = await conn.fetchval("SELECT MAX(last_updated) FROM stocks WHERE exchange = 'NSE' AND market = 'IN'")
     now = datetime.now(IST)
     last_close = now.replace(hour=15, minute=30, second=0, microsecond=0)
     if now < last_close + timedelta(hours=3):      # today's file appears in the evening
         last_close -= timedelta(days=1)
     while last_close.weekday() >= 5:
         last_close -= timedelta(days=1)
-    return t is None or t < last_close
+    # Count how many companies are up to date: a single stock refreshed on demand
+    # must not make the whole table look fresh.
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        fresh = await conn.fetchval(
+            "SELECT COUNT(*) FROM stocks WHERE exchange = 'NSE' AND market = 'IN' AND last_updated >= $1",
+            last_close)
+    return (fresh or 0) < 1000

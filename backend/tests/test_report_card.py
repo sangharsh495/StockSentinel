@@ -64,3 +64,20 @@ def test_live_verdict_ledger_scores_after_the_period():
     card = rc.score_verdict_log(W, rows)
     assert card["status"] == "ok" and card["logged_calls"] == 4
     assert card["1w"]["buy"]["scored"] == 1 and card["1w"]["sell"]["scored"] == 1 and "1y" not in card
+
+
+def test_position_size_takes_the_smallest_limit():
+    from app.quant.sizing import position_size
+    base = dict(price=100.0, stop=90.0, target=125.0, capital=100000.0, risk_pct=1.0, governance="A", red_flags=[])
+    # risk budget 1000 / 10 = 100 shares (10%); kelly: 0.56 - 0.44/2.5 = 38.4% -> quarter 9.6%; cap 10%
+    r = position_size(chance=0.56, verdict="buy", verified=True, **base)
+    assert r["binding_limit"] == "quarter_kelly" and r["shares"] == 96 and r["loss_if_stopped"] == 960.0
+    # no tested edge -> 3% cap
+    r = position_size(chance=0.56, verdict="hold", verified=False, **base)
+    assert r["shares"] == 30 and r["binding_limit"] == "evidence_cap"
+    # sell, red flags or bad governance -> nothing
+    assert position_size(chance=0.4, verdict="sell", verified=True, **base)["shares"] == 0
+    assert position_size(chance=0.6, verdict="buy", verified=True, **{**base, "red_flags": ["high_debt"]})["shares"] == 0
+    assert position_size(chance=0.6, verdict="buy", verified=True, **{**base, "governance": "D"})["shares"] == 0
+    # no range -> no size
+    assert position_size(chance=0.6, verdict="buy", verified=True, **{**base, "stop": None})["shares"] == 0

@@ -147,10 +147,15 @@ async def cleanup_old_news():
 
     pool = await get_pool()
     async with pool.acquire() as conn:
+        # News linked to a stock is kept for 400 days: its measured price reaction
+        # (news_outcomes, deleted with it) is what the news-impact model learns from,
+        # and a 5-day reaction takes about a week to measure.
         result = await conn.execute(
             """
-            DELETE FROM news
-            WHERE created_at < NOW() - $1 * INTERVAL '1 day'
+            DELETE FROM news n
+            WHERE (n.created_at < NOW() - $1 * INTERVAL '1 day'
+                   AND NOT EXISTS (SELECT 1 FROM news_stock_impact i WHERE i.news_id = n.id))
+               OR n.created_at < NOW() - INTERVAL '400 days'
             """,
             settings.NEWS_RETENTION_DAYS,
         )

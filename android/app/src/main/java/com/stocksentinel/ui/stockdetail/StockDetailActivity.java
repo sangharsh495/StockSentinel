@@ -128,6 +128,11 @@ public class StockDetailActivity extends AppCompatActivity {
         priceChange = findViewById(R.id.stock_price_change);
         scrubberInfo = findViewById(R.id.scrubber_info);
         btnWatchlist = findViewById(R.id.btn_watchlist_toggle);
+        findViewById(R.id.btn_full_research).setOnClickListener(v -> {
+            Intent intent = new Intent(this, com.stocksentinel.ui.quant.ResearchActivity.class);
+            intent.putExtra(com.stocksentinel.ui.quant.ResearchActivity.EXTRA_SYMBOL, symbol);
+            startActivity(intent);
+        });
         findViewById(R.id.btn_report_card).setOnClickListener(v -> {
             Intent intent = new Intent(this, ReportCardActivity.class);
             intent.putExtra(ReportCardActivity.EXTRA_SYMBOL, symbol);
