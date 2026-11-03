@@ -57,9 +57,10 @@ async def _log_job(job_name: str, func):
         await execute(
             """
             INSERT INTO job_runs (job_name, status, records_processed, started_at, finished_at)
-            VALUES ($1, 'success', $2, $3, NOW())
+            VALUES ($1, $2, $3, $4, NOW())
             """,
-            job_name, result or 0, started,
+            # a job that reports 0 records fetched nothing: record it as 'empty', not 'success'
+            job_name, "empty" if result == 0 and isinstance(result, int) else "success", result or 0, started,
         )
     except Exception as e:
         logger.error(f"Job {job_name} failed: {e}")
@@ -79,10 +80,20 @@ async def _log_job(job_name: str, func):
 # Job wrappers (called by APScheduler)
 # ---------------------------------------------------------------------------
 def job_fetch_nse():
-    """Fetch NSE India stock prices."""
+    """Delayed live NSE prices from Yahoo for the most-traded companies (market hours)."""
     async def _run():
-        from app.scrapers.nse_scraper import fetch_nse_all_stocks
-        await _log_job("nse_stocks", fetch_nse_all_stocks)
+        from app.scrapers.nse_prices import fetch_nse_intraday
+        await _log_job("nse_stocks", fetch_nse_intraday)
+    _run_async(_run())
+
+
+def job_nse_eod(only_if_needed: bool = False):
+    """End-of-day prices for every NSE company from NSE's public daily file."""
+    async def _run():
+        from app.scrapers.nse_prices import eod_needed, fetch_nse_eod
+        if only_if_needed and not await eod_needed():
+            return
+        await _log_job("nse_eod", fetch_nse_eod)
     _run_async(_run())
 
 
@@ -153,8 +164,9 @@ def job_fetch_dividends():
 def job_fetch_ipos():
     """Fetch IPO data."""
     async def _run():
-        from app.scrapers.ipo_scraper import fetch_india_ipos, fetch_us_ipos
-        await _log_job("ipos_india", fetch_india_ipos)
+        from app.scrapers.ipo_live import fetch_india_ipos_live
+        from app.scrapers.ipo_scraper import fetch_us_ipos
+        await _log_job("ipos_india", fetch_india_ipos_live)
         await _log_job("ipos_us", fetch_us_ipos)
     _run_async(_run())
 
@@ -312,6 +324,19 @@ def create_scheduler() -> BackgroundScheduler:
         id="nse_stocks",
         name="NSE Stock Prices",
     )
+
+    # --- After close: every NSE company's end-of-day prices (6:45 PM and 9:15 PM IST, Mon-Fri) ---
+    scheduler.add_job(
+        job_nse_eod,
+        CronTrigger(hour="18,21", minute="45,15", day_of_week="mon-fri"),
+        id="nse_eod",
+        name="NSE End-of-day Prices",
+    )
+    # and once at start-up when the stored prices are behind (e.g. after a restart)
+    scheduler.add_job(job_nse_eod, kwargs={"only_if_needed": True}, id="nse_eod_startup",
+                      name="NSE End-of-day Catch-up")
+    # IPO list once at start-up too, so a fresh deploy never shows an old list
+    scheduler.add_job(job_fetch_ipos, id="ipos_startup", name="IPO list at start-up")
 
     scheduler.add_job(
         job_fetch_bse,

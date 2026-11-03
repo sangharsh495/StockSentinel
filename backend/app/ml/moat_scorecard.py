@@ -56,7 +56,7 @@ class MoatScorecardEngine:
         if cache_key in _quality_cache:
             return _quality_cache[cache_key]
 
-        fin_data = await fundamentals_scraper.get_financial_data(symbol, exchange)
+        fin_data = await fundamentals_scraper.get_fundamentals(symbol, exchange)
         annual = fin_data.get("annual", [])
         quarterly = fin_data.get("quarterly", [])
         info = fin_data.get("info", {})

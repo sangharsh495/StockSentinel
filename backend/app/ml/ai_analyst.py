@@ -462,41 +462,9 @@ async def generate_full_research_report(symbol: str) -> Dict[str, Any]:
         except Exception as e:
             logger.warning(f"Groq research report failed: {e}")
 
-    # Fallback
+    # Fallback: our own tested report card and income record (no AI needed)
     if not report:
-        pct = ctx["change_pct"]
-        if pct >= 2:
-            grade = "B+"
-        elif pct >= 0:
-            grade = "B"
-        elif pct >= -2:
-            grade = "C+"
-        else:
-            grade = "C"
-
-        report = {
-            "company_profile": f"{ctx['name']} is a {'large-cap' if mcap and mcap > 100_000_000_000 else 'mid-cap'} company in the {ctx['sector']} sector listed on {ctx['exchange']}.",
-            "industry_competition": f"Operates in the competitive {ctx['industry']} space. Full competitive analysis requires AI.",
-            "financial_scorecard": {
-                "revenue_growth": "Data requires AI analysis",
-                "profit_margins": "Check quarterly filings",
-                "debt_health": "Balance sheet review needed",
-                "cash_flow": "Operating cash flow data unavailable",
-                "overall_grade": grade,
-            },
-            "technical_summary": f"Stock at {ctx['currency']} {ctx['current_price']} within day range {ctx['day_low']}-{ctx['day_high']}.",
-            "shareholding_pattern": {
-                "promoter_pct": None,
-                "fii_pct": None,
-                "dii_pct": None,
-                "public_pct": None,
-                "commentary": "Shareholding data requires latest quarterly filings.",
-            },
-            "peer_comparison": [],
-            "investment_thesis": f"Further analysis needed. Current price action shows {pct:+.1f}% movement with {'bullish' if pct > 0 else 'bearish'} bias.",
-            "research_grade": grade,
-            "source": "StockSentinel Rules Engine",
-        }
+        report = await _report_from_cards(symbol_upper, ctx, mcap)
 
     # Attach stock metadata
     report["symbol"] = stock["symbol"]
@@ -520,3 +488,89 @@ async def generate_full_research_report(symbol: str) -> Dict[str, Any]:
     ]
 
     return report
+
+
+async def _report_from_cards(symbol: str, ctx: Dict[str, Any], mcap) -> Dict[str, Any]:
+    """Research report built from the stock's 57-check report card and dividend record."""
+    card, income = {}, {}
+    try:
+        pool = await get_pool()
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                "SELECT model_key, payload FROM quant_predictions "
+                "WHERE symbol = $1 AND model_key IN ('stock_report_card', 'dividend_income')", symbol)
+        for r in rows:
+            p = json.loads(r["payload"]) if isinstance(r["payload"], str) else r["payload"]
+            if r["model_key"] == "stock_report_card":
+                card = p
+            else:
+                income = p
+    except Exception as e:
+        logger.debug(f"report card lookup failed for {symbol}: {e}")
+
+    checks = card.get("checks") or {}
+    k = card.get("key_numbers") or {}
+    passed, failed = card.get("checks_passed"), card.get("checks_failed")
+
+    def pct(v, mult=100, sign=True):
+        return None if v is None else (f"{v * mult:+.1f}%" if sign else f"{v * mult:.1f}%")
+
+    def check(cid, yes, no):
+        v = checks.get(cid)
+        return yes if v == 1 else (no if v == -1 else None)
+
+    if passed is not None and failed is not None and passed + failed > 0:
+        share = passed / (passed + failed)
+        grade = "A" if share >= 0.7 else "B" if share >= 0.55 else "C" if share >= 0.4 else "D"
+    else:
+        grade = "Not rated"
+
+    import math
+    rev = k.get("rev_growth")
+    rev_txt = f"Revenue {math.expm1(rev) * 100:+.1f}% last year" if rev is not None else None
+    verdicts = card.get("verdicts") or {}
+    horizon_names = {"1w": "1 week", "1m": "1 month", "3m": "3 months", "1y": "1 year"}
+    vparts = []
+    for h, name in horizon_names.items():
+        v = verdicts.get(h) or {}
+        if v:
+            tag = v.get("verdict", "hold").upper() + ("" if v.get("horizon_verified") else " (unproven)")
+            vparts.append(f"{name}: {tag}, {v.get('chance_beat_market_pct', 0):.0f}% chance to beat the market")
+    gov = (card.get("governance") or {}).get("grade")
+    stage = (card.get("stage") or "").replace("_", " ")
+
+    na = "No report card for this stock yet (only liquid NSE companies get one)"
+    return {
+        "company_profile": (f"{ctx['name']} ({ctx['sector']}) on {ctx['exchange']}"
+                            + (f", {'large-cap' if mcap and mcap > 100_000_000_000 else 'mid/small-cap'}" if mcap else "")
+                            + "."),
+        "industry_competition": "See the Compare section for this stock against its peers.",
+        "financial_scorecard": {
+            "revenue_growth": rev_txt or check("revenue_growing", "Revenue grew last year", "Revenue fell last year") or na,
+            "profit_margins": check("good_margin", "Operating margin above 15%", "Operating margin below 5%")
+                              or check("profitable", "Profitable", "Loss-making") or "Margin data not available",
+            "debt_health": (f"Debt/equity {k['debt_to_equity']:.2f}" if k.get("debt_to_equity") is not None
+                            else "Debt data not available"),
+            "cash_flow": check("cash_backed_profit", "Profits backed by operating cash",
+                               "Operating cash flow negative") or "Cash-flow data not available",
+            "overall_grade": grade,
+        },
+        "technical_summary": " · ".join(x for x in (
+            f"Stage: {stage}" if stage else None,
+            f"1-year return {pct(k.get('ret_1y'))}" if k.get("ret_1y") is not None else None,
+            f"worst fall in a year {pct(k.get('max_dd_1y'))}" if k.get("max_dd_1y") is not None else None,
+            f"Kalman trend certainty {k['kalman_snr']:.1f}" if k.get("kalman_snr") is not None else None) if x)
+            or f"Price {ctx['currency']} {ctx['current_price']}",
+        "shareholding_pattern": {
+            "promoter_pct": None, "fii_pct": None, "dii_pct": None, "public_pct": None,
+            "commentary": "See the Shareholding section for the latest ownership split.",
+        },
+        "peer_comparison": [],
+        "investment_thesis": ("; ".join(vparts) + "." if vparts else na)
+                             + (f" Governance grade {gov}." if gov else "")
+                             + (f" Dividend record: {income.get('rating_badge', '').title()}, yield {income.get('yield_pct')}%."
+                                if income else ""),
+        "research_grade": grade,
+        "checks_passed": passed, "checks_failed": failed,
+        "source": "StockSentinel report card (tested checks)" if card else "StockSentinel (limited data)",
+    }

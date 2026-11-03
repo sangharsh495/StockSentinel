@@ -256,7 +256,12 @@ class IPOResearcher:
             verdict, confidence = "RISKY_BET", 30
             rationale = "No GMP and no model estimate yet: not enough data for a confident call."
 
-        facts = [f"Price band {cur}{low:,.0f} - {cur}{high:,.0f}" if high else "Price band not announced yet"]
+        if high and low and low != high:
+            facts = [f"Price band {cur}{low:,.0f} - {cur}{high:,.0f}"]
+        elif high:
+            facts = [f"Issue price {cur}{high:,.0f}"]
+        else:
+            facts = ["Price band not announced yet"]
         if ipo_data.get("lot_size"):
             facts.append(f"lot of {ipo_data['lot_size']} shares")
         if ipo_data.get("issue_size"):
@@ -274,24 +279,52 @@ class IPOResearcher:
             avoid.append("GMP sources disagree: treat the premium with caution")
         if model and not model.get("subscription_known"):
             avoid.append("Bidding not started: estimate rests on GMP only")
+
+        det = ipo_data.get("details") or {}
+        if isinstance(det, str):
+            try:
+                det = json.loads(det)
+            except ValueError:
+                det = {}
+
+        def f(k, fmt):
+            v = det.get(k)
+            return fmt.format(v) if isinstance(v, (int, float)) else None
+
+        fin_rev = " · ".join(x for x in (f("pat_margin", "profit margin {:.1f}%"), f("roe", "ROE {:.1f}%"),
+                                         f("roce", "ROCE {:.1f}%")) if x)
+        fin_debt = f("debt_equity", "Debt/equity {:.2f}")
+        fin_val = " · ".join(x for x in (f("pe_ratio", "P/E {:.1f} (pre-issue)"), f("post_pe_ratio", "{:.1f} post-issue"),
+                                         f("price_to_book", "P/B {:.2f}"), f("market_cap_cr", "market cap ₹{:,.0f} Cr")) if x)
+        promo = " → ".join(x for x in (f("promoter_pre", "{:.1f}%"), f("promoter_post", "{:.1f}%")) if x)
+        if isinstance(det.get("debt_equity"), (int, float)):
+            (avoid if det["debt_equity"] > 1.5 else buy).append(f"Debt/equity {det['debt_equity']:.2f}")
+        if isinstance(det.get("roe"), (int, float)):
+            (buy if det["roe"] >= 15 else avoid).append(f"Return on equity {det['roe']:.1f}%")
+        if isinstance(det.get("ofs_amt"), (int, float)) and isinstance(det.get("total_issue_amt"), (int, float)) \
+                and det["total_issue_amt"] > 0 and det["ofs_amt"] / det["total_issue_amt"] > 0.5:
+            avoid.append(f"{det['ofs_amt'] / det['total_issue_amt'] * 100:.0f}% of the issue is existing holders selling (OFS)")
         if not buy:
             buy.append("No strong positive signal yet")
         if not avoid:
             avoid.append("Listing gains are never guaranteed; markets can turn before listing day")
-
-        no_ai = "Company description needs the AI write-up (not configured) or the offer document (DRHP on sebi.gov.in)."
+        no_ai = ("Business description needs the AI write-up (not configured) or the offer document (DRHP on sebi.gov.in)."
+                 + (f" Sector: {det['sector']}." if det.get("sector") else ""))
         return {
             "company_overview": f"{name}: {', '.join(facts)}; {dates}. {no_ai}",
             "business_model": "Read the 'Our Business' section of the DRHP on sebi.gov.in for how the company earns money.",
             "industry_position": "See the 'Industry Overview' section of the DRHP for competitors and market size.",
             "financial_snapshot": {
-                "revenue_description": "Revenue and profit history are in the DRHP's 'Financial Information' section",
+                "revenue_description": fin_rev or "Revenue and profit history are in the DRHP's 'Financial Information' section",
                 "profitability": f"GMP {cur}{gmp:,.0f}" + (f" ({gmp_pct:+.1f}% of the issue price)" if gmp_pct is not None else ""),
-                "debt_status": f"Subscription {total_x:.1f}x overall" if total_x is not None else "Subscription data not out yet",
-                "key_metrics": (f"Model expected listing gain {exp:+.1f}%, chance positive {prob * 100:.0f}%"
-                                if prob is not None and exp is not None else "No model estimate for this issue yet"),
+                "debt_status": " · ".join(x for x in (fin_debt, f"subscribed {total_x:.1f}x" if total_x is not None
+                                                       else "subscription not out yet") if x),
+                "key_metrics": " · ".join(x for x in (fin_val, f"model expected listing gain {exp:+.1f}%, chance positive {prob * 100:.0f}%"
+                                                       if prob is not None and exp is not None else None) if x)
+                               or "No valuation data or model estimate for this issue yet",
             },
-            "promoter_management": "Promoters and management are listed in the DRHP.",
+            "promoter_management": (f"Promoter holding {promo} after the issue." if promo
+                                    else "Promoters and management are listed in the DRHP."),
             "valuation_assessment": rationale,
             "strengths": buy,
             "risks": avoid,

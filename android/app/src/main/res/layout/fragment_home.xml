@@ -46,7 +46,7 @@
                         android:id="@+id/stock_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tracking 13,000+ Stocks"
+                        android:text="Tracking NSE &amp; US stocks"
                         android:textColor="@color/text_primary"
                         android:textSize="22sp"
                         android:textStyle="bold"
@@ -356,7 +356,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="🟢 0% Bullish"
+                        android:text="🟢 —"
                         android:textColor="@color/bullish"
                         android:textSize="13sp"
                         android:gravity="center" />
@@ -366,7 +366,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="🔴 0% Bearish"
+                        android:text="🔴 —"
                         android:textColor="@color/bearish"
                         android:textSize="13sp"
                         android:gravity="center" />
@@ -376,7 +376,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="⚪ 0% Neutral"
+                        android:text="⚪ —"
                         android:textColor="@color/neutral"
                         android:textSize="13sp"
                         android:gravity="center" />

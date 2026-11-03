@@ -65,6 +65,32 @@ async def scanner_scorecard(results):
     }
 
 
+async def sync_dividends(results):
+    """Refill the app's dividends table from the income engine (NSE's corporate-actions API blocks cloud servers)."""
+    from datetime import date
+    from app.database import execute, execute_many
+    from app.quant.income import dividend_table_rows
+
+    income = next((r for r in results if r.get("model_key") == "dividend_income"), None)
+    if not income:
+        return
+    rows = dividend_table_rows(income)
+    if not rows:
+        return
+    await execute("DELETE FROM dividends WHERE dividend_type IN ('yahoo', 'expected') OR ex_date IS NULL "
+                  "OR symbol LIKE '^%'")
+    await execute_many(
+        """
+        INSERT INTO dividends (stock_id, symbol, exchange, company_name, dividend_type, amount, ex_date, status)
+        SELECT (SELECT id FROM stocks WHERE symbol = $1 AND exchange = 'NSE' LIMIT 1), $1, 'NSE',
+               COALESCE((SELECT name FROM stocks WHERE symbol = $1 AND exchange = 'NSE' LIMIT 1), $1),
+               $2, $3, $4, $5
+        """,
+        [(s, t, a, date.fromisoformat(d), st) for s, t, a, d, st in rows],
+    )
+    log.info(f"Dividends table: {len(rows)} paid/expected entries")
+
+
 async def verdict_scorecard(results):
     """Log tonight's strongest report-card calls, then score every earlier call whose period has passed."""
     from datetime import date, datetime, timezone
@@ -126,6 +152,10 @@ async def main(args):
                     results.append(news)
             except Exception as e:  # news tables may be empty on a fresh DB
                 log.warning(f"News model step skipped: {e}")
+            try:
+                await sync_dividends(results)
+            except Exception as e:
+                log.warning(f"Dividend table sync skipped: {e}")
             try:
                 card = await verdict_scorecard(results)
                 if card:

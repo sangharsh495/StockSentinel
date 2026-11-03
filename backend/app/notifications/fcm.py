@@ -112,6 +112,7 @@ async def send_dividend_alerts():
         LEFT JOIN stocks s ON d.stock_id = s.id
         WHERE d.ex_date = CURRENT_DATE + INTERVAL '1 day'
           AND d.notified = FALSE
+          AND COALESCE(d.dividend_type, '') <> 'expected'   -- estimates are not announcements
         """
     )
 

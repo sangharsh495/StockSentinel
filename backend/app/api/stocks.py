@@ -107,6 +107,7 @@ async def top_gainers(
                    prev_close, change_pct, volume, currency, last_updated
             FROM stocks
             WHERE change_pct IS NOT NULL AND change_pct > 0
+              AND symbol NOT LIKE '^%' AND current_price >= 10 AND COALESCE(volume, 0) * current_price >= CASE WHEN market = 'IN' THEN 50000000 ELSE 5000000 END AND last_updated > NOW() - INTERVAL '4 days'
               AND market = $1 AND is_active = TRUE
             ORDER BY change_pct DESC
             LIMIT $2
@@ -121,6 +122,7 @@ async def top_gainers(
                    prev_close, change_pct, volume, currency, last_updated
             FROM stocks
             WHERE change_pct IS NOT NULL AND change_pct > 0
+              AND symbol NOT LIKE '^%' AND current_price >= 10 AND COALESCE(volume, 0) * current_price >= CASE WHEN market = 'IN' THEN 50000000 ELSE 5000000 END AND last_updated > NOW() - INTERVAL '4 days'
               AND is_active = TRUE
             ORDER BY change_pct DESC
             LIMIT $1
@@ -144,6 +146,7 @@ async def top_losers(
                    prev_close, change_pct, volume, currency, last_updated
             FROM stocks
             WHERE change_pct IS NOT NULL AND change_pct < 0
+              AND symbol NOT LIKE '^%' AND current_price >= 10 AND COALESCE(volume, 0) * current_price >= CASE WHEN market = 'IN' THEN 50000000 ELSE 5000000 END AND last_updated > NOW() - INTERVAL '4 days'
               AND market = $1 AND is_active = TRUE
             ORDER BY change_pct ASC
             LIMIT $2
@@ -158,6 +161,7 @@ async def top_losers(
                    prev_close, change_pct, volume, currency, last_updated
             FROM stocks
             WHERE change_pct IS NOT NULL AND change_pct < 0
+              AND symbol NOT LIKE '^%' AND current_price >= 10 AND COALESCE(volume, 0) * current_price >= CASE WHEN market = 'IN' THEN 50000000 ELSE 5000000 END AND last_updated > NOW() - INTERVAL '4 days'
               AND is_active = TRUE
             ORDER BY change_pct ASC
             LIMIT $1

@@ -142,7 +142,7 @@
                                 android:id="@+id/ipo_stat_price"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="₹450 - ₹475"
+                                android:text="—"
                                 android:textColor="@color/text_primary"
                                 android:textSize="13sp"
                                 android:textStyle="bold" />
@@ -165,7 +165,7 @@
                                 android:id="@+id/ipo_stat_gmp"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="+₹120 (25%)"
+                                android:text="—"
                                 android:textColor="@color/green_accent"
                                 android:textSize="13sp"
                                 android:textStyle="bold" />
@@ -188,7 +188,7 @@
                                 android:id="@+id/ipo_stat_issue"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="₹1,200 Cr"
+                                android:text="—"
                                 android:textColor="@color/text_primary"
                                 android:textSize="13sp"
                                 android:textStyle="bold" />

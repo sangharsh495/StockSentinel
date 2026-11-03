@@ -31,7 +31,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="September 2026"
+            android:text="—"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary" />
