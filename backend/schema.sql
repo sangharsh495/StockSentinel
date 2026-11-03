@@ -312,3 +312,6 @@ CREATE TABLE IF NOT EXISTS live_watch (
     status VARCHAR(20),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- IPO details from investorgain (financials, sector, promoter holding) for the no-AI report
+ALTER TABLE ipos ADD COLUMN IF NOT EXISTS details JSONB;

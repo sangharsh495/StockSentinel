@@ -195,3 +195,16 @@ def build_income(fund: Optional[pd.DataFrame], close: pd.DataFrame, cards: Optio
                         "FAIRLY REGULAR": "score 55-75", "IRREGULAR": "score below 55"}},
         "backtest": None, "folds": None, "predictions": profiles,
     })
+
+
+def dividend_table_rows(income: Dict) -> List[tuple]:
+    """Rows for the app's `dividends` table: each payer's last payment per usual month ('paid') and next expected one."""
+    rows = []
+    for p in income.get("predictions") or []:
+        for n in p.get("next_expected") or []:
+            amt = n.get("expected_amount")
+            if n.get("last_paid"):
+                rows.append((p["symbol"], "yahoo", amt, n["last_paid"], "paid"))
+            if n.get("expected_date"):
+                rows.append((p["symbol"], "expected", amt, n["expected_date"], "expected"))
+    return rows

@@ -84,7 +84,7 @@ public class SearchActivity extends AppCompatActivity {
         if (query.length() < 1) {
             adapter.clear();
             emptyText.setVisibility(View.VISIBLE);
-            emptyText.setText("Search 13,000+ stocks…");
+            emptyText.setText("Search NSE & US stocks…");
             return;
         }
 

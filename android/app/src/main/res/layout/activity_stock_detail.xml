@@ -93,7 +93,7 @@
                     android:id="@+id/stock_live_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="₹0.00"
+                    android:text="—"
                     android:textColor="@color/text_primary"
                     android:textSize="32sp"
                     android:textStyle="bold" />
@@ -106,7 +106,7 @@
                     android:background="@drawable/change_badge_bg"
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="4dp"
-                    android:text="+0.00%"
+                    android:text="—"
                     android:textColor="@color/green_accent"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -286,7 +286,7 @@
                             android:id="@+id/val_fair_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="₹0.00"
+                            android:text="—"
                             android:textColor="@color/text_primary"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -309,7 +309,7 @@
                             android:id="@+id/val_margin_of_safety"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="+0.0%"
+                            android:text="—"
                             android:textColor="@color/green_accent"
                             android:textSize="20sp"
                             android:textStyle="bold" />
@@ -340,7 +340,7 @@
                             android:id="@+id/val_model_dcf"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="₹0"
+                            android:text="—"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -361,7 +361,7 @@
                             android:id="@+id/val_model_graham"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="₹0"
+                            android:text="—"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -382,7 +382,7 @@
                             android:id="@+id/val_model_peg"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="₹0"
+                            android:text="—"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -403,7 +403,7 @@
                             android:id="@+id/val_buffett_score"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0/100"
+                            android:text="—"
                             android:textColor="@color/yellow_accent"
                             android:textSize="12sp"
                             android:textStyle="bold" />
@@ -490,7 +490,7 @@
                             android:id="@+id/quality_piotroski_score"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="8/9"
+                            android:text="—"
                             android:textColor="@color/green_accent"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -522,7 +522,7 @@
                             android:id="@+id/quality_altman_score"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3.45"
+                            android:text="—"
                             android:textColor="@color/green_accent"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -636,7 +636,7 @@
                             android:id="@+id/tech_rsi"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="54.2"
+                            android:text="—"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -657,7 +657,7 @@
                             android:id="@+id/tech_sma_50"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="₹0"
+                            android:text="—"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -678,7 +678,7 @@
                             android:id="@+id/tech_sma_200"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="₹0"
+                            android:text="—"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />
@@ -933,7 +933,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="Composite Score: 88.5/100"
+                        android:text="Composite Score: —"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -976,7 +976,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="P/E: 24.5x"
+                            android:text="P/E: —"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp" />
 
@@ -985,7 +985,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="ROE: 18.2%"
+                            android:text="ROE: —"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -1001,7 +1001,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Op Margin: 15.4%"
+                            android:text="Op Margin: —"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp" />
 
@@ -1010,7 +1010,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Debt/Equity: 0.35"
+                            android:text="Debt/Equity: —"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -1060,7 +1060,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Upside Target: +18%"
+                        android:text="Upside Target: —"
                         android:textColor="@color/green_accent"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -1070,7 +1070,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Risk Floor: -8%"
+                        android:text="Risk Floor: —"
                         android:textColor="@color/red_accent"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -1099,7 +1099,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Prom: 50.4%"
+                        android:text="Prom: —"
                         android:textColor="@color/text_primary"
                         android:textSize="11sp" />
 
@@ -1108,7 +1108,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="FII: 22.1%"
+                        android:text="FII: —"
                         android:textColor="@color/text_primary"
                         android:textSize="11sp" />
 
@@ -1117,7 +1117,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="DII: 16.5%"
+                        android:text="DII: —"
                         android:textColor="@color/text_primary"
                         android:textSize="11sp" />
 
@@ -1126,7 +1126,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Pub: 11.0%"
+                        android:text="Pub: —"
                         android:textColor="@color/text_primary"
                         android:textSize="11sp" />
                 </LinearLayout>

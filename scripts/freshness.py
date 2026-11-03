@@ -24,7 +24,12 @@ MODELS = {
     "multibagger_radar": "weekly",
 }
 # background jobs on the API server -> max age in hours
-JOBS = {"nse_stocks": 26, "news_fetch": 6, "indices": 26, "dividends": 30, "ipos_india": 30}
+JOBS = {"nse_eod": 30, "news_fetch": 6, "indices": 26, "ipos_india": 30}
+# the data itself (a job can "succeed" and still save nothing) -> max age in hours
+DATA = {
+    "NSE stock prices": ("SELECT MAX(last_updated) FROM stocks WHERE exchange = 'NSE' AND market = 'IN'", 40),
+    "IPO list": ("SELECT MAX(updated_at) FROM ipos WHERE market = 'IN'", 30),
+}
 
 
 def last_weekday_close(now: datetime) -> datetime:
@@ -46,14 +51,18 @@ async def status():
             "SELECT model_key, MAX(trained_at) AS t FROM quant_model_runs GROUP BY model_key")}
         jobs = {r["job_name"]: r["t"] for r in await fetch(
             "SELECT job_name, MAX(finished_at) AS t FROM job_runs WHERE status = 'success' GROUP BY job_name")}
+        data = {}
+        for name, (sql, _) in DATA.items():
+            rows = await fetch(sql)
+            data[name] = list(rows[0].values())[0] if rows else None
     finally:
         await close_pool()
-    return models, jobs
+    return models, jobs, data
 
 
 def main(args):
     now = datetime.now(timezone.utc)
-    models, jobs = asyncio.run(status())
+    models, jobs, data = asyncio.run(status())
     if args.guard:
         # Tonight's run counts as done if the report cards were trained after today's close.
         today_close = now.replace(hour=10, minute=0, second=0, microsecond=0)
@@ -80,6 +89,12 @@ def main(args):
         print(f"{state:8s} job   {job:24s} last success {t}")
         if state != "ok":
             problems.append(job)
+    for name, (_, hours) in DATA.items():
+        t = data.get(name)
+        state = "MISSING" if t is None else ("STALE" if t < now - timedelta(hours=hours) else "ok")
+        print(f"{state:8s} data  {name:24s} newest {t}")
+        if state != "ok":
+            problems.append(name)
     if problems:
         print(f"::error::Out of date: {', '.join(problems)}")
         return 1
