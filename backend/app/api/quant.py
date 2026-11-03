@@ -543,3 +543,123 @@ async def income_profile(symbol: str):
         return {"status": "not_a_regular_payer", "symbol": sym,
                 "note": "No dividend in the last 3 years, or not a liquid NSE company."}
     return {"status": "ok", "profile": _j(row["payload"])}
+
+
+RESEARCH_RANGE = {"1w": "5d", "1m": "20d", "3m": "20d", "1y": "20d"}
+
+
+@router.get("/research/{symbol}")
+async def research(symbol: str, capital: float = Query(100000, gt=0, le=1e10),
+                   risk_pct: float = Query(1.0, gt=0, le=5), horizon: Optional[str] = Query(None)):
+    """
+    Everything the models know about one NSE stock in one answer: price, tested
+    Buy/Hold/Sell per holding period, stage, valuation against the whole market,
+    guaranteed-coverage price ranges, news with measured impact, dividend record,
+    governance, the tested checks, radar/scanner mentions, and how much to invest.
+    """
+    from app.quant.sizing import position_size
+
+    sym = symbol.upper().strip()
+    if not SYMBOL_RE.match(sym):
+        raise HTTPException(400, "invalid symbol")
+    if horizon is not None and horizon not in CARD_HORIZONS:
+        raise HTTPException(400, f"horizon must be one of {list(CARD_HORIZONS)}")
+
+    stock = await fetchrow(
+        "SELECT symbol, name, sector, current_price, prev_close, change_pct, day_high, day_low, volume, "
+        "market_cap, last_updated FROM stocks WHERE UPPER(symbol) = $1 AND exchange = 'NSE' LIMIT 1", sym)
+    preds = {r["model_key"]: _j(r["payload"]) for r in await fetch(
+        "SELECT model_key, payload FROM quant_predictions WHERE symbol = $1", sym)}
+    card = preds.get("stock_report_card")
+    if not stock and not card:
+        return {"status": "not_found", "symbol": sym,
+                "note": "Not an NSE-listed company in the database. Check the symbol (e.g. RELIANCE, TCS, COALINDIA)."}
+
+    run = await _latest_run("stock_report_card")
+    m = (_j(run.get("metrics")) or {}) if run else {}
+    tests = m.get("horizon_tests") or {}
+    if horizon is None:        # default: the longest holding period that proved itself
+        horizon = next((h for h in ("1y", "3m", "1m", "1w") if (tests.get(h) or {}).get("verified")), "1w")
+
+    price = float(stock["current_price"]) if stock and stock["current_price"] is not None else \
+        (card or {}).get("last_close")
+    out = {"status": "ok", "symbol": sym, "horizon": horizon,
+           "as_of": str(run["data_end"]) if run and run.get("data_end") else None,
+           "price": {"current": price,
+                     "change_pct": float(stock["change_pct"]) if stock and stock["change_pct"] is not None else None,
+                     "day_high": float(stock["day_high"]) if stock and stock["day_high"] is not None else None,
+                     "day_low": float(stock["day_low"]) if stock and stock["day_low"] is not None else None,
+                     "updated": stock["last_updated"].isoformat() if stock and stock["last_updated"] else None},
+           "name": (stock or {}).get("name") or sym, "sector": (stock or {}).get("sector")}
+
+    if card:
+        v = (card.get("verdicts") or {}).get(horizon) or {}
+        rng = ((card.get("ranges") or {}).get(RESEARCH_RANGE[horizon]) or {})
+        p80 = rng.get("p80") or [None, None]
+        # ranges were computed from last night's close: shift them to today's price
+        scale = (price / card["last_close"]) if price and card.get("last_close") else 1.0
+        stop = p80[0] * scale if p80[0] else None
+        target = p80[1] * scale if p80[1] else None
+        out["verdicts"] = card.get("verdicts")
+        out["stage"] = card.get("stage")
+        out["governance"] = card.get("governance")
+        out["red_flags"] = card.get("red_flags")
+        out["checks"] = {"passed": card.get("checks_passed"), "failed": card.get("checks_failed"),
+                         "unknown": card.get("checks_unknown")}
+        out["valuation"] = card.get("valuation")
+        out["key_numbers"] = card.get("key_numbers")
+        out["ranges"] = card.get("ranges")
+        out["ranges_track_record"] = m.get("ranges_coverage")
+        out["position"] = position_size(
+            price=price, stop=stop, target=target,
+            chance=(v.get("chance_beat_market_pct") / 100) if v.get("chance_beat_market_pct") is not None else None,
+            verdict=v.get("verdict", "hold"), verified=bool(v.get("horizon_verified")),
+            governance=(card.get("governance") or {}).get("grade"), red_flags=card.get("red_flags") or [],
+            capital=capital, risk_pct=risk_pct)
+        # the tested checks that matter most for this holding period, and how this stock does on them
+        ranked = []
+        for c in m.get("checks") or []:
+            t = (c.get("tests") or {}).get(horizon) or {}
+            if t.get("verified"):
+                ranked.append({"label": c["label"], "category": c["category"],
+                               "result": {1: "pass", -1: "fail"}.get((card.get("checks") or {}).get(c["id"]), "no data"),
+                               "pass_minus_fail_pct": t.get("pass_minus_fail_pct"), "direction": t.get("direction")})
+        ranked.sort(key=lambda r: -abs(r.get("pass_minus_fail_pct") or 0))
+        out["key_checks"] = ranked[:10]
+    else:
+        out["note"] = "No report card yet: only liquid NSE companies (about ₹50 lakh+ traded a day) are fully modelled."
+
+    out["dividend"] = preds.get("dividend_income")
+    out["mentions"] = {k: True for k in ("multibagger_radar", "market_scanner") if k in preds}
+    out["trust"] = {"horizon_test": {k: v for k, v in (tests.get(horizon) or {}).items() if k != "calibration"},
+                    "how_to_read": ("Verdicts compare the stock with the median NSE stock over the holding period; "
+                                    "a Buy that proved itself beat the market about 53-55% of the time, so size "
+                                    "positions small and spread them out.")}
+
+    news = await fetch(
+        """
+        SELECT n.title, n.source, n.published_at, n.sentiment, i.impact_direction, i.impact_score,
+               o.abn_1d, o.abn_5d
+        FROM news_stock_impact i JOIN news n ON n.id = i.news_id
+        LEFT JOIN news_outcomes o ON o.news_id = i.news_id AND o.symbol = i.symbol
+        WHERE UPPER(i.symbol) = $1 ORDER BY n.published_at DESC NULLS LAST LIMIT 10
+        """,
+        sym)
+    items = [{"title": r["title"], "source": r["source"],
+              "published_at": r["published_at"].isoformat() if r["published_at"] else None,
+              "direction": r["impact_direction"], "impact_score": r["impact_score"],
+              "measured_abn_1d_pct": round(r["abn_1d"] * 100, 2) if r["abn_1d"] is not None else None,
+              "measured_abn_5d_pct": round(r["abn_5d"] * 100, 2) if r["abn_5d"] is not None else None}
+             for r in news]
+    news_run = await _latest_run("news_5d")
+    out["news"] = {
+        "items": items,
+        "bullish": sum(1 for i in items if i["direction"] == "BULLISH"),
+        "bearish": sum(1 for i in items if i["direction"] == "BEARISH"),
+        "model": {"status": "trained" if news_run else "collecting_data",
+                  "trust": _trust(news_run) if news_run else None,
+                  "note": None if news_run else
+                  "The news-impact model is still collecting measured reactions; news is shown with its tagged "
+                  "direction, not a tested forecast."},
+    }
+    return out

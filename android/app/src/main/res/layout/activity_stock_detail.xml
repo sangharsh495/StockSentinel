@@ -217,6 +217,19 @@
                 android:textStyle="bold"
                 android:text="🧪 57-Check Report Card ➔" />
 
+            <TextView
+                android:id="@+id/btn_full_research"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/badge_bg"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:textColor="@color/purple_accent"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:text="🔬 Full Research &amp; How Much to Invest ➔" />
+
             <!-- ============================================================ -->
             <!-- 1. BUFFETT INTRINSIC VALUATION & MARGIN OF SAFETY -->
             <!-- ============================================================ -->

@@ -167,8 +167,9 @@ public class QuantPicksActivity extends AppCompatActivity {
 
     // ---- helpers shared with HomeFragment ----
 
+    /** String field, or "" when missing, JSON null, or not a plain value. */
     public static String str(JsonObject o, String k) {
-        return o != null && o.has(k) && !o.get(k).isJsonNull() ? o.get(k).getAsString() : "";
+        return o != null && o.has(k) && o.get(k).isJsonPrimitive() ? o.get(k).getAsString() : "";
     }
 
     /** Object field, or null when missing or JSON null. */
@@ -182,11 +183,17 @@ public class QuantPicksActivity extends AppCompatActivity {
     }
 
     public static boolean bool(JsonObject o, String k) {
-        return o != null && o.has(k) && !o.get(k).isJsonNull() && o.get(k).getAsBoolean();
+        return o != null && o.has(k) && o.get(k).isJsonPrimitive() && o.get(k).getAsBoolean();
     }
 
+    /** Number field, or null when missing, JSON null, or not a number. */
     public static Double dbl(JsonObject o, String k) {
-        return o != null && o.has(k) && !o.get(k).isJsonNull() ? o.get(k).getAsDouble() : null;
+        if (o == null || !o.has(k) || !o.get(k).isJsonPrimitive()) return null;
+        try {
+            return o.get(k).getAsDouble();
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static String pct(JsonObject o, String k) {

@@ -73,6 +73,10 @@
             android:name=".ui.dividends.IncomeCalendarActivity"
             android:exported="false"
             android:theme="@style/Theme.StockSentinel" />
+        <activity
+            android:name=".ui.quant.ResearchActivity"
+            android:exported="false"
+            android:theme="@style/Theme.StockSentinel" />
 
         <!-- Settings & System Status Activity -->
         <activity

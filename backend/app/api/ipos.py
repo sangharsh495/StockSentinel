@@ -65,8 +65,10 @@ async def upcoming_ipos(
     ipos = await fetch(
         """
         SELECT * FROM ipos
-        WHERE (status = 'upcoming' OR status = 'open')
-          AND (open_date IS NULL OR open_date <= CURRENT_DATE + $1 * INTERVAL '1 day')
+        WHERE ((status = 'upcoming' OR status = 'open')
+               AND (open_date IS NULL OR open_date <= CURRENT_DATE + $1 * INTERVAL '1 day'))
+           -- bidding closed but not listed yet: still "coming" for the listing
+           OR (status = 'closed' AND listing_date >= CURRENT_DATE)
         ORDER BY open_date ASC NULLS LAST
         LIMIT $2
         """,
