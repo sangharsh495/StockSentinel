@@ -44,9 +44,10 @@ def test_no_key_configured_means_open():
 
 
 def test_rate_limit_uses_forwarded_client_ip():
+    # Render/Cloudflare append the real caller last.
     c = TestClient(_app(key="", limit=2))
-    a = {"X-Forwarded-For": "1.1.1.1, 10.0.0.1"}
-    b = {"X-Forwarded-For": "2.2.2.2, 10.0.0.1"}
+    a = {"X-Forwarded-For": "10.0.0.1, 1.1.1.1"}
+    b = {"X-Forwarded-For": "10.0.0.1, 2.2.2.2"}
     assert [c.get("/api/thing", headers=a).status_code for _ in range(3)] == [200, 200, 429]
     # a different real client behind the same proxy is not blocked
     assert c.get("/api/thing", headers=b).status_code == 200
@@ -97,3 +98,60 @@ def test_api_key_ignores_spaces_and_line_breaks_around_it():
     assert c.get("/api/x", headers={"X-API-Key": "abc123XYZ"}).status_code == 200
     assert c.get("/api/x", headers={"X-API-Key": "abc123XY"}).status_code == 401
     assert c.get("/api/x").status_code == 401
+
+
+def test_rate_limit_cannot_be_dodged_with_a_fake_forwarded_header():
+    c = TestClient(_app(key="", limit=2))
+    # The caller varies the first entry; the proxy-added last entry stays the same.
+    codes = [c.get("/api/thing", headers={"X-Forwarded-For": f"9.9.9.{i}, 5.5.5.5"}).status_code
+             for i in range(3)]
+    assert codes == [200, 200, 429]
+
+
+def test_rate_limit_prefers_cloudflare_client_ip():
+    c = TestClient(_app(key="", limit=1))
+    h = {"CF-Connecting-IP": "7.7.7.7"}
+    assert c.get("/api/thing", headers={**h, "X-Forwarded-For": "1.2.3.4"}).status_code == 200
+    assert c.get("/api/thing", headers={**h, "X-Forwarded-For": "4.3.2.1"}).status_code == 429
+
+
+def test_path_guard_blocks_odd_urls_but_allows_real_symbols():
+    from app.security import PathGuardMiddleware
+    app = FastAPI()
+
+    @app.get("/api/stocks/{symbol}")
+    def stock(symbol: str):
+        return {"symbol": symbol}
+
+    app.add_middleware(PathGuardMiddleware)
+    c = TestClient(app)
+    for ok in ("RELIANCE", "M&M", "BAJAJ-AUTO", "^NSEI", "BRK.B"):
+        assert c.get(f"/api/stocks/{ok.replace('&', '%26')}").status_code == 200, ok
+    for bad in ("<script>", "a%27%20OR%201=1", "x" * 101, "%00"):
+        assert c.get(f"/api/stocks/{bad}").status_code == 400, bad
+
+
+def test_device_registration_validates_input():
+    import pytest
+    from pydantic import ValidationError
+    from app.api.notifications import DeviceRegistration
+    DeviceRegistration(device_id="a1b2c3d4e5f60718", fcm_token="dGVzdA:APA91b" + "x" * 140)
+    for bad in ({"device_id": "x", "fcm_token": "t" * 30},
+                {"device_id": "a1b2c3d4e5f60718", "fcm_token": "<html>" * 10},
+                {"device_id": "a1b2c3d4e5f60718", "fcm_token": "t" * 5000},
+                {"device_id": "a1b2c3d4e5f60718", "fcm_token": "t" * 30, "platform": "ios'--"}):
+        with pytest.raises(ValidationError):
+            DeviceRegistration(**bad)
+
+
+def test_docs_hidden_even_without_a_key(monkeypatch):
+    monkeypatch.delenv("APP_API_KEY", raising=False)
+    monkeypatch.delenv("DEBUG", raising=False)
+    import importlib
+    import app.config
+    import app.main
+    importlib.reload(app.config)
+    main = importlib.reload(app.main)
+    c = TestClient(main.app)
+    assert c.get("/docs").status_code == 404
+    assert c.get("/openapi.json").status_code == 404

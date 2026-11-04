@@ -60,13 +60,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 # ---------------------------------------------------------------------------
 def client_ip_of(request: Request) -> str:
     """
-    Real client IP. Behind Render's proxy request.client.host is the proxy,
-    which would put every user in one rate-limit bucket; the first
-    X-Forwarded-For entry is the caller.
+    Real client IP for rate limiting. The live server sits behind Cloudflare,
+    which overwrites CF-Connecting-IP with the caller's address, so it can't be
+    faked. Without it, use the LAST X-Forwarded-For entry (added by the proxy
+    in front of us): earlier entries are whatever the caller chose to send.
     """
-    fwd = request.headers.get("x-forwarded-for", "")
+    cf = request.headers.get("cf-connecting-ip", "").strip()
+    if cf:
+        return cf
+    fwd = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
     if fwd:
-        return fwd.split(",")[0].strip()
+        return fwd[-1]
     return request.client.host if request.client else "unknown"
 
 
@@ -95,6 +99,27 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
             logger.warning(f"Rejected request without valid API key: {request.method} {path} "
                            f"from {client_ip_of(request)}")
             return JSONResponse(status_code=401, content={"detail": "Missing or invalid API key"})
+        return await call_next(request)
+
+
+# ---------------------------------------------------------------------------
+# Path guard: every /api path part (symbols, device ids, ...) is short and plain
+# ---------------------------------------------------------------------------
+_SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9._\-^&]{1,100}$")
+
+
+class PathGuardMiddleware(BaseHTTPMiddleware):
+    """
+    Rejects /api URLs whose parts hold anything but letters, digits and . _ - ^ &
+    (stock symbols like M&M or BAJAJ-AUTO pass). Odd input never reaches a
+    handler, a database query or an outside data source.
+    """
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        if path.startswith("/api/"):
+            parts = path.split("/")[2:]
+            if len(path) > 300 or any(p and not _SAFE_SEGMENT.match(p) for p in parts):
+                return JSONResponse(status_code=400, content={"detail": "Invalid characters in URL"})
         return await call_next(request)
 
 

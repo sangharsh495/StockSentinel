@@ -122,10 +122,10 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description="Personal stock intelligence API — India + US markets",
     lifespan=lifespan,
-    # Interactive API docs list every endpoint; hide them once the API is locked.
-    docs_url=None if settings.APP_API_KEY else "/docs",
-    redoc_url=None if settings.APP_API_KEY else "/redoc",
-    openapi_url=None if settings.APP_API_KEY else "/openapi.json",
+    # Interactive API docs list every endpoint (a map for attackers): only in local debug runs.
+    docs_url="/docs" if settings.DEBUG and not settings.APP_API_KEY else None,
+    redoc_url="/redoc" if settings.DEBUG and not settings.APP_API_KEY else None,
+    openapi_url="/openapi.json" if settings.DEBUG and not settings.APP_API_KEY else None,
 )
 
 # CORS — only for browser origins listed in CORS_ORIGINS. The Android app is
@@ -139,9 +139,10 @@ if settings.CORS_ORIGINS:
         allow_headers=["X-API-Key", "Content-Type"],
     )
 
-# Security middleware (added last = runs first): rate limit, then API key, then headers
-from app.security import APIKeyMiddleware, SecurityHeadersMiddleware, RateLimitMiddleware
+# Security middleware (added last = runs first): rate limit, API key, path guard, headers
+from app.security import APIKeyMiddleware, PathGuardMiddleware, SecurityHeadersMiddleware, RateLimitMiddleware
 app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(PathGuardMiddleware)
 app.add_middleware(APIKeyMiddleware, api_key=settings.APP_API_KEY)
 app.add_middleware(RateLimitMiddleware, max_requests=120, window_seconds=60)
 if not settings.APP_API_KEY:
