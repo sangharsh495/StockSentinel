@@ -49,7 +49,7 @@ public class HomeFragment extends Fragment {
     private TextView sentimentBullish;
     private TextView sentimentBearish;
     private TextView sentimentNeutral;
-    private TextView stockCountText;
+    private TextView stockCountText, homeDate, marketStatus;
 
     // Weekly Movers Radar
     private RecyclerView weeklyMoversRecycler;
@@ -84,6 +84,8 @@ public class HomeFragment extends Fragment {
         sentimentBearish = view.findViewById(R.id.sentiment_bearish);
         sentimentNeutral = view.findViewById(R.id.sentiment_neutral);
         stockCountText = view.findViewById(R.id.stock_count);
+        homeDate = view.findViewById(R.id.home_date);
+        marketStatus = view.findViewById(R.id.market_status_pill);
 
         // Weekly Movers Radar setup
         weeklyMoversRecycler = view.findViewById(R.id.weekly_movers_recycler);
@@ -135,6 +137,8 @@ public class HomeFragment extends Fragment {
                 startActivity(new Intent(requireContext(), MultibaggerActivity.class)));
         view.findViewById(R.id.btn_see_all_best).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), BestStocksActivity.class)));
+        view.findViewById(R.id.btn_home_income).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), com.stocksentinel.ui.dividends.IncomeCalendarActivity.class)));
         view.findViewById(R.id.btn_see_all_research).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), ResearchActivity.class)));
 
@@ -145,8 +149,25 @@ public class HomeFragment extends Fragment {
         loadAllData();
     }
 
+    private void bindMarketClock() {
+        java.util.TimeZone ist = java.util.TimeZone.getTimeZone("Asia/Kolkata");
+        java.util.Calendar now = java.util.Calendar.getInstance(ist);
+        java.text.SimpleDateFormat f = new java.text.SimpleDateFormat("EEE, d MMM", java.util.Locale.US);
+        f.setTimeZone(ist);
+        homeDate.setText(f.format(now.getTime()).toUpperCase(java.util.Locale.US));
+        int dow = now.get(java.util.Calendar.DAY_OF_WEEK);
+        int minutes = now.get(java.util.Calendar.HOUR_OF_DAY) * 60 + now.get(java.util.Calendar.MINUTE);
+        boolean weekday = dow != java.util.Calendar.SATURDAY && dow != java.util.Calendar.SUNDAY;
+        boolean open = weekday && minutes >= 9 * 60 + 15 && minutes <= 15 * 60 + 30;
+        boolean pre = weekday && minutes >= 9 * 60 && minutes < 9 * 60 + 15;
+        marketStatus.setText(open ? "● MARKET OPEN" : (pre ? "● PRE-OPEN" : "● MARKET CLOSED"));
+        marketStatus.setTextColor(getResources().getColor(open ? R.color.bullish
+                : (pre ? R.color.yellow_accent : R.color.neutral), null));
+    }
+
     private void loadAllData() {
         swipeRefresh.setRefreshing(true);
+        bindMarketClock();
         loadMarketOutlook();
         loadQuantPicks();
         loadWeeklyMovers();
@@ -201,6 +222,31 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadQuantPicks() {
+        ApiClient.getApi().getAnalystPicks(null, 5).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (!isAdded()) return;
+                JsonArray picks = response.isSuccessful() && response.body() != null
+                        ? QuantPicksActivity.arr(response.body(), "picks") : null;
+                if (picks == null || picks.size() == 0) {
+                    loadFactorPicks();
+                    return;
+                }
+                List<JsonObject> items = new ArrayList<>();
+                for (JsonElement el : picks) {
+                    if (el.isJsonObject()) items.add(el.getAsJsonObject());
+                }
+                quantPicksAdapter.setItems(items);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) {
+                if (isAdded()) loadFactorPicks();
+            }
+        });
+    }
+
+    private void loadFactorPicks() {
         ApiClient.getApi().getQuantPicks(QuantPicksActivity.STRATEGY_INVESTOR, 5)
                 .enqueue(new Callback<JsonObject>() {
             @Override
@@ -327,7 +373,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadGainers() {
-        ApiClient.getApi().getTopGainers(null, 5).enqueue(new Callback<JsonObject>() {
+        ApiClient.getApi().getTopGainers("IN", 3).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (response.isSuccessful() && response.body() != null && isAdded()) {
@@ -345,7 +391,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadLosers() {
-        ApiClient.getApi().getTopLosers(null, 5).enqueue(new Callback<JsonObject>() {
+        ApiClient.getApi().getTopLosers("IN", 3).enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (response.isSuccessful() && response.body() != null && isAdded()) {
@@ -423,8 +469,18 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
                 if (response.isSuccessful() && response.body() != null && isAdded()) {
-                    int total = response.body().has("total") ? response.body().get("total").getAsInt() : 0;
-                    stockCountText.setText(String.format("Tracking %,d stocks", total));
+                    int nse = 0;
+                    JsonArray parts = QuantPicksActivity.arr(response.body(), "breakdown");
+                    if (parts != null) {
+                        for (JsonElement el : parts) {
+                            if (el.isJsonObject() && "NSE".equals(QuantPicksActivity.str(el.getAsJsonObject(), "exchange"))) {
+                                Double c = QuantPicksActivity.dbl(el.getAsJsonObject(), "count");
+                                if (c != null) nse = c.intValue();
+                            }
+                        }
+                    }
+                    stockCountText.setText(nse > 0 ? String.format(java.util.Locale.US, "%,d NSE stocks live", nse)
+                            : "NSE & US stocks");
                 }
             }
 

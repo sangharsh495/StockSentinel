@@ -125,13 +125,31 @@ async def main(args):
     if not args.no_cards:
         try:
             from app.quant.report_card import nightly_cards_and_income
-            cards, income = await asyncio.to_thread(nightly_cards_and_income)
+            graded = None
+            if not args.no_db:      # the latest weekly grade of the analyst panel
+                from app.database import close_pool, create_pool, fetchrow
+                await create_pool()
+                try:
+                    row = await fetchrow("SELECT trained_at, metrics FROM quant_model_runs WHERE model_key = "
+                                         "'analyst_panel' ORDER BY trained_at DESC LIMIT 1")
+                    if row:
+                        graded = {"trained_at": row["trained_at"].isoformat(),
+                                  "metrics": json.loads(row["metrics"]) if isinstance(row["metrics"], str) else row["metrics"]}
+                except Exception as e:
+                    log.warning(f"Analyst grade not loaded: {e}")
+                finally:
+                    await close_pool()
+            parts = await asyncio.to_thread(nightly_cards_and_income, 400, graded)
+            cards, income = parts[0], parts[1]
             t = cards["metrics"]["horizon_tests"]
             log.info("Report cards: " + ", ".join(f"{h} verified={v['verified']}" for h, v in t.items()))
             bt = income["metrics"]["paying_power_backtest"]
             log.info(f"Income calendar: {income['metrics']['payers']} payers; top record score paid next year "
                      f"{bt.get('top_bucket_paid_pct')}%, no cut {bt.get('top_bucket_no_cut_pct')}%")
-            results.extend([cards, income])
+            results.extend(parts)
+            if len(parts) > 2:
+                log.info(f"Analyst consensus: {parts[2]['metrics'].get('fits')} analysts voted "
+                         f"(graded: {parts[2]['metrics'].get('graded')})")
         except Exception as e:
             log.warning(f"Report cards skipped: {e}")
 

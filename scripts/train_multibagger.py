@@ -33,18 +33,34 @@ def build(args):
     symbols = list(ever[ever].index)
     fund = load_fundamentals(symbols, max_fetch=args.max_fetch)
     log.info(f"Fundamentals: {fund['symbol'].nunique()} of {len(symbols)} stocks")
-    return W, fund, run_multibagger(W, fund, n_bags=args.bags, refit_months=args.refit_months)
+    res = run_multibagger(W, fund, n_bags=args.bags, refit_months=args.refit_months)
+    graded = None
+    if not args.no_analysts:
+        from app.quant.analysts import grade
+        from app.quant.market_data import equities_only
+        from app.quant.multibagger import month_ends
+        from app.quant.report_card import build_card_panel, check_matrix
+
+        We = equities_only(W)
+        dates = month_ends(We["Close"].index)
+        if dates[-1] != We["Close"].index[-1]:
+            dates.append(We["Close"].index[-1])
+        panel = build_card_panel(We, fund, dates)
+        graded = grade(panel, check_matrix(panel))
+        log.info(f"Analyst panel: {graded['metrics']['skilled_analysts']} of {graded['metrics']['analysts']} "
+                 f"analysts proved skill; consensus tests {graded['metrics']['consensus_tests']}")
+    return W, fund, res, graded
 
 
 async def main(args):
-    W, fund, res = await asyncio.to_thread(build, args)
+    W, fund, res, graded = await asyncio.to_thread(build, args)
     m = res["metrics"]
     s = m["honest_stack"]
     log.info(f"Zoo: {m['model_configurations']} configurations, {m['fitted_models']} fitted models, "
              f"{len(m['fdr_survivors'])} pass the false-discovery test")
     log.info(f"Honest stack: top-decile doubling {s.get('top_decile_hit_pct')}% vs base {s.get('avg_base_rate_pct')}% "
              f"(lift {s.get('lift_top_decile')}, t={s.get('newey_west_t')}), edge_verified={res['edge_verified']}")
-    results = [res]
+    results = [res] + ([graded] if graded else [])
     if not args.no_db:
         from app.database import close_pool, create_pool, execute_many, fetch, init_schema
         from app.quant.store import save_results
@@ -82,4 +98,5 @@ if __name__ == "__main__":
     ap.add_argument("--bags", type=int, default=6, help="bootstrap models per configuration")
     ap.add_argument("--refit-months", type=int, default=6)
     ap.add_argument("--max-fetch", type=int, default=4000, help="max stocks to refresh fundamentals for")
+    ap.add_argument("--no-analysts", action="store_true", help="skip grading the 1,728-analyst panel")
     asyncio.run(main(ap.parse_args()))

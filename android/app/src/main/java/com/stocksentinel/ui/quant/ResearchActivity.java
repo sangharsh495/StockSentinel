@@ -46,7 +46,7 @@ public class ResearchActivity extends AppCompatActivity {
     private EditText symbolInput, capitalInput;
     private ProgressBar loadingBar;
     private TextView nameText, stageBadge, summaryText, priceText, changeText, verdictText, chanceText;
-    private TextView positionText, rangesText, valuationText, newsText, checksText, governanceText, dividendText, trustText;
+    private TextView analystsText, positionText, rangesText, valuationText, newsText, checksText, governanceText, dividendText, trustText;
     private TextView chip1w, chip1m, chip3m, chip1y, chipR05, chipR1, chipR2;
     private String horizon = null;      // null: the server picks the longest tested period
     private double riskPct = 1.0;
@@ -75,6 +75,7 @@ public class ResearchActivity extends AppCompatActivity {
         changeText = findViewById(R.id.research_change);
         verdictText = findViewById(R.id.research_verdict);
         chanceText = findViewById(R.id.research_chance);
+        analystsText = findViewById(R.id.research_analysts);
         positionText = findViewById(R.id.research_position);
         rangesText = findViewById(R.id.research_ranges);
         valuationText = findViewById(R.id.research_valuation);
@@ -209,6 +210,7 @@ public class ResearchActivity extends AppCompatActivity {
         Double chance = dbl(v, "chance_beat_market_pct");
         chanceText.setText(chance == null ? "—" : String.format(Locale.US, "%.0f%%", chance));
 
+        bindAnalysts(obj(b, "analysts"), h);
         bindPosition(obj(b, "position"));
         bindRanges(obj(b, "ranges"), obj(b, "ranges_track_record"));
         bindValuation(obj(b, "valuation"));
@@ -220,13 +222,47 @@ public class ResearchActivity extends AppCompatActivity {
     }
 
     private void clearSections() {
-        for (TextView t : new TextView[]{positionText, rangesText, valuationText, newsText, checksText,
+        for (TextView t : new TextView[]{analystsText, positionText, rangesText, valuationText, newsText, checksText,
                 governanceText, dividendText, trustText}) t.setText("—");
         priceText.setText("—");
         changeText.setText("—");
         verdictText.setText("—");
         chanceText.setText("—");
         stageBadge.setText("—");
+    }
+
+    private void bindAnalysts(JsonObject a, String h) {
+        JsonObject cons = obj(a, "consensus");
+        if (cons == null) {
+            analystsText.setText("The analyst panel hasn't voted on this stock yet.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String[] pp : PERIODS) {
+            JsonObject c = obj(cons, pp[0]);
+            if (c == null) continue;
+            sb.append(String.format(Locale.US, "%s%s: %s of %s analysts bullish · %s%% chance to beat the market · %s%s\n",
+                    pp[0].equals(h) ? "▶ " : "", pp[1], n0(dbl(c, "bullish_analysts")), n0(dbl(c, "analysts_voting")),
+                    n0(dbl(c, "chance_beat_market_pct")), BestStocksActivity.verdictLabel(str(c, "verdict")),
+                    bool(c, "verified") ? "" : " (unproven)"));
+        }
+        JsonArray top = arr(obj(cons, h), "top_analysts");
+        if (top != null && top.size() > 0) {
+            sb.append("Most trusted for this period:\n");
+            for (JsonElement e : top) {
+                if (!e.isJsonObject()) continue;
+                JsonObject t = e.getAsJsonObject();
+                sb.append(String.format(Locale.US, "• %s: %s%%\n", str(t, "name"), n0(dbl(t, "chance_pct"))));
+            }
+        }
+        JsonObject test = obj(obj(a, "tests"), h);
+        Double buy = dbl(test, "buy_beat_market_pct");
+        if (buy != null) {
+            sb.append(String.format(Locale.US, "Tested: the consensus's Buy picks beat the market %.1f%% of the time, Sell picks %s.",
+                    buy, dbl(test, "sell_beat_market_pct") == null ? "—"
+                            : String.format(Locale.US, "%.1f%%", dbl(test, "sell_beat_market_pct"))));
+        }
+        analystsText.setText(sb.toString().trim());
     }
 
     private void bindPosition(JsonObject pos) {

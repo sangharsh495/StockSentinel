@@ -34,9 +34,10 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/home_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="MARKET SENTINEL"
+                        android:text="TODAY"
                         android:textColor="@color/purple_accent"
                         android:textSize="11sp"
                         android:textStyle="bold"
@@ -60,11 +61,162 @@
                     android:background="@drawable/badge_bg"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="6dp"
-                    android:text="● 24/7 SENTINEL"
+                    android:text="● MARKET"
                     android:textColor="@color/bullish"
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </LinearLayout>
+
+            <!-- Market Indices -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📊 Today's Market"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/indices_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp" />
+
+            <!-- Shortcuts -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/btn_see_all_research"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/badge_bg"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="6dp"
+                        android:text="🔬 Research"
+                        android:textColor="@color/blue_accent"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/btn_see_all_best"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/badge_bg"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="6dp"
+                        android:text="🧪 Best Stocks"
+                        android:textColor="@color/blue_accent"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/btn_see_all_radar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/badge_bg"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="6dp"
+                        android:text="🚀 Radar"
+                        android:textColor="@color/blue_accent"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/btn_home_income"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/badge_bg"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="6dp"
+                        android:text="💰 Income"
+                        android:textColor="@color/blue_accent"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Top movers today: gainers -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🔥 Top Gainers Today"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/gainers_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp" />
+
+            <!-- Top Losers -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📉 Top Losers Today"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/losers_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="20dp" />
+
+            <!-- Analysts' top picks (consensus of the analyst panel) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="🧠 Analysts' Top Picks"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btn_see_all_picks"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="See all ➔"
+                    android:textColor="@color/blue_accent"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/quant_picks_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false" />
 
             <!-- Market Outlook (walk-forward tested) -->
             <LinearLayout
@@ -152,121 +304,62 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Tested Picks (investor factor score) -->
-            <LinearLayout
+            <!-- Sentiment Pulse -->
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="8dp">
+                android:text="📰 Sentiment Pulse (24h)"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🎯 Tested Picks"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/btn_see_all_picks"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="See all ➔"
-                    android:textColor="@color/blue_accent"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/quant_picks_recycler"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false" />
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="@color/card_dark"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp">
 
-            <!-- Stock Research (every model for one stock) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="24dp">
-
-                <TextView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🔬 Stock Research"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center">
 
-                <TextView
-                    android:id="@+id/btn_see_all_research"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Open ➔"
-                    android:textColor="@color/blue_accent"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/sentiment_bullish"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="🟢 —"
+                        android:textColor="@color/bullish"
+                        android:textSize="13sp"
+                        android:gravity="center" />
 
-            <!-- Best Stocks (57-check report cards) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="24dp">
+                    <TextView
+                        android:id="@+id/sentiment_bearish"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="🔴 —"
+                        android:textColor="@color/bearish"
+                        android:textSize="13sp"
+                        android:gravity="center" />
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🧪 Best Stocks &amp; Dividends"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/btn_see_all_best"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="See all ➔"
-                    android:textColor="@color/blue_accent"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <!-- Multibagger Radar (weekly model zoo) -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="24dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🚀 Multibagger Radar"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/btn_see_all_radar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="See all ➔"
-                    android:textColor="@color/blue_accent"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/sentiment_neutral"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="⚪ —"
+                        android:textColor="@color/neutral"
+                        android:textSize="13sp"
+                        android:gravity="center" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- Weekly Movers Radar (Catalyst & Momentum AI) -->
             <LinearLayout
@@ -335,114 +428,6 @@
                 android:layout_marginBottom="24dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false" />
-
-            <!-- Market Indices -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="📊 Market Indices"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <LinearLayout
-                android:id="@+id/indices_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp" />
-
-            <!-- Sentiment Pulse -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="📰 Sentiment Pulse (24h)"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                app:cardBackgroundColor="@color/card_dark"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center">
-
-                    <TextView
-                        android:id="@+id/sentiment_bullish"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="🟢 —"
-                        android:textColor="@color/bullish"
-                        android:textSize="13sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:id="@+id/sentiment_bearish"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="🔴 —"
-                        android:textColor="@color/bearish"
-                        android:textSize="13sp"
-                        android:gravity="center" />
-
-                    <TextView
-                        android:id="@+id/sentiment_neutral"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="⚪ —"
-                        android:textColor="@color/neutral"
-                        android:textSize="13sp"
-                        android:gravity="center" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Top Gainers -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="🔥 Top Gainers"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <LinearLayout
-                android:id="@+id/gainers_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp" />
-
-            <!-- Top Losers -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="📉 Top Losers"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <LinearLayout
-                android:id="@+id/losers_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginBottom="20dp" />
 
         </LinearLayout>
     </ScrollView>
