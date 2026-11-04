@@ -270,6 +270,9 @@ public interface StockApi {
             @Query("horizon") String horizon
     );
 
+    @GET("api/quant/analysts/top")
+    Call<JsonObject> getAnalystPicks(@Query("horizon") String horizon, @Query("limit") int limit);
+
     @GET("api/quant/best")
     Call<JsonObject> getBestStocks(
             @Query("kind") String kind,

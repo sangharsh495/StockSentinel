@@ -263,8 +263,9 @@ public class QuantPicksActivity extends AppCompatActivity {
                 rangeText = String.format(Locale.US, " (range %+.1f%% to %+.1f%%)",
                         range.get(0).getAsDouble(), range.get(1).getAsDouble());
             }
-            holder.reasonText.setText(exp == null ? "No history for this score yet"
-                    : String.format(Locale.US, "Avg vs market %+.2f%%%s", exp, rangeText));
+            String summary = str(p, "summary");
+            holder.reasonText.setText(!summary.isEmpty() ? summary : (exp == null ? "No history for this score yet"
+                    : String.format(Locale.US, "Avg vs market %+.2f%%%s", exp, rangeText)));
             holder.scoreText.setText(hit == null ? ""
                     : String.format(Locale.US, "Similar scores beat peers %.0f%% of the time", hit));
 

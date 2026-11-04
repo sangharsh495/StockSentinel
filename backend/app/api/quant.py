@@ -629,6 +629,13 @@ async def research(symbol: str, capital: float = Query(100000, gt=0, le=1e10),
     else:
         out["note"] = "No report card yet: only liquid NSE companies (about ₹50 lakh+ traded a day) are fully modelled."
 
+    cons = preds.get("analyst_consensus")
+    if cons:
+        cr = await _latest_run("analyst_consensus")
+        cm = (_j(cr.get("metrics")) or {}) if cr else {}
+        out["analysts"] = {"consensus": cons.get("consensus"), "panel_size": cm.get("analysts"),
+                           "skilled_by_horizon": cm.get("skilled_by_horizon"),
+                           "tests": cm.get("consensus_tests")}
     out["dividend"] = preds.get("dividend_income")
     out["mentions"] = {k: True for k in ("multibagger_radar", "market_scanner") if k in preds}
     out["trust"] = {"horizon_test": {k: v for k, v in (tests.get(horizon) or {}).items() if k != "calibration"},
@@ -663,3 +670,52 @@ async def research(symbol: str, capital: float = Query(100000, gt=0, le=1e10),
                   "direction, not a tested forecast."},
     }
     return out
+
+
+HORIZON_LABEL = {"1w": "1 week", "1m": "1 month", "3m": "3 months", "1y": "1 year"}
+
+
+@router.get("/analysts/top")
+async def analysts_top(horizon: Optional[str] = Query(None), limit: int = Query(10, ge=1, le=50)):
+    """Top stocks by the analyst-panel consensus (only analysts that proved themselves vote), clean governance only."""
+    if horizon is not None and horizon not in CARD_HORIZONS:
+        raise HTTPException(400, f"horizon must be one of {list(CARD_HORIZONS)}")
+    run = await _latest_run("analyst_consensus")
+    if not run:
+        return {"status": "not_trained", "picks": []}
+    m = _j(run.get("metrics")) or {}
+    tests = m.get("consensus_tests") or {}
+    if horizon is None:
+        horizon = next((h for h in ("1y", "3m", "1m", "1w") if (tests.get(h) or {}).get("verified")), "3m")
+    rows = await fetch(
+        """
+        SELECT p.symbol, p.payload, c.payload AS card, s.name, s.current_price, s.change_pct
+        FROM quant_predictions p
+        LEFT JOIN quant_predictions c ON c.model_key = 'stock_report_card' AND c.symbol = p.symbol
+        LEFT JOIN stocks s ON UPPER(s.symbol) = p.symbol AND s.exchange = 'NSE'
+        WHERE p.model_key = 'analyst_consensus'
+        """
+    )
+    t = tests.get(horizon) or {}
+    picks = []
+    for r in rows:
+        cons = ((_j(r["payload"]) or {}).get("consensus") or {}).get(horizon)
+        card = _j(r["card"]) or {}
+        if not cons or card.get("red_flags") or (card.get("governance") or {}).get("grade") not in ("A", "B"):
+            continue
+        picks.append({
+            "symbol": r["symbol"], "name": r["name"],
+            "current_price": float(r["current_price"]) if r["current_price"] is not None else None,
+            "change_pct": float(r["change_pct"]) if r["change_pct"] is not None else None,
+            "probability": cons["chance_beat_market_pct"] / 100, "verdict": cons["verdict"],
+            "historical_hit_rate_pct": t.get("buy_beat_market_pct"),
+            "summary": (f"{cons['bullish_analysts']} of {cons['analysts_voting']} analysts bullish · "
+                        f"{HORIZON_LABEL[horizon]}" + ("" if cons.get("verified") else " · unproven")),
+            "consensus": cons, "stage": card.get("stage"),
+        })
+    picks.sort(key=lambda p: -p["probability"])
+    for i, p in enumerate(picks[:limit], 1):
+        p["rank"] = i
+    return {"status": "ok", "horizon": horizon, "as_of": str(run["data_end"]) if run.get("data_end") else None,
+            "analysts": m.get("analysts"), "skilled_by_horizon": m.get("skilled_by_horizon"),
+            "test": t, "picks": picks[:limit]}

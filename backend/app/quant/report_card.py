@@ -172,6 +172,7 @@ CHECKS: List[Tuple[str, str, str, Callable]] = [
 ]
 CHECK_IDS = [c[0] for c in CHECKS]
 CHECK_META = {c[0]: {"category": c[1], "label": c[2]} for c in CHECKS}
+LAST_PANEL: Dict = {}
 GOVERNANCE_NOT_COVERED = ["promoter pledging", "auditor changes", "related-party transactions",
                           "SEBI actions"]
 
@@ -416,6 +417,7 @@ def run_report_cards(W: Dict[str, pd.DataFrame], fund: Optional[pd.DataFrame], t
         dates.append(C.index[-1])
     panel = build_card_panel(W, fund, dates)
     M = check_matrix(panel)
+    LAST_PANEL.update(panel=panel, M=M)          # reused by the analyst panel the same night
     logger.info(f"Report cards: {len(panel)} rows, {len(CHECKS)} checks")
     check_stats, survivors = test_checks(panel, M)
     horizon_tests = walk_forward_verdicts(panel, M)
@@ -521,7 +523,7 @@ def nightly_report_cards(max_fetch: int = 400) -> Dict:
     return run_report_cards(W, fund)
 
 
-def nightly_cards_and_income(max_fetch: int = 400) -> List[Dict]:
+def nightly_cards_and_income(max_fetch: int = 400, graded: Optional[Dict] = None) -> List[Dict]:
     """Report cards, then the dividend income calendar (which uses the cards' payout, governance and verdicts)."""
     from app.quant.fundamentals import load_fundamentals
     from app.quant.income import build_income
@@ -533,7 +535,13 @@ def nightly_cards_and_income(max_fetch: int = 400) -> List[Dict]:
     fund = load_fundamentals(list(ever[ever].index), max_fetch=max_fetch)
     cards = run_report_cards(W, fund)
     income = build_income(fund, equities_only(W)["Close"], cards["predictions"])
-    return [cards, income]
+    out = [cards, income]
+    try:
+        from app.quant.analysts import vote
+        out.append(vote(LAST_PANEL["panel"], LAST_PANEL["M"], graded))
+    except Exception as e:      # the analyst panel is an extra: never block the cards
+        logger.warning(f"Analyst consensus skipped: {e}")
+    return out
 
 
 def verdicts_to_log(cards: Dict, per_side: int = 25) -> List[Tuple]:
