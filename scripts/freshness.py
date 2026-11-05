@@ -21,10 +21,11 @@ MODELS = {
     "stock_report_card": "daily", "dividend_income": "daily", "market_scanner": "daily",
     "price_ranges": "daily", "stock_swing": "daily", "stock_investor_factor": "daily",
     "market_5d": "daily", "data_quality": "daily", "ipo_listing": "daily",
-    "multibagger_radar": "weekly",
+    "stock_day": "daily", "market_day": "daily", "analyst_consensus": "daily",
+    "multibagger_radar": "weekly", "analyst_panel": "weekly",
 }
 # background jobs on the API server -> max age in hours
-JOBS = {"nse_eod": 30, "news_fetch": 6, "indices": 26, "ipos_india": 30}
+JOBS = {"nse_eod": 30, "bse_stocks": 30, "news_fetch": 6, "indices": 26, "ipos_india": 30}
 # the data itself (a job can "succeed" and still save nothing) -> max age in hours
 DATA = {
     "NSE stock prices": ("SELECT MAX(last_updated) FROM stocks WHERE exchange = 'NSE' AND market = 'IN'", 40),

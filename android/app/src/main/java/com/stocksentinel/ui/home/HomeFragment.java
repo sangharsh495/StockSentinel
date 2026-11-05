@@ -50,6 +50,8 @@ public class HomeFragment extends Fragment {
     private TextView sentimentBearish;
     private TextView sentimentNeutral;
     private TextView stockCountText, homeDate, marketStatus;
+    private TextView todaySession, todayMarket, todaySummary, todayTrack;
+    private LinearLayout todayBuyContainer, todayAvoidContainer;
 
     // Weekly Movers Radar
     private RecyclerView weeklyMoversRecycler;
@@ -86,6 +88,12 @@ public class HomeFragment extends Fragment {
         stockCountText = view.findViewById(R.id.stock_count);
         homeDate = view.findViewById(R.id.home_date);
         marketStatus = view.findViewById(R.id.market_status_pill);
+        todaySession = view.findViewById(R.id.today_session);
+        todayMarket = view.findViewById(R.id.today_market);
+        todaySummary = view.findViewById(R.id.today_summary);
+        todayTrack = view.findViewById(R.id.today_track);
+        todayBuyContainer = view.findViewById(R.id.today_buy_container);
+        todayAvoidContainer = view.findViewById(R.id.today_avoid_container);
 
         // Weekly Movers Radar setup
         weeklyMoversRecycler = view.findViewById(R.id.weekly_movers_recycler);
@@ -168,6 +176,7 @@ public class HomeFragment extends Fragment {
     private void loadAllData() {
         swipeRefresh.setRefreshing(true);
         bindMarketClock();
+        loadTodayRating();
         loadMarketOutlook();
         loadQuantPicks();
         loadWeeklyMovers();
@@ -179,6 +188,89 @@ public class HomeFragment extends Fragment {
         loadStockCount();
     }
 
+
+    private void loadTodayRating() {
+        ApiClient.getApi().getTodayRating(3).enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NonNull Call<JsonObject> call, @NonNull Response<JsonObject> response) {
+                if (!response.isSuccessful() || response.body() == null || !isAdded()) return;
+                JsonObject body = response.body();
+                if ("not_trained".equals(QuantPicksActivity.str(body, "status"))) {
+                    todaySummary.setText("Today's rating appears after tonight's model run.");
+                    return;
+                }
+                String session = QuantPicksActivity.str(body, "session_date");
+                boolean stale = "stale".equals(QuantPicksActivity.str(body, "status"));
+                todaySession.setText(session.isEmpty() ? "—" : (stale ? "Old · " : "For ") + session);
+
+                JsonObject market = QuantPicksActivity.obj(body, "market");
+                JsonObject nifty = QuantPicksActivity.obj(body, "nifty_live");
+                Double chance = QuantPicksActivity.dbl(market, "chance_close_above_open_pct");
+                Double since = QuantPicksActivity.dbl(nifty, "since_open_pct");
+                todayMarket.setText(String.format(Locale.US, "Nifty close above open: %s%s",
+                        chance == null ? "—" : String.format(Locale.US, "%.0f%%", chance),
+                        since == null ? "" : String.format(Locale.US, " · since open %+.2f%%", since)));
+                todayMarket.setTextColor(getResources().getColor(chance == null ? R.color.text_primary
+                        : (chance >= 55 ? R.color.bullish : (chance <= 45 ? R.color.bearish
+                        : R.color.text_primary)), null));
+                todaySummary.setText(stale
+                        ? "Tonight's model run has not finished yet; this is the last rating."
+                        : QuantPicksActivity.str(body, "summary"));
+
+                bindTodayRows(todayBuyContainer, QuantPicksActivity.arr(body, "buy"));
+                bindTodayRows(todayAvoidContainer, QuantPicksActivity.arr(body, "avoid"));
+
+                JsonObject track = QuantPicksActivity.obj(body, "track_record");
+                Double days = QuantPicksActivity.dbl(track, "days_tested");
+                Double beat = QuantPicksActivity.dbl(track, "beat_basket_days_pct");
+                todayTrack.setText(days == null ? "—" : String.format(Locale.US,
+                        "Tested on %.0f unseen days · top 10 beat the whole basket on %s of days after costs",
+                        days, beat == null ? "—" : String.format(Locale.US, "%.0f%%", beat)));
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<JsonObject> call, @NonNull Throwable t) { }
+        });
+    }
+
+    private void bindTodayRows(LinearLayout container, JsonArray rows) {
+        container.removeAllViews();
+        if (rows == null) return;
+        for (JsonElement el : rows) {
+            if (!el.isJsonObject()) continue;
+            JsonObject r = el.getAsJsonObject();
+            View row = LayoutInflater.from(requireContext()).inflate(R.layout.item_stock_row, container, false);
+            String sym = QuantPicksActivity.str(r, "symbol");
+            String name = QuantPicksActivity.str(r, "name");
+            Double chance = QuantPicksActivity.dbl(r, "chance_beat_peers_pct");
+            Double since = QuantPicksActivity.dbl(r, "since_open_pct");
+            Double pct = since != null ? since : QuantPicksActivity.dbl(r, "change_pct");
+            ((TextView) row.findViewById(R.id.stock_symbol)).setText(sym.isEmpty() ? "—" : sym);
+            TextView nameView = row.findViewById(R.id.stock_name);
+            if (nameView != null) {
+                nameView.setText(chance == null ? name
+                        : String.format(Locale.US, "Chance to beat peers today %.0f%%", chance));
+            }
+            ((TextView) row.findViewById(R.id.stock_price)).setText(
+                    FormatUtils.formatPrice(QuantPicksActivity.dbl(r, "price"), "INR"));
+            TextView change = row.findViewById(R.id.stock_change);
+            change.setText(pct == null ? "—"
+                    : (since != null ? "Since open " : "") + FormatUtils.formatChangePercent(pct));
+            change.setTextColor(FormatUtils.getChangeColor(pct));
+            final String fs = sym;
+            final String fn = name.isEmpty() ? sym : name;
+            row.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), StockDetailActivity.class);
+                intent.putExtra(StockDetailActivity.EXTRA_SYMBOL, fs);
+                intent.putExtra(StockDetailActivity.EXTRA_EXCHANGE, "NSE");
+                intent.putExtra(StockDetailActivity.EXTRA_NAME, fn);
+                startActivity(intent);
+            });
+            View remove = row.findViewById(R.id.remove_btn);
+            if (remove != null) remove.setVisibility(View.GONE);
+            container.addView(row);
+        }
+    }
 
     private void loadMarketOutlook() {
         ApiClient.getApi().getMarketOutlook().enqueue(new Callback<JsonObject>() {

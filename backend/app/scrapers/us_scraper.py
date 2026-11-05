@@ -131,65 +131,74 @@ async def fetch_us_stock_list():
         return 0
 
 
+US_TOP_N = 600
+
+
+def _download_daily(symbols: list[str]):
+    import yfinance as yf
+    return yf.download(symbols, period="5d", interval="1d", progress=False,
+                       group_by="column", auto_adjust=False, threads=True)
+
+
+def rows_from_daily(data, symbols: list[str]) -> list[tuple]:
+    """(symbol, price, prev_close, high, low, open, volume, change_pct) from a yfinance daily frame."""
+    out = []
+    if data is None or data.empty:
+        return out
+    for s in symbols:
+        try:
+            c = data["Close"][s].dropna()
+        except KeyError:
+            continue
+        if len(c) < 2:
+            continue
+        day = c.index[-1]
+        price, prev = float(c.iloc[-1]), float(c.iloc[-2])
+
+        def f(col):
+            try:
+                v = data[col][s].get(day)
+                return float(v) if v == v and v is not None else None
+            except KeyError:
+                return None
+        vol = f("Volume")
+        out.append((s, price, prev, f("High"), f("Low"), f("Open"), int(vol) if vol else None,
+                    round((price / prev - 1) * 100, 4) if prev else None))
+    return out
+
+
 async def fetch_us_prices():
-    """Fetch latest US stock prices using yfinance."""
-    logger.info("Fetching US stock prices...")
-
+    """
+    Latest US prices for the most valuable US companies in one batched Yahoo
+    request (the old per-company calls for every listed ticker never finished).
+    """
     pool = await get_pool()
-
-    # Get all US stock symbols from database
     async with pool.acquire() as conn:
         rows = await conn.fetch(
-            "SELECT symbol FROM stocks WHERE market = 'US' AND is_active = TRUE"
+            """
+            SELECT symbol FROM stocks WHERE market = 'US' AND is_active = TRUE
+              AND symbol ~ '^[A-Z][A-Z.-]{0,9}$'
+            ORDER BY market_cap DESC NULLS LAST, COALESCE(volume, 0) * COALESCE(current_price, 0) DESC
+            LIMIT $1
+            """,
+            US_TOP_N,
         )
-
-    symbols = [row["symbol"] for row in rows]
+    symbols = [r["symbol"].replace(".", "-") for r in rows]
     if not symbols:
-        logger.info("No US stocks to update")
         return 0
-
-    logger.info(f"Fetching prices for {len(symbols)} US stocks...")
-
-    # Run yfinance in thread pool (it's blocking)
-    loop = asyncio.get_event_loop()
-    results = await loop.run_in_executor(_executor, _fetch_us_prices_sync, symbols)
-
-    # Update database
-    count = 0
+    data = await asyncio.to_thread(_download_daily, symbols)
+    updates = rows_from_daily(data, symbols)
     async with pool.acquire() as conn:
-        for symbol, data in results.items():
-            try:
-                await conn.execute(
-                    """
-                    UPDATE stocks SET
-                        current_price = $1,
-                        prev_close = $2,
-                        day_high = $3,
-                        day_low = $4,
-                        open_price = $5,
-                        volume = $6,
-                        market_cap = $7,
-                        change_pct = $8,
-                        last_updated = $9
-                    WHERE symbol = $10 AND market = 'US'
-                    """,
-                    data.get("current_price"),
-                    data.get("prev_close"),
-                    data.get("day_high"),
-                    data.get("day_low"),
-                    data.get("open_price"),
-                    data.get("volume"),
-                    data.get("market_cap"),
-                    data.get("change_pct"),
-                    datetime.now(timezone.utc),
-                    symbol,
-                )
-                count += 1
-            except Exception as e:
-                logger.debug(f"Error updating {symbol}: {e}")
-
-    logger.info(f"US stock prices updated: {count}")
-    return count
+        await conn.executemany(
+            """
+            UPDATE stocks SET current_price = $2, prev_close = $3, day_high = $4, day_low = $5,
+                open_price = $6, volume = $7, change_pct = $8, last_updated = NOW()
+            WHERE symbol = $1 AND market = 'US'
+            """,
+            [(u[0].replace("-", "."),) + u[1:] for u in updates],
+        )
+    logger.info(f"US prices (Yahoo, delayed): {len(updates)} of {len(symbols)} companies")
+    return len(updates)
 
 
 async def fetch_market_indices():

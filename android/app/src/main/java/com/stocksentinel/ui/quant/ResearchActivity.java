@@ -211,6 +211,7 @@ public class ResearchActivity extends AppCompatActivity {
         chanceText.setText(chance == null ? "—" : String.format(Locale.US, "%.0f%%", chance));
 
         bindAnalysts(obj(b, "analysts"), h);
+        prependToday(obj(b, "today"));
         bindPosition(obj(b, "position"));
         bindRanges(obj(b, "ranges"), obj(b, "ranges_track_record"));
         bindValuation(obj(b, "valuation"));
@@ -263,6 +264,20 @@ public class ResearchActivity extends AppCompatActivity {
                             : String.format(Locale.US, "%.1f%%", dbl(test, "sell_beat_market_pct"))));
         }
         analystsText.setText(sb.toString().trim());
+    }
+
+    /** Today's day-trade rating (open to close) on top of the analyst section. */
+    private void prependToday(JsonObject t) {
+        if (t == null) return;
+        String r = str(t, "rating");
+        String label = "strong_today".equals(r) ? "Strong today" : "weak_today".equals(r) ? "Weak today"
+                : "neutral_today".equals(r) ? "Neutral today" : "No tested edge for day trades";
+        String line = String.format(Locale.US, "Today's rating%s: %s · %s%% chance to beat peers open-to-close",
+                str(t, "session_date").isEmpty() ? "" : " (" + str(t, "session_date") + ")",
+                label, n0(dbl(t, "chance_beat_peers_pct")));
+        CharSequence rest = analystsText.getText();
+        analystsText.setText(rest == null || rest.length() == 0 || "—".contentEquals(rest)
+                ? line : line + "\n\n" + rest);
     }
 
     private void bindPosition(JsonObject pos) {

@@ -636,6 +636,19 @@ async def research(symbol: str, capital: float = Query(100000, gt=0, le=1e10),
         out["analysts"] = {"consensus": cons.get("consensus"), "panel_size": cm.get("analysts"),
                            "skilled_by_horizon": cm.get("skilled_by_horizon"),
                            "tests": cm.get("consensus_tests")}
+    day = preds.get("stock_day")
+    if day:
+        dr = await _latest_run("stock_day")
+        verified = bool(dr and dr.get("edge_verified"))
+        pctl = day.get("score_percentile")
+        out["today"] = {
+            "session_date": str(_session_after(dr["data_end"])) if dr and dr.get("data_end") else None,
+            "score_percentile": pctl,
+            "chance_beat_peers_pct": round(day["probability"] * 100, 1) if day.get("probability") is not None else None,
+            "rating": ("no_tested_edge" if not verified or pctl is None else
+                       "strong_today" if pctl >= 90 else "weak_today" if pctl <= 10 else "neutral_today"),
+            "verified": verified,
+        }
     out["dividend"] = preds.get("dividend_income")
     out["mentions"] = {k: True for k in ("multibagger_radar", "market_scanner") if k in preds}
     out["trust"] = {"horizon_test": {k: v for k, v in (tests.get(horizon) or {}).items() if k != "calibration"},
@@ -719,3 +732,136 @@ async def analysts_top(horizon: Optional[str] = Query(None), limit: int = Query(
     return {"status": "ok", "horizon": horizon, "as_of": str(run["data_end"]) if run.get("data_end") else None,
             "analysts": m.get("analysts"), "skilled_by_horizon": m.get("skilled_by_horizon"),
             "test": t, "picks": picks[:limit]}
+
+
+# ---------------------------------------------------------------------------
+# Today's rating: next-session (open -> close) model, tracked live during the day
+# ---------------------------------------------------------------------------
+def _session_after(d):
+    """The trading session a rating made with data up to `d` is for (next weekday)."""
+    from datetime import timedelta
+    n = d + timedelta(days=1)
+    while n.weekday() >= 5:
+        n += timedelta(days=1)
+    return n
+
+
+def _market_status(now_ist):
+    from datetime import time as dtime
+    if now_ist.weekday() >= 5:
+        return "closed"
+    t = now_ist.time()
+    if t < dtime(9, 0):
+        return "pre_open"
+    if t < dtime(9, 15):
+        return "pre_open_session"
+    if t <= dtime(15, 30):
+        return "open"
+    return "closed"
+
+
+def _pct(a, b):
+    try:
+        return round((float(a) / float(b) - 1) * 100, 2) if a and b and float(b) > 0 else None
+    except (TypeError, ValueError):
+        return None
+
+
+@router.get("/today")
+async def today_rating(limit: int = Query(10, ge=1, le=50)):
+    """
+    Today's rating: the stocks the tested day model likes and dislikes for today's
+    session (buy at the open, sell at the close), the chance the Nifty closes above
+    its open, and how each one is doing since the open (prices about 15 minutes delayed).
+    """
+    from datetime import datetime
+    from app.scrapers.nse_prices import IST
+
+    run = await _latest_run("stock_day")
+    if not run:
+        return {"status": "not_trained", "buy": [], "avoid": []}
+    now = datetime.now(IST)
+    data_end = run["data_end"]
+    session = _session_after(data_end)
+    status = _market_status(now)
+    stale = now.date() > session
+    verified = bool(run.get("edge_verified"))
+
+    async def side(order: str):
+        rows = await fetch(
+            f"""
+            SELECT p.payload, s.name, s.sector, s.current_price, s.open_price, s.prev_close,
+                   s.change_pct, s.last_updated
+            FROM quant_predictions p
+            LEFT JOIN stocks s ON UPPER(s.symbol) = p.symbol AND s.exchange = 'NSE'
+            WHERE p.model_key = 'stock_day'
+            ORDER BY p.rank {order} LIMIT $1
+            """,
+            limit,
+        )
+        out = []
+        for r in rows:
+            p = _j(r["payload"])
+            live_today = (r["last_updated"] is not None
+                          and r["last_updated"].astimezone(IST).date() == session == now.date())
+            out.append({
+                "symbol": p["symbol"], "name": r["name"], "sector": r["sector"],
+                "score_percentile": p.get("score_percentile"),
+                "chance_beat_peers_pct": round(p["probability"] * 100, 1) if p.get("probability") is not None else None,
+                "rating": ("strong_today" if order == "ASC" else "weak_today") if verified else "no_tested_edge",
+                "price": float(r["current_price"]) if r["current_price"] is not None else None,
+                "change_pct": float(r["change_pct"]) if r["change_pct"] is not None else None,
+                "since_open_pct": _pct(r["current_price"], r["open_price"]) if live_today else None,
+                "yesterday": p.get("signals", {}),
+            })
+        return out
+
+    buy, avoid = await side("ASC"), await side("DESC")
+
+    nifty = await fetchrow("SELECT current_price, open_price, prev_close, change_pct, last_updated "
+                           "FROM stocks WHERE symbol = '^NSEI' LIMIT 1")
+    nifty_live = None
+    if nifty and nifty["last_updated"] and nifty["last_updated"].astimezone(IST).date() == now.date():
+        nifty_live = {"price": float(nifty["current_price"]) if nifty["current_price"] else None,
+                      "change_pct": float(nifty["change_pct"]) if nifty["change_pct"] is not None else None,
+                      "since_open_pct": _pct(nifty["current_price"], nifty["open_price"])}
+    for lst in (buy, avoid):
+        for s in lst:
+            s["vs_nifty_since_open_pct"] = (round(s["since_open_pct"] - nifty_live["since_open_pct"], 2)
+                                            if s["since_open_pct"] is not None and nifty_live
+                                            and nifty_live["since_open_pct"] is not None else None)
+
+    mrun = await _latest_run("market_day")
+    market = None
+    if mrun:
+        mp = await fetchrow("SELECT payload FROM quant_predictions WHERE model_key = 'market_day'")
+        mp = _j(mp["payload"]) if mp else {}
+        market = {
+            "chance_close_above_open_pct": round(mp["probability"] * 100, 1) if mp.get("probability") is not None else None,
+            "source": mp.get("source"), "verified": bool(mrun.get("edge_verified")),
+            "typical_day_range_pct": mp.get("typical_range_pct"),
+            "historical_up_days_pct": round(mp["historical_base_rate"] * 100, 1)
+            if mp.get("historical_base_rate") is not None else None,
+        }
+
+    m = _j(run.get("metrics")) or {}
+    bt = _j(run.get("backtest")) or {}
+    return {
+        "status": "stale" if stale else "ok",
+        "session_date": str(session), "data_end": str(data_end), "market_status": status,
+        "rating_verified": verified,
+        "summary": (f"Rated for {session:%a %d %b}: tested day model, buy at the open and sell at the close."
+                    if verified else
+                    f"Rated for {session:%a %d %b}. The day model has no proven edge after costs, so these "
+                    "lists are context only, not buy or sell calls."),
+        "track_record": {
+            "days_tested": (bt.get("settings") or {}).get("periods"),
+            "model_cagr_pct": (bt.get("model") or {}).get("cagr_pct"),
+            "equal_weight_cagr_pct": (bt.get("equal_weight") or {}).get("cagr_pct"),
+            "beat_basket_days_pct": (bt.get("model") or {}).get("beat_equal_weight_periods_pct"),
+            "cost_per_side_pct": (bt.get("settings") or {}).get("cost_per_side_pct"),
+            "auc": m.get("auc"), "oos_period": [m.get("oos_start"), m.get("oos_end")],
+        },
+        "trust": _trust(run), "market": market, "nifty_live": nifty_live,
+        "buy": buy, "avoid": avoid,
+    }

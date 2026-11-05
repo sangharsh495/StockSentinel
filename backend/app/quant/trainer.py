@@ -36,12 +36,15 @@ RULE_BASELINES = {
     "trader": ("rsi_14", True, "Buy the 10 most oversold stocks (lowest RSI-14)"),
     "swing": ("ret_250_skip20", False, "Buy the 10 strongest 12-month momentum stocks"),
     "investor": ("ret_250_skip20", False, "Buy the 10 strongest 12-month momentum stocks"),
+    "day": ("ret_1", True, "Buy yesterday's 10 biggest losers at the open (1-day reversal)"),
 }
 
 STRATEGY_INFO = {
     "trader": "Short-term trader: 5-day hold. Chance a stock beats the median stock of the universe.",
     "swing": "Swing trader: 20-day hold. Chance a stock beats the median stock of the universe.",
     "investor": "Positional investor: 60-day hold. Chance a stock beats the median stock of the universe.",
+    "day": ("Today's rating: buy at today's open, sell at today's close. "
+            "Chance a stock beats the median stock of the universe that day."),
 }
 
 
@@ -58,9 +61,13 @@ def market_model():
     return make_pipeline(StandardScaler(), LogisticRegression(C=0.1, max_iter=500))
 
 
+DAY_TRADE = "day"
+
+
 def train_stock_strategy(prices: Dict[str, pd.DataFrame], strategy: str) -> Dict:
-    h = HORIZONS[strategy]
-    df = build_dataset(prices, h)
+    intraday = strategy == DAY_TRADE
+    h = 1 if intraday else HORIZONS[strategy]
+    df = build_dataset(prices, h, intraday=intraday)
     fc = feature_columns(df)
     labeled = df["fwd_excess"].notna()
     med = df.groupby(level="date")["fwd_excess"].transform("median")
@@ -71,7 +78,7 @@ def train_stock_strategy(prices: Dict[str, pd.DataFrame], strategy: str) -> Dict
     wf, mm = multi_walk_forward(df, fc, y, h, cands, fit_target=rank_target)
     metrics = evaluate(wf.oos, h)
     base_col, asc, rule_desc = RULE_BASELINES[strategy]
-    bt = backtest(wf.oos, df, h, baseline_col=base_col, baseline_ascending=asc)
+    bt = backtest(wf.oos, df, h, baseline_col=base_col, baseline_ascending=asc, intraday=intraday)
     bt["rule_description"] = rule_desc
 
     # Final model on all labelled history, then score the latest day.
@@ -92,6 +99,7 @@ def train_stock_strategy(prices: Dict[str, pd.DataFrame], strategy: str) -> Dict
             "probability": _r(calibrator.predict([score[sym]])[0], 4),
             **bucket_outcome(calibrator, score[sym]),
             "signals": {
+                "ret_1d_pct": _r(row["ret_1"] * 100, 2),
                 "ret_20d_pct": _r(row["ret_20"] * 100, 2), "ret_1y_pct": _r(row["ret_250"] * 100, 2),
                 "rsi_14": _r(row["rsi_14"], 1), "dist_52w_high_pct": _r(row["dist_52w_high"] * 100, 1),
                 "volatility_pct": _r(row["vol_20"] * 100, 1), "volume_vs_avg": _r(np.exp(row["volume_z"]), 2),
@@ -181,7 +189,7 @@ def train_investor_factor(prices: Dict[str, pd.DataFrame], horizon: int = 60) ->
     }
 
 
-def train_market_outlook(prices: Dict[str, pd.DataFrame], horizon: int) -> Dict:
+def train_market_outlook(prices: Dict[str, pd.DataFrame], horizon: int, intraday: bool = False) -> Dict:
     m = market_features(prices).dropna()
     from app.quant.participants import participant_features
     part = participant_features(m.index)
@@ -192,7 +200,10 @@ def train_market_outlook(prices: Dict[str, pd.DataFrame], horizon: int) -> Dict:
         m["has_positioning"] = part.notna().all(axis=1).astype(float)
         m = m.join(part.fillna(part.median()))
     no = prices["nifty"]["Open"]
-    fwd = np.log(no.shift(-1 - horizon) / no.shift(-1)).reindex(m.index)
+    if intraday:   # next session, open to close
+        fwd = np.log(prices["nifty"]["Close"].shift(-1) / no.shift(-1)).reindex(m.index)
+    else:
+        fwd = np.log(no.shift(-1 - horizon) / no.shift(-1)).reindex(m.index)
     df = m.copy()
     df["fwd_ret"] = fwd
     df["fwd_excess"] = fwd
@@ -215,8 +226,10 @@ def train_market_outlook(prices: Dict[str, pd.DataFrame], horizon: int) -> Dict:
     current = {k: _r(v, 4) for k, v in last[fc].iloc[0].items()}
 
     return {
-        "model_key": f"market_{horizon}d", "strategy": "market", "horizon_days": horizon,
-        "description": f"Chance the Nifty 50 is higher {horizon} trading days from now.",
+        "model_key": "market_day" if intraday else f"market_{horizon}d", "strategy": "market",
+        "horizon_days": horizon,
+        "description": ("Chance the Nifty 50 closes above its opening level in the next session."
+                        if intraday else f"Chance the Nifty 50 is higher {horizon} trading days from now."),
         "model_type": f"multi_model:{mm['chosen_live']}",
         "trained_at": datetime.now(timezone.utc).isoformat(),
         "data_end": str(df.index.get_level_values("date")[-1].date()),
@@ -263,6 +276,14 @@ def run_all(strategies: Optional[List[str]] = None, period: str = "10y",
     for h in (5, 20):
         logger.info(f"Training market outlook: {h}d")
         results.append(train_market_outlook(prices, h))
+    # Today's rating: next session, open to close (stocks and the Nifty)
+    for fn, args in ((train_stock_strategy, (prices, DAY_TRADE)),
+                     (train_market_outlook, (prices, 1, True))):
+        try:
+            logger.info(f"Training today's rating: {fn.__name__}")
+            results.append(fn(*args))
+        except Exception as e:  # a failed day model must not lose the nightly run
+            logger.warning(f"Today's rating skipped ({fn.__name__}): {e}")
     try:
         from app.quant.market_data import update_market
         from app.quant.scanner import run_scanner
