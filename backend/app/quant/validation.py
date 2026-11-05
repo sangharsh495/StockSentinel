@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 TRADING_DAYS = 252
 RISK_FREE = 0.065          # approx. Indian T-bill yield, for Sharpe
 COST_PER_SIDE = 0.002      # STT + stamp + exchange + slippage on delivery trades
+COST_PER_SIDE_INTRADAY = 0.0008   # intraday STT/stamp are lower; brokerage + slippage dominate
 
 
 def make_model(seed: int = 7) -> HistGradientBoostingClassifier:
@@ -292,13 +293,17 @@ def backtest(
     top_n: int = 10,
     baseline_col: Optional[str] = None,
     baseline_ascending: bool = False,
+    intraday: bool = False,
 ) -> Dict:
     """
     Every `horizon` days, buy the top_n stocks by model probability at the
     next open, hold `horizon` days, pay costs on what changed. Compared
     against the Nifty, an equal-weight basket of the whole universe, and
     a simple rule-based strategy (baseline_col).
+    intraday=True: every position is opened at the open and closed at the
+    close the same day, so the whole basket pays costs every day.
     """
+    cost = COST_PER_SIDE_INTRADAY if intraday else COST_PER_SIDE
     rebal = _non_overlapping_dates(oos.index.get_level_values("date"), horizon)
     rows = {"model": [], "rule": [], "equal_weight": [], "nifty": []}
     prev = {"model": set(), "rule": set()}
@@ -314,8 +319,8 @@ def backtest(
             fb = features.xs(d, level="date").reindex(g.index)[baseline_col].dropna()
             picks["rule"] = (fb.nsmallest(top_n) if baseline_ascending else fb.nlargest(top_n)).index
         for k, idx in picks.items():
-            turnover = 1 - len(prev[k] & set(idx)) / top_n
-            rows[k].append(simple.loc[idx].mean() - 2 * COST_PER_SIDE * turnover)
+            turnover = 1.0 if intraday else 1 - len(prev[k] & set(idx)) / top_n
+            rows[k].append(simple.loc[idx].mean() - 2 * cost * turnover)
             prev[k] = set(idx)
         rows["equal_weight"].append(simple.mean())
         rows["nifty"].append(mkt)
@@ -335,5 +340,5 @@ def backtest(
             for d, r in eq.iloc[::step].iterrows()
         ]
     out["settings"] = {"top_n": top_n, "rebalance_every_days": horizon,
-                       "cost_per_side_pct": COST_PER_SIDE * 100, "periods": len(dates_out)}
+                       "cost_per_side_pct": cost * 100, "periods": len(dates_out), "intraday": intraday}
     return out

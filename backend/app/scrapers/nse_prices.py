@@ -147,28 +147,31 @@ async def fetch_nse_intraday(force: bool = False) -> int:
             """,
             INTRADAY_TOP_N,
         )
+        # Stocks on today's rating lists are always tracked live too.
+        try:
+            rated = await conn.fetch(
+                """
+                (SELECT symbol FROM quant_predictions WHERE model_key = 'stock_day' ORDER BY rank ASC LIMIT 50)
+                UNION
+                (SELECT symbol FROM quant_predictions WHERE model_key = 'stock_day' ORDER BY rank DESC LIMIT 50)
+                """)
+        except Exception:
+            rated = []
     if not rows:
         return 0
     syms = [r["symbol"] for r in rows if not r["symbol"].startswith("^")]
+    syms += [r["symbol"] for r in rated if r["symbol"] not in set(syms)]
     data = await asyncio.to_thread(lambda: yf.download(
         [f"{s}.NS" for s in syms], period="1d", interval="5m", progress=False,
         group_by="column", auto_adjust=False, threads=True))
     if data is None or data.empty:
         return 0
-    close = data["Close"]
-    updates = []
-    for s in syms:
-        col = f"{s}.NS"
-        if col not in close.columns:
-            continue
-        series = close[col].dropna()
-        if series.empty:
-            continue
-        updates.append((s, float(series.iloc[-1])))
+    updates = intraday_rows(data, syms, datetime.now(IST).date())
     async with pool.acquire() as conn:
         await conn.executemany(
             """
-            UPDATE stocks SET current_price = $2,
+            UPDATE stocks SET current_price = $2, open_price = COALESCE($3, open_price),
+                day_high = COALESCE($4, day_high), day_low = COALESCE($5, day_low),
                 change_pct = CASE WHEN prev_close > 0 THEN ($2 / prev_close - 1) * 100 ELSE change_pct END,
                 last_updated = NOW()
             WHERE symbol = $1 AND exchange = 'NSE'
@@ -177,6 +180,36 @@ async def fetch_nse_intraday(force: bool = False) -> int:
         )
     logger.info(f"NSE intraday prices (Yahoo, delayed): {len(updates)} companies")
     return len(updates)
+
+
+def intraday_rows(data, syms: List[str], today: date) -> List[Tuple]:
+    """(symbol, last, today's open, high, low) from 5-minute bars of today's session only."""
+    out = []
+    if data is None or data.empty:
+        return out
+    idx = data.index
+    if getattr(idx, "tz", None) is not None:
+        idx = idx.tz_convert(IST)
+    today_mask = [ts.date() == today for ts in idx]
+    for s in syms:
+        col = f"{s}.NS"
+        try:
+            c = data["Close"][col][today_mask].dropna()
+        except KeyError:
+            continue
+        if c.empty:
+            continue
+
+        def first(field, how):
+            try:
+                v = data[field][col][today_mask].dropna()
+            except KeyError:
+                return None
+            if v.empty:
+                return None
+            return float(v.iloc[0] if how == "first" else (v.max() if how == "max" else v.min()))
+        out.append((s, float(c.iloc[-1]), first("Open", "first"), first("High", "max"), first("Low", "min")))
+    return out
 
 
 async def eod_needed() -> bool:

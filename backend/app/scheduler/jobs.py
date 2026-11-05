@@ -340,7 +340,7 @@ def create_scheduler() -> BackgroundScheduler:
 
     scheduler.add_job(
         job_fetch_bse,
-        CronTrigger(minute="2,7,12,17,22,27,32,37,42,47,52,57", hour="9-15", day_of_week="mon-fri"),
+        CronTrigger(hour="18,21", minute="50,20", day_of_week="mon-fri"),
         id="bse_stocks",
         name="BSE Stock Prices",
     )
@@ -348,7 +348,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- US market hours: US prices every 5 min (7 PM - 1:30 AM IST = 9:30 AM - 4 PM ET, Mon-Fri) ---
     scheduler.add_job(
         job_fetch_us,
-        CronTrigger(minute="*/5", hour="19-23,0-1", day_of_week="mon-fri"),
+        CronTrigger(minute="*/10", hour="19-23,0-2", day_of_week="mon-fri"),
         id="us_stocks",
         name="US Stock Prices",
     )

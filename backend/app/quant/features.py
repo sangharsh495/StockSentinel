@@ -90,16 +90,23 @@ def stock_features(prices: Dict[str, pd.DataFrame]) -> pd.DataFrame:
     return panel
 
 
-def forward_labels(prices: Dict[str, pd.DataFrame], horizon: int) -> pd.DataFrame:
+def forward_labels(prices: Dict[str, pd.DataFrame], horizon: int, intraday: bool = False) -> pd.DataFrame:
     """
     Forward return from the next open (t+1) to the open h days after (t+1+h),
     for the stock and for the Nifty. Excess = stock minus Nifty.
+    intraday=True: the next session only, from its open to its close (a day trade).
     """
     o = prices["Open"].where(prices["Open"] > 0)
     no = prices["nifty"]["Open"].where(prices["nifty"]["Open"] > 0)
-    entry, exit_ = o.shift(-1), o.shift(-1 - horizon)
-    stock_ret = np.log(exit_ / entry)
-    mkt_ret = np.log(no.shift(-1 - horizon) / no.shift(-1))
+    if intraday:
+        c = prices["Close"].where(prices["Close"] > 0)
+        nc = prices["nifty"]["Close"].where(prices["nifty"]["Close"] > 0)
+        stock_ret = np.log(c.shift(-1) / o.shift(-1))
+        mkt_ret = np.log(nc.shift(-1) / no.shift(-1))
+    else:
+        entry, exit_ = o.shift(-1), o.shift(-1 - horizon)
+        stock_ret = np.log(exit_ / entry)
+        mkt_ret = np.log(no.shift(-1 - horizon) / no.shift(-1))
     excess = stock_ret.sub(mkt_ret, axis=0)
     lab = pd.concat(
         {"fwd_ret": stock_ret.stack(future_stack=True), "fwd_excess": excess.stack(future_stack=True)},
@@ -109,7 +116,8 @@ def forward_labels(prices: Dict[str, pd.DataFrame], horizon: int) -> pd.DataFram
     return lab
 
 
-def build_dataset(prices: Dict[str, pd.DataFrame], horizon: int, extras: bool = True) -> pd.DataFrame:
+def build_dataset(prices: Dict[str, pd.DataFrame], horizon: int, extras: bool = True,
+                  intraday: bool = False) -> pd.DataFrame:
     """
     Features + market regime + labels. Rows without a label are kept (they are 'today').
     extras=True adds delivery %, FII/DII positioning and results-surprise
@@ -129,7 +137,7 @@ def build_dataset(prices: Dict[str, pd.DataFrame], horizon: int, extras: bool = 
         part = participant_features(prices["Close"].index)
         if part is not None:
             panel = panel.join(part, on="date")
-    panel = panel.join(forward_labels(prices, horizon))
+    panel = panel.join(forward_labels(prices, horizon, intraday=intraday))
     return panel
 
 
