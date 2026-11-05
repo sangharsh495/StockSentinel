@@ -306,10 +306,19 @@ def job_live_watch():
 # ---------------------------------------------------------------------------
 # Scheduler factory
 # ---------------------------------------------------------------------------
+IST_ZONE = "Asia/Kolkata"
+
+
+def _cron(**fields) -> CronTrigger:
+    """A cron schedule in Indian time. CronTrigger ignores the scheduler's time zone
+    and would otherwise use the server clock (UTC on Render), 5.5 hours off."""
+    return CronTrigger(timezone=IST_ZONE, **fields)
+
+
 def create_scheduler() -> BackgroundScheduler:
     """Create and configure the APScheduler instance."""
     scheduler = BackgroundScheduler(
-        timezone="Asia/Kolkata",
+        timezone=IST_ZONE,
         job_defaults={
             "coalesce": True,  # Merge missed runs
             "max_instances": 1,  # No overlapping
@@ -320,7 +329,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- India market hours: NSE/BSE prices every 5 min (9:15 AM - 3:30 PM IST, Mon-Fri) ---
     scheduler.add_job(
         job_fetch_nse,
-        CronTrigger(minute="*/5", hour="9-15", day_of_week="mon-fri"),
+        _cron(minute="*/5", hour="9-15", day_of_week="mon-fri"),
         id="nse_stocks",
         name="NSE Stock Prices",
     )
@@ -328,7 +337,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- After close: every NSE company's end-of-day prices (6:45 PM and 9:15 PM IST, Mon-Fri) ---
     scheduler.add_job(
         job_nse_eod,
-        CronTrigger(hour="18,21", minute="45,15", day_of_week="mon-fri"),
+        _cron(hour="18,21", minute="45,15", day_of_week="mon-fri"),
         id="nse_eod",
         name="NSE End-of-day Prices",
     )
@@ -340,17 +349,24 @@ def create_scheduler() -> BackgroundScheduler:
 
     scheduler.add_job(
         job_fetch_bse,
-        CronTrigger(hour="18,21", minute="50,20", day_of_week="mon-fri"),
+        _cron(hour="18,21", minute="50,20", day_of_week="mon-fri"),
         id="bse_stocks",
         name="BSE Stock Prices",
     )
 
-    # --- US market hours: US prices every 5 min (7 PM - 1:30 AM IST = 9:30 AM - 4 PM ET, Mon-Fri) ---
+    # --- US market hours: every 10 min, 7 PM - 2:50 AM IST (covers 9:30 AM - 4 PM ET in summer
+    # and winter). A US weekday session ends after midnight IST, so the late part runs Tue-Sat. ---
     scheduler.add_job(
         job_fetch_us,
-        CronTrigger(minute="*/10", hour="19-23,0-2", day_of_week="mon-fri"),
+        _cron(minute="*/10", hour="19-23", day_of_week="mon-fri"),
         id="us_stocks",
         name="US Stock Prices",
+    )
+    scheduler.add_job(
+        job_fetch_us,
+        _cron(minute="*/10", hour="0-2", day_of_week="tue-sat"),
+        id="us_stocks_late",
+        name="US Stock Prices (after midnight IST)",
     )
 
     # --- Market indices: every 15 min during any market hours ---
@@ -372,7 +388,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Sentiment: every 30 min, 24/7 (offset by 15 min from news) ---
     scheduler.add_job(
         job_sentiment,
-        CronTrigger(minute="10,40"),
+        _cron(minute="10,40"),
         id="sentiment",
         name="Sentiment Analysis",
     )
@@ -380,7 +396,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Stock Impact ML: every 30 min (offset by 5 min after sentiment) ---
     scheduler.add_job(
         job_stock_impact,
-        CronTrigger(minute="20,50"),
+        _cron(minute="20,50"),
         id="stock_impact",
         name="ML Stock Impact Analysis",
     )
@@ -388,7 +404,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Dividends: every 2 hours, 6 AM - 10 PM IST ---
     scheduler.add_job(
         job_fetch_dividends,
-        CronTrigger(minute="0", hour="6,8,10,12,14,16,18,20,22"),
+        _cron(minute="0", hour="6,8,10,12,14,16,18,20,22"),
         id="dividends",
         name="Dividend Calendar",
     )
@@ -396,7 +412,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- IPOs: every 4 hours ---
     scheduler.add_job(
         job_fetch_ipos,
-        CronTrigger(minute="30", hour="6,10,14,18,22"),
+        _cron(minute="30", hour="6,10,14,18,22"),
         id="ipos",
         name="IPO Pipeline",
     )
@@ -404,7 +420,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- US stock list: daily at 7 PM IST (before US market opens) ---
     scheduler.add_job(
         job_fetch_us_stock_list,
-        CronTrigger(hour="19", minute="0"),
+        _cron(hour="19", minute="0"),
         id="us_stock_list",
         name="US Stock List (Daily)",
     )
@@ -412,7 +428,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Push alerts: daily at 6 AM IST ---
     scheduler.add_job(
         job_send_alerts,
-        CronTrigger(hour="6", minute="0"),
+        _cron(hour="6", minute="0"),
         id="alerts",
         name="Push Notification Alerts",
     )
@@ -420,7 +436,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Cleanup: daily at 2 AM IST ---
     scheduler.add_job(
         job_cleanup,
-        CronTrigger(hour="2", minute="0"),
+        _cron(hour="2", minute="0"),
         id="cleanup",
         name="Data Cleanup",
     )
@@ -428,7 +444,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Financial Fundamentals: daily at 4 AM IST ---
     scheduler.add_job(
         job_fetch_fundamentals,
-        CronTrigger(hour="4", minute="0"),
+        _cron(hour="4", minute="0"),
         id="fundamentals",
         name="Financial Data Fetch",
     )
@@ -436,7 +452,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Price History Backfill: daily at 4:30 AM IST ---
     scheduler.add_job(
         job_backfill_price_history,
-        CronTrigger(hour="4", minute="30"),
+        _cron(hour="4", minute="30"),
         id="price_history",
         name="Price History Backfill",
     )
@@ -444,7 +460,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- News outcome measurement: daily at 5:30 PM IST (after market close) ---
     scheduler.add_job(
         job_news_outcomes,
-        CronTrigger(hour="17", minute="30"),
+        _cron(hour="17", minute="30"),
         id="news_outcomes",
         name="News Outcome Measurement",
     )
@@ -452,7 +468,7 @@ def create_scheduler() -> BackgroundScheduler:
     # --- Live watchlist tracking: every 15 min, Mon-Fri 9:15-15:30 IST ---
     scheduler.add_job(
         job_live_watch,
-        CronTrigger(day_of_week="mon-fri", hour="9-15", minute="*/15"),
+        _cron(day_of_week="mon-fri", hour="9-15", minute="*/15"),
         id="live_watch",
         name="Live Watchlist Tracking",
     )
