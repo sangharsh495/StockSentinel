@@ -767,6 +767,19 @@ def _pct(a, b):
         return None
 
 
+def _today_summary(session, verified: bool, m: dict, bt: dict) -> str:
+    head = f"Rated for {session:%a %d %b} (buy at the open, sell at the close). "
+    if verified:
+        return head + "Tested edge: the top picks beat the whole basket after day-trading costs on unseen days."
+    ew = (bt.get("equal_weight") or {}).get("cagr_pct")
+    market = (f" Even the whole market lost {abs(ew):.0f}% a year bought at the open and sold at the close: "
+              "Indian stocks tend to make their gains overnight." if ew is not None and ew < 0 else "")
+    if m.get("ranking_skill_verified"):
+        return (head + "The model ranks stocks better than chance, but after day-trading costs its picks lost "
+                "money, so treat the lists as today's relative strength, not buy or sell calls." + market)
+    return head + "No proven edge after costs: context only, not buy or sell calls." + market
+
+
 @router.get("/today")
 async def today_rating(limit: int = Query(10, ge=1, le=50)):
     """
@@ -850,10 +863,7 @@ async def today_rating(limit: int = Query(10, ge=1, le=50)):
         "status": "stale" if stale else "ok",
         "session_date": str(session), "data_end": str(data_end), "market_status": status,
         "rating_verified": verified,
-        "summary": (f"Rated for {session:%a %d %b}: tested day model, buy at the open and sell at the close."
-                    if verified else
-                    f"Rated for {session:%a %d %b}. The day model has no proven edge after costs, so these "
-                    "lists are context only, not buy or sell calls."),
+        "summary": _today_summary(session, verified, m, bt),
         "track_record": {
             "days_tested": (bt.get("settings") or {}).get("periods"),
             "model_cagr_pct": (bt.get("model") or {}).get("cagr_pct"),
