@@ -216,8 +216,12 @@ def scrape_history(start_year: int = 2019, end_year: Optional[int] = None,
     return out
 
 
-def scrape_current() -> List[Dict]:
-    """Upcoming/open IPOs from the live GMP page, with details, for scoring."""
+def scrape_current(include_sme: bool = False) -> List[Dict]:
+    """
+    Upcoming/open IPOs from the live GMP page, with details. Mainboard only by
+    default (what the listing model was trained on); include_sme=True also
+    returns SME issues, marked category "SME", for the app's IPO list.
+    """
     out = []
     with httpx.Client(headers={"User-Agent": UA}, timeout=30, follow_redirects=True) as client:
         html = _get(client, BASE + "/report/ipo-gmp-live/331/")
@@ -234,7 +238,8 @@ def scrape_current() -> List[Dict]:
             for r in arr:
                 if not isinstance(r, dict) or "~id" not in r or r["~id"] in seen:
                     continue
-                if (r.get("~IPO_Category") or "IPO") != "IPO" or not r.get("~urlrewrite_folder_name"):
+                category = r.get("~IPO_Category") or "IPO"
+                if category not in (("IPO", "SME") if include_sme else ("IPO",)) or not r.get("~urlrewrite_folder_name"):
                     continue
                 seen.add(r["~id"])
                 row = {
@@ -245,7 +250,7 @@ def scrape_current() -> List[Dict]:
                     "listing_date": _date(r.get("~Str_Listing")),
                     "gmp": _num(r.get("GMP")), "issue_price": _num(r.get("Price (₹)") or r.get("Price")),
                     "issue_size_cr": _num(r.get("IPO Size")), "subscription_x": _num(r.get("Sub")),
-                    "url": BASE + r["~urlrewrite_folder_name"],
+                    "url": BASE + r["~urlrewrite_folder_name"], "category": category,
                 }
                 time.sleep(DELAY_S)
                 dh = _get(client, row["url"])

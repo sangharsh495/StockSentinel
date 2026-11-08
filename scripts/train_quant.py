@@ -88,6 +88,13 @@ async def sync_dividends(results):
         """,
         [(s, t, a, date.fromisoformat(d), st) for s, t, a, d, st in rows],
     )
+    # Older sources left duplicates and stale statuses: keep one row per company/ex-date/amount.
+    await execute("""
+        DELETE FROM dividends a USING dividends b
+        WHERE a.id < b.id AND a.symbol = b.symbol AND a.ex_date = b.ex_date AND a.amount IS NOT DISTINCT FROM b.amount
+    """)
+    await execute("UPDATE dividends SET status = CASE WHEN ex_date >= CURRENT_DATE THEN 'upcoming' "
+                  "WHEN payment_date IS NOT NULL AND payment_date > CURRENT_DATE THEN 'pending' ELSE 'paid' END")
     log.info(f"Dividends table: {len(rows)} paid/expected entries")
 
 

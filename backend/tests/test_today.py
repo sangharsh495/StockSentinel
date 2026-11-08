@@ -86,3 +86,21 @@ def test_us_prices_from_one_batched_daily_frame():
     rows = {r[0]: r for r in rows_from_daily(data, ["AAPL", "BRK-B", "NOPE"])}
     assert rows["AAPL"][1:3] == (104.0, 100.0) and rows["AAPL"][-1] == 4.0
     assert "BRK-B" not in rows and "NOPE" not in rows
+
+
+def test_saved_prices_must_include_the_latest_session():
+    from datetime import datetime, timedelta, timezone
+    from app.quant.data import _cache_is_current, last_finished_session
+    ist = timezone(timedelta(hours=5, minutes=30))
+    fri_night = datetime(2026, 11, 6, 21, 0, tzinfo=ist)
+    sun = datetime(2026, 11, 8, 13, 0, tzinfo=ist)
+    mon_morning = datetime(2026, 11, 9, 8, 0, tzinfo=ist)
+    assert last_finished_session(fri_night).isoformat() == "2026-11-06"
+    assert last_finished_session(sun).isoformat() == "2026-11-06"
+    assert last_finished_session(mon_morning).isoformat() == "2026-11-06"
+    idx = pd.bdate_range("2026-11-02", "2026-11-05")
+    thu = {"nifty": pd.DataFrame({"Close": range(len(idx))}, index=idx)}
+    assert not _cache_is_current(thu, fri_night)
+    idx2 = pd.bdate_range("2026-11-02", "2026-11-06")
+    fri = {"nifty": pd.DataFrame({"Close": range(len(idx2))}, index=idx2)}
+    assert _cache_is_current(fri, sun)

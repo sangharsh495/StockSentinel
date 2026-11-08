@@ -41,6 +41,27 @@ def _download(tickers: List[str], period: str) -> pd.DataFrame:
     raise RuntimeError("Could not download price data from yfinance")
 
 
+def last_finished_session(now=None):
+    """The latest NSE weekday session whose close is known (data posts by about 4 PM IST)."""
+    from datetime import datetime, timedelta, timezone
+    ist = timezone(timedelta(hours=5, minutes=30))
+    now = (now or datetime.now(ist)).astimezone(ist)
+    d = now.date() if now.hour >= 16 else now.date() - timedelta(days=1)
+    while d.weekday() >= 5:
+        d -= timedelta(days=1)
+    return d
+
+
+def _cache_is_current(out: Dict[str, pd.DataFrame], now=None) -> bool:
+    """Saved prices are usable only if they already include the latest finished session
+    (a restored CI cache can look new by file time and still be days old)."""
+    try:
+        last = out["nifty"]["Close"].dropna().index.max().date()
+    except Exception:
+        return False
+    return last >= last_finished_session(now)
+
+
 def load_prices(
     symbols: Optional[List[str]] = None,
     period: str = "10y",
@@ -57,7 +78,10 @@ def load_prices(
     if use_cache and os.path.exists(cache_file):
         age_h = (time.time() - os.path.getmtime(cache_file)) / 3600
         if age_h < max_cache_age_hours:
-            return pd.read_pickle(cache_file)
+            cached = pd.read_pickle(cache_file)
+            if _cache_is_current(cached):
+                return cached
+            logger.info("Saved prices miss the latest session; downloading again")
 
     tickers = [yf_ticker(s) for s in symbols] + [NIFTY_INDEX, VIX_INDEX]
     raw = _download(tickers, period)

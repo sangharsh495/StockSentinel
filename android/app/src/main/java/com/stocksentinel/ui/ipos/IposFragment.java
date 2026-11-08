@@ -324,7 +324,8 @@ public class IposFragment extends Fragment {
                     ? ipo.get("gmp").getAsDouble() : null;
 
             holder.nameText.setText(name);
-            holder.statusText.setText(status.toUpperCase());
+            boolean sme = "SME".equalsIgnoreCase(str(ipo, "exchange"));
+            holder.statusText.setText((sme ? "SME · " : "") + status.toUpperCase());
             holder.dateText.setText(FormatUtils.formatDate(openDate) +
                     (closeDate.isEmpty() ? "" : " – " + FormatUtils.formatDate(closeDate)));
 
