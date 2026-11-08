@@ -186,7 +186,9 @@ async def fetch_us_prices():
     symbols = [r["symbol"].replace(".", "-") for r in rows]
     if not symbols:
         return 0
-    data = await asyncio.to_thread(_download_daily, symbols)
+    from app.scrapers.yf_util import yf_download
+    data = await yf_download(symbols, period="5d", interval="1d", group_by="column",
+                             auto_adjust=False, threads=True)
     updates = rows_from_daily(data, symbols)
     async with pool.acquire() as conn:
         await conn.executemany(

@@ -34,7 +34,6 @@ def classify(price: float, low: float, high: float) -> str:
 async def refresh_live_watch(force: bool = False) -> int:
     if not force and not market_open():
         return 0
-    import yfinance as yf
     from app.database import execute_many, fetch
 
     rows = await fetch("SELECT symbol, payload FROM quant_predictions WHERE model_key = 'market_scanner'")
@@ -47,9 +46,9 @@ async def refresh_live_watch(force: bool = False) -> int:
     if not picks:
         return 0
     tickers = [f"{s}.NS" for s in picks]
-    data = await asyncio.to_thread(
-        lambda: yf.download(tickers, period="1d", interval="5m", progress=False,
-                            group_by="column", auto_adjust=False, threads=True))
+    from app.scrapers.yf_util import yf_download
+    data = await yf_download(tickers, period="1d", interval="5m",
+                             group_by="column", auto_adjust=False, threads=True)
     if data is None or data.empty:
         return 0
     close = data["Close"]

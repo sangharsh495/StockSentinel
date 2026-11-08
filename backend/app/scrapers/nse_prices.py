@@ -135,7 +135,6 @@ async def fetch_nse_intraday(force: bool = False) -> int:
     """Delayed live prices from Yahoo for the most-traded NSE companies (market hours only)."""
     if not force and not market_open():
         return 0
-    import yfinance as yf
 
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -161,9 +160,9 @@ async def fetch_nse_intraday(force: bool = False) -> int:
         return 0
     syms = [r["symbol"] for r in rows if not r["symbol"].startswith("^")]
     syms += [r["symbol"] for r in rated if r["symbol"] not in set(syms)]
-    data = await asyncio.to_thread(lambda: yf.download(
-        [f"{s}.NS" for s in syms], period="1d", interval="5m", progress=False,
-        group_by="column", auto_adjust=False, threads=True))
+    from app.scrapers.yf_util import yf_download
+    data = await yf_download([f"{s}.NS" for s in syms], period="1d", interval="5m",
+                             group_by="column", auto_adjust=False, threads=True)
     if data is None or data.empty:
         return 0
     updates = intraday_rows(data, syms, datetime.now(IST).date())

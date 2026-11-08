@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 DETAIL_KEYS = ("sector", "pe_ratio", "post_pe_ratio", "price_to_book", "roe", "roce", "debt_equity",
                "pat_margin", "market_cap_cr", "promoter_pre", "promoter_post", "fresh_issue_amt",
-               "ofs_amt", "total_issue_amt", "min_order_amount", "incorporated", "url")
+               "ofs_amt", "total_issue_amt", "min_order_amount", "incorporated", "url", "category")
 
 
 def ipo_status(open_d, close_d, listing_d, today=None) -> str:
@@ -41,6 +41,8 @@ def to_row(r: dict) -> dict:
     size = r.get("issue_size_cr")
     return {
         "company_name": (r.get("name") or "").strip()[:200],
+        # SME issues trade on NSE Emerge / BSE SME: smaller, riskier, bigger lots
+        "exchange": "SME" if r.get("category") == "SME" else "NSE",
         "price_band_high": price,
         "lot_size": lot,
         "issue_size": f"₹{size:,.0f} Cr" if size else None,
@@ -57,7 +59,7 @@ def to_row(r: dict) -> dict:
 async def fetch_india_ipos_live() -> int:
     from app.scrapers.ipo_history import scrape_current
 
-    rows = [to_row(r) for r in await asyncio.to_thread(scrape_current)]
+    rows = [to_row(r) for r in await asyncio.to_thread(scrape_current, True)]
     rows = [r for r in rows if r["company_name"]]
     pool = await get_pool()
     async with pool.acquire() as conn:
@@ -67,7 +69,7 @@ async def fetch_india_ipos_live() -> int:
                 INSERT INTO ipos (company_name, market, exchange, price_band_low, price_band_high, lot_size,
                                   issue_size, open_date, close_date, listing_date, gmp, subscription_status,
                                   status, details, source, updated_at)
-                VALUES ($1, 'IN', 'NSE', $2, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11::jsonb,
+                VALUES ($1, 'IN', $12, $2, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11::jsonb,
                         'investorgain', NOW())
                 ON CONFLICT (company_name, market, open_date) DO UPDATE SET
                     price_band_high = COALESCE(EXCLUDED.price_band_high, ipos.price_band_high),
@@ -78,13 +80,13 @@ async def fetch_india_ipos_live() -> int:
                     listing_date = COALESCE(EXCLUDED.listing_date, ipos.listing_date),
                     gmp = COALESCE(EXCLUDED.gmp, ipos.gmp),
                     subscription_status = COALESCE(EXCLUDED.subscription_status, ipos.subscription_status),
-                    status = EXCLUDED.status, details = EXCLUDED.details,
+                    status = EXCLUDED.status, details = EXCLUDED.details, exchange = EXCLUDED.exchange,
                     source = 'investorgain', updated_at = NOW()
                 """,
                 r["company_name"], r["price_band_high"], r["lot_size"], r["issue_size"], r["open_date"],
                 r["close_date"], r["listing_date"], r["gmp"],
                 json.dumps(r["subscription_status"]) if r["subscription_status"] else None,
-                r["status"], json.dumps(r["details"]),
+                r["status"], json.dumps(r["details"]), r["exchange"],
             )
         await refresh_statuses(conn)
     logger.info(f"IPOs from investorgain: {len(rows)} current issues saved")

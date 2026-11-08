@@ -83,3 +83,10 @@ def test_walk_forward_trains_only_on_already_listed_ipos():
     m = evaluate_ipo(oos)
     # the model learns the systematic GMP haircut, so it should beat raw GMP
     assert m["model_mae_pct"] < m["gmp_rule_mae_pct"]
+
+
+def test_sme_issues_are_marked_sme():
+    from app.scrapers.ipo_live import to_row
+    assert to_row({"name": "Small Co", "category": "SME"})["exchange"] == "SME"
+    assert to_row({"name": "Big Co", "category": "IPO"})["exchange"] == "NSE"
+    assert to_row({"name": "Big Co"})["exchange"] == "NSE"

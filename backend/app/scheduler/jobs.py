@@ -13,6 +13,7 @@ Schedule overview:
 
 import logging
 import asyncio
+import concurrent.futures
 from typing import Optional
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -44,6 +45,10 @@ def _run_async(coro, timeout: float = 1800):
     future = asyncio.run_coroutine_threadsafe(coro, loop)
     try:
         future.result(timeout=timeout)
+    except concurrent.futures.TimeoutError:
+        # Stop it, or the stuck run keeps going and the next runs pile up behind it.
+        future.cancel()
+        logger.error(f"Scheduled job ran over {timeout:.0f}s and was cancelled")
     except Exception:
         logger.exception("Scheduled job failed")
 
